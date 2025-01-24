@@ -39,5 +39,42 @@ class DeteksiController extends Controller
             'message' => 'Status created successfully'
         ], 201);
     }
-      
+
+    public function deleteAll()
+    {
+        DeteksiPenyakit::truncate(); 
+        return response()->json([
+            'status' => 'success',
+            'message' => 'All data deleted successfully'
+        ], 200);
+    }
+
+   
+    public function deleteById($id)
+    {
+        $deteksi = DeteksiPenyakit::find($id);
+
+        if (!$deteksi) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data not found'
+            ], 404);
+        }
+
+        $deteksi->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data deleted successfully'
+        ], 200);
+    }
+
+
+
+
 }
+
+
+
+
+
