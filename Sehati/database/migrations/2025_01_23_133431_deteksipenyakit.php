@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('deteksipenyakit', function (Blueprint $table) {
-            $table->id('deteksi_id')->primary(); 
+            $table->id('deteksi_id'); 
             $table->string('nama');
-            $table->string('umur');
+            $table->integer('umur'); // Ubah menjadi integer jika data umur berupa angka
             $table->integer('bmi');
             $table->integer('tekanan_darah');
             $table->integer('hemoglobin');
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('add_ons');
+        Schema::dropIfExists('deteksipenyakit'); // Perbaiki nama tabel di sini
     }
 };
