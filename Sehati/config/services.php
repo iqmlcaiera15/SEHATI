@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+
+#addons API
+    'airvisual' => [
+        'key' => env('AIRVISUAL_API_KEY'),
+    ],
+
 ];
