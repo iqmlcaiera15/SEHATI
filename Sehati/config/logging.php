@@ -90,6 +90,8 @@ return [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
                 'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                'url' => env('PAPERTRAIL_URL', null), // Nilai default null
+                'port' => env('PAPERTRAIL_PORT', null), // Nilai default null
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
