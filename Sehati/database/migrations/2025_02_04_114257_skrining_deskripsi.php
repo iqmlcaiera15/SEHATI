@@ -4,33 +4,26 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+return new class extends Migration {
+    public function up()
     {
-        Schema::create('skrining_depresi', function (Blueprint $table) {
-            $table->id('user_id'); 
-            $table->integer('whooley_1');
-            $table->integer('whooley_2');
-            $table->integer('whooley_result');
-            $table->integer('epds_score');
+        Schema::create('prediksi_depresi', function (Blueprint $table) {
+            $table->id();
             $table->integer('umur');
-            $table->integer('jumlah_kelahiran');
-            $table->integer('jumlah_keguguran');
-            $table->string('status_bekerja');
-            $table->integer('tanggal_evaluasi');
-            $table->string('depression_status')->nullable(); 
+            $table->integer('merasa_sedih'); // 0, 1, 2
+            $table->integer('mudah_tersinggung'); // 0, 1, 2
+            $table->integer('masalah_tidur'); // 0, 1, 2
+            $table->integer('masalah_fokus'); // 0, 1, 2
+            $table->integer('pola_makan'); // 0, 1, 2
+            $table->integer('merasa_bersalah'); // 0, 1, 2
+            $table->integer('suicide_attempt'); // 0, 1, 2
+            $table->boolean('hasil_prediksi')->nullable(); // 0: Tidak Depresi, 1: Depresi
             $table->timestamps();
         });
     }
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+
+    public function down()
     {
-        //
+        Schema::dropIfExists('prediksi_depresi');
     }
 };

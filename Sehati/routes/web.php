@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DeteksiController;
-use App\Http\Controllers\SkriningDepresiController;
+use App\Http\Controllers\PrediksiDepresiController;
+use App\Http\Controllers\RekomendasiMakananController;
 use App\Http\Controllers\AirQualityController;
-use App\Models\SkriningDepresi;
+use App\Models\PrediksiDepresi;
 
 #Air Quality
 Route::get('/KualitasUdara', [AirQualityController::class, 'index']);
@@ -16,13 +17,15 @@ Route::post('/Deteksi', [DeteksiController::class, 'store']);
 Route::delete('/deteksi/History/DeleteAll', [DeteksiController::class, 'deleteAll']);
 Route::delete('/deteksi/History/{id}', [DeteksiController::class, 'deleteById']);
 
-#Skrining Depresi
-Route::get('/skriningdepresi//', [SkriningDepresiController::class, 'index']);
-Route::post('/skriningdepresi/whooley', [SkriningDepresiController::class, 'store']);
-Route::post('/skriningdepresi/epds/{id}', [SkriningDepresiController::class, 'storeEPDS']);
-Route::get('/skriningdepresi/{id}', [SkriningDepresiController::class, 'show']);
-Route::post('/skriningdepresi/hasilprediksi', [SkriningDepresiController::class, 'prediksiDepresiHasil']);
+#Prediksi Depresi
+Route::get('/skriningdepresi', [PrediksiDepresiController::class, 'index']);
+Route::post('/skriningdepresi/whooley', [PrediksiDepresiController::class, 'store']);
+Route::get('/skriningdepresi/{id}', [PrediksiDepresiController::class, 'show']);
+Route::post('/skriningdepresi/hasilprediksi', [PrediksiDepresiController::class, 'prediksiDepresiHasil']);
 
+#Rekomendasi Makanan
+Route::get('/rekomendasimakanan', [RekomendasiMakananController::class, 'index']);
+Route::get('/rekomendasimakanan/{id}', [RekomendasiMakananController::class, 'show']);
 
 Route::get('token', function () {
     return csrf_token();
