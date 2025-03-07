@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('saran_makanan', function (Blueprint $table) {
-            $table->id('makanan_id'); 
-            $table->string('kategori');
-            $table->string('gambar')->nullable(); 
-            $table->string('nama_makanan');
-            $table->string('deskripsi');
-            $table->string('cocok');
+        Schema::create('pospartum_tracker', function (Blueprint $table) {
+            $table->id('pospartum_tracker_id'); 
+            $table->string('nama_bayi');
+            $table->date('tanggal_kelahiran');
+            $table->integer('hari');
+            $table->integer('minggu');
+            $table->integer('bulan');
             $table->timestamps();
         });
     }

@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('saran_makanan', function (Blueprint $table) {
-            $table->id('makanan_id'); 
-            $table->string('kategori');
-            $table->string('gambar')->nullable(); 
-            $table->string('nama_makanan');
+        Schema::create('postpartum', function (Blueprint $table) {
+            $table->id('postpartum_id'); 
+            $table->string('postpartum');
             $table->string('deskripsi');
-            $table->string('cocok');
-            $table->timestamps();
+            $table->integer('hari');
         });
     }
 
