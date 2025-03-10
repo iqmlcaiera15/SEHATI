@@ -11,7 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::create('bonding', function (Blueprint $table) {
+            $table->id('bonding_id'); 
+            $table->string('bonding_header');
+            $table->string('activity');
+            $table->string('gambar');
+        });
     }
 
     /**
