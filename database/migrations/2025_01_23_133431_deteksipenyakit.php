@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('deteksipenyakit', function (Blueprint $table) {
             $table->id('deteksi_id'); 
             $table->string('nama');
-            $table->integer('umur'); // Ubah menjadi integer jika data umur berupa angka
+            $table->integer('umur'); 
             $table->integer('bmi');
             $table->integer('tekanan_darah');
             $table->integer('hemoglobin');
