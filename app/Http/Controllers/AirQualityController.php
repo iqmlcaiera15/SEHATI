@@ -38,8 +38,6 @@ class AirQualityController extends Controller
     dd($ip);
   
     $data = $this->airVisualService->getNearestCityData($ip);
-    
-    
     return response()->json($data);
     }
     

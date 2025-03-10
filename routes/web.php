@@ -38,6 +38,9 @@ Route::get('/Recovery', [DeteksiController::class, 'index']);
 Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
 
 
+Route::get('/home', [HomeProfileController::class, 'home']);
+
+
 #TOKEN
 Route::get('token', function () {
     return csrf_token();
