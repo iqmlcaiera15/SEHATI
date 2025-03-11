@@ -29,9 +29,9 @@ return new class extends Migration
             $table->decimal('body_temp', 5, 2)->nullable(); 
         
             // Kolom hasil prediksi
-            $table->boolean('diabetes_prediction'); 
-            $table->boolean('hypertension_prediction'); 
-            $table->string('maternal_health_prediction'); 
+            $table->boolean('diabetes_prediction')->nullable(); 
+            $table->boolean('hypertension_prediction')->nullable(); 
+            $table->string('maternal_health_prediction')->nullable(); 
         
             $table->timestamps();
         });

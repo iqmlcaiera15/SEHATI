@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\DeteksiPenyakit;
 
@@ -16,13 +16,13 @@ class DeteksiController extends Controller
         ]);
     }
     
-    use Illuminate\Support\Facades\Http;
 
     public function store(Request $request)
     {   try {
             $request->validate([
                 'nama' => 'required',
-                'umur' => 'required|integer',
+                'pregnancies' => 'required|integer',
+                'age' => 'required|integer',
                 'bmi' => 'required|numeric',
                 'blood_pressure' => 'required|numeric',
                 'bs' => 'required|numeric',
@@ -40,7 +40,8 @@ class DeteksiController extends Controller
             // Simpan ke database
             $deteksi = DeteksiPenyakit::create([
                 'nama' => $request->nama,
-                'umur' => $request->umur,
+                'pregnancies' => $request->pregnancies,
+                'age' => $request->age,
                 'bmi' => $request->bmi,
                 'blood_pressure' => $request->blood_pressure,
                 'bs' => $request->bs,
@@ -54,7 +55,7 @@ class DeteksiController extends Controller
                 'heart_rate' => $request->heart_rate,
                 'body_temp' => $request->body_temp,
             ]);
-        
+            
             // Kirim data ke API ML Railway
             $response = Http::post('https://sehatiml-production.up.railway.app/predict', [
                 'diabetes' => [
