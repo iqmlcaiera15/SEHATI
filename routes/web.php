@@ -20,7 +20,6 @@ Route::get('/komunitas/history', [KomunitasController::class, 'history']);
 Route::delete('/komunitas/history/deleteAll', [KomunitasController::class, 'deleteAll']);
 Route::delete('/komunitas/history/{id}', [KomunitasController::class, 'deleteById']);
 
-
 #Catatan Kunjungan
 Route::get('/catatan/history', [CatatanController::class, 'index']);
 Route::post('/catatan', [CatatanController::class, 'store']);
@@ -37,6 +36,9 @@ Route::delete('/deteksi/history/{id}', [DeteksiController::class, 'deleteById'])
 Route::get('/Recovery', [DeteksiController::class, 'index']);
 Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
 
+#Saran Makanan
+Route::get('/Recovery', [DeteksiController::class, 'index']);
+Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
 
 Route::get('/home', [HomeProfileController::class, 'home']);
 

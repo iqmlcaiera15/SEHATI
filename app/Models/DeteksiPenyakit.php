@@ -13,13 +13,27 @@ class DeteksiPenyakit extends Model
     protected $primaryKey = 'deteksi_id';
 
     protected $fillable = [
-        'nama', 
-        'umur', 
+        'pregnancies', 
+        'bs', 
+        'blood_pressure', 
+        'skin_thickness', 
         'bmi', 
-        'tekanan_darah', 
-        'hemoglobin', 
-        'hasil_deteksi'
+        'age', 
+        'sex', 
+        'current_smoker', 
+        'cigs_per_day', 
+        'bp_meds', 
+        'systolic_bp', 
+        'diastolic_bp', 
+        'heart_rate', 
+        'body_temp', 
+    
+        // Kolom hasil prediksi
+        'diabetes_prediction', 
+        'hypertension_prediction', 
+        'maternal_health_prediction'
     ];
+    
     
 
 }

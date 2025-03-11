@@ -13,15 +13,29 @@ return new class extends Migration
     {
         Schema::create('deteksipenyakit', function (Blueprint $table) {
             $table->id('deteksi_id'); 
-            $table->string('nama');
-            $table->integer('umur'); 
-            $table->integer('bmi');
-            $table->integer('tekanan_darah');
-            $table->integer('hemoglobin');
-            $table->string('hasil_deteksi')->nullable(); 
+            $table->integer('pregnancies')->nullable(); 
+            $table->integer('bs'); 
+            $table->integer('blood_pressure'); 
+            $table->integer('skin_thickness')->nullable(); 
+            $table->integer('bmi'); 
+            $table->integer('age'); 
+            $table->integer('sex')->nullable(); 
+            $table->boolean('current_smoker')->nullable(); 
+            $table->integer('cigs_per_day')->nullable(); 
+            $table->boolean('bp_meds')->nullable(); 
+            $table->integer('systolic_bp'); 
+            $table->integer('diastolic_bp'); 
+            $table->integer('heart_rate'); 
+            $table->decimal('body_temp', 5, 2)->nullable(); 
+        
+            // Kolom hasil prediksi
+            $table->boolean('diabetes_prediction'); 
+            $table->boolean('hypertension_prediction'); 
+            $table->string('maternal_health_prediction'); 
+        
             $table->timestamps();
         });
-    }
+    }        
 
     /**
      * Reverse the migrations.
