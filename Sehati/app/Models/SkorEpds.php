@@ -5,20 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RekomendasiMakanan extends Model
+class SkorEpds extends Model
 {
     use HasFactory;
 
-    protected $table = 'rekomendasi_makanan';
+    protected $table = 'skorepds';
 
     protected $fillable = [
-        'nama',
-        'deskripsi',
-        'gambar',
-        'target_makanan',
+        'answers',
+        'score'
     ];
 
     protected $casts = [
-        'target_makanan' => 'array',
+        'answers' => 'array',
     ];
 }

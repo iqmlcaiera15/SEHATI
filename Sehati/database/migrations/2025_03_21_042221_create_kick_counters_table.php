@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateKickCountersTable extends Migration
+{
+    public function up()
+    {
+        Schema::create('kick_counters', function (Blueprint $table) {
+            $table->id();
+            $table->integer('kick_count');
+            $table->timestamp('recorded_at')->useCurrent();
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('kick_counters');
+    }
+};
