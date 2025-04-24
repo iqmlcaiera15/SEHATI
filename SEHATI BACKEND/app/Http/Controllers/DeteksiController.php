@@ -117,8 +117,6 @@ class DeteksiController extends Controller
 }
 
 
-    
-
     public function deleteAll()
     {
         DeteksiPenyakit::truncate(); 
