@@ -15,7 +15,7 @@ class DeteksiController extends Controller
             'DeteksiPenyakit' => $DeteksiPenyakit
         ]);
     }
-    
+
 
     public function store(Request $request)
     {   try {
