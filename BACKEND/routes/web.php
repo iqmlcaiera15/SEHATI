@@ -34,7 +34,7 @@ Route::delete('/catatan/history/{id}', [CatatanController::class, 'deleteById'])
 
 #Deteksi Penyakit
 Route::get('/deteksi/history', [DeteksiController::class, 'index']);
-Route::post('/deteksi', [DeteksiController::class, 'store']);
+Route::post('/deteksi/store', [DeteksiController::class, 'store']);
 Route::delete('/deteksi/history/deleteAll', [DeteksiController::class, 'deleteAll']);
 Route::delete('/deteksi/history/{id}', [DeteksiController::class, 'deleteById']);
 
