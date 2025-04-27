@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "latianflutter2" "\0"
+            VALUE "FileDescription", "latianflutter" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "latianflutter2" "\0"
+            VALUE "InternalName", "latianflutter" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "latianflutter2.exe" "\0"
-            VALUE "ProductName", "latianflutter2" "\0"
+            VALUE "OriginalFilename", "latianflutter.exe" "\0"
+            VALUE "ProductName", "latianflutter" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

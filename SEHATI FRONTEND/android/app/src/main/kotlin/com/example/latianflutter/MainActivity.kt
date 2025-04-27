@@ -1,4 +1,4 @@
-package com.example.latianflutter2
+package com.example.latianflutter
 
 import io.flutter.embedding.android.FlutterActivity
 
