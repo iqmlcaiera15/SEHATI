@@ -26,26 +26,17 @@ class AirVisualService
         ]);
     
         $response = Http::get("http://api.airvisual.com/v2/stations", [
-            'key' => $apiKey,
             'city' => 'Bandung',
             'state' => 'West Java',
             'country' => 'Indonesia',
-        ]);
-        
-        \Log::info('AirVisual API Response:', [
-            'status' => $response->status(),
-            'body' => $response->body(), // Tambahkan ini untuk melihat detail error
+            'key' => $apiKey,
         ]);
         
         if ($response->successful()) {
-            return $response->json();
+            return response()->json($response->json());
         } else {
-            return [
-                'error' => 'Unable to fetch data from AirVisual API',
-                'status' => $response->status(),
-                'body' => $response->body(),  // Berikan response body agar dapat mendiagnosis error
-            ];
-        }
+            return response()->json(['error' => 'Unable to fetch data', 'status' => $response->status()]);
+        }        
         
     }
 }
