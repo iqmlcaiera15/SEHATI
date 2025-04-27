@@ -34,8 +34,7 @@ class AirQualityController extends Controller
     {
    
     $ip = $request->input('ip', $request->ip());
-    
-    dd($ip);
+
   
     $data = $this->airVisualService->getNearestCityData($ip);
     return response()->json($data);
