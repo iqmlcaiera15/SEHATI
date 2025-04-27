@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\AirVisualService;
 use Illuminate\Http\Request;
 
+
 class AirQualityController extends Controller
 {
     protected $airVisualService;
@@ -14,30 +15,34 @@ class AirQualityController extends Controller
         $this->airVisualService = $airVisualService;
     }
 
-
-    #Code jika IP sudah public
+    /**
+     * Menampilkan data kualitas udara berdasarkan IP address.
+     */
     public function index(Request $request)
     {
         try {
             $ip = $request->input('ip', $request->ip());
-    
+
             $data = $this->airVisualService->getNearestCityData($ip);
-    
-            if (!$data) {
+
+            if (empty($data)) {
                 return response()->json([
+                    'success' => false,
                     'message' => 'Data kualitas udara tidak ditemukan.',
                 ], 404);
             }
-    
-            return response()->json($data);
-    
-        } catch (\Exception $e) {
+
             return response()->json([
+                'success' => true,
+                'data' => $data,
+            ], 200);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
                 'message' => 'Gagal mengambil data kualitas udara.',
-                'error' => $e->getMessage(), // Untuk debug, bisa dihapus di production
+                'error' => env('APP_DEBUG') ? $e->getMessage() : 'Terjadi kesalahan.', // Lebih aman di production
             ], 500);
         }
     }
-      
 }
-
