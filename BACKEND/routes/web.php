@@ -16,7 +16,7 @@ use App\Http\Controllers\SkorEpdsController;
 
 
 #Air Quality
-Route::get('/kualitasudara', [AirQualityController::class, 'index']);
+Route::get('/airquality/stations', [AirQualityController::class, 'getStations']);
 
 
 #Komunitas

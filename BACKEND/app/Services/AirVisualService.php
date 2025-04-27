@@ -7,22 +7,28 @@ use Illuminate\Support\Facades\Http;
 class AirVisualService
 {
     /**
-     * Get nearest city data based on IP.
+     * Get the list of supported stations in a specified city.
      *
-     * @param string $ip
+     * @param string $city
+     * @param string $state
+     * @param string $country
      * @return array
      */
-    public function getNearestCityData($ip)
+    public function getStations($city, $state, $country)
     {
         $apiKey = config('services.airvisual.key');
 
-        \Log::info('Making request to AirVisual API', [
-            'ip' => $ip,
+        \Log::info('Making request to AirVisual API to get stations', [
+            'city' => $city,
+            'state' => $state,
+            'country' => $country,
             'api_key' => $apiKey,
         ]);
     
-        $response = Http::withHeaders([
-        ])->get("http://api.airvisual.com/v2/nearest_city", [
+        $response = Http::get("http://api.airvisual.com/v2/stations", [
+            'city' => $city,
+            'state' => $state,
+            'country' => $country,
             'key' => $apiKey,
         ]);
     
@@ -42,5 +48,3 @@ class AirVisualService
         ];
     }
 }
-
-
