@@ -12,7 +12,7 @@ class AirVisualService
      * @param string $ip
      * @return array
      */
-    public function index($ip)
+    public function getNearestCityData($ip)
     {
         $apiKey = config('services.airvisual.key');
 
