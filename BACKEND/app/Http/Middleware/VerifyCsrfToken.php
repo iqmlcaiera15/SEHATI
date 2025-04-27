@@ -13,7 +13,7 @@ class VerifyCsrfToken
      * @var array
      */
     protected $except = [
-        'api/*',  // Nonaktifkan CSRF untuk API routes
+        //
     ];
 
     /**
