@@ -25,7 +25,7 @@ class AirVisualService
             'api_key' => $apiKey,
         ]);
     
-        $response = Http::get("http://api.airvisual.com/v2/stations", [
+        $response = Http::get("http://api.airvisual.com/v2/stations?city=Bandung&state=West%20Java&country=Indonesia&key=f3d3ed29-2c0f-4957-a49b-d6c9b850a1cd", [
             'city' => $city,
             'state' => $state,
             'country' => $country,
