@@ -14,31 +14,30 @@ class AirQualityController extends Controller
         $this->airVisualService = $airVisualService;
     }
 
-    // #IP LOCAL dan PostMan
-    // public function index(Request $request)
-    // {
-    // $ip = $request->header('X-Forwarded-For') ?: $request->ip();
-
-
-    // if (strpos($ip, ',') !== false) {
-    //     $ip = explode(',', $ip)[0];
-    // }
-
-    // $data = $this->airVisualService->index($ip);
-
-    // return response()->json($data);
-    // }
 
     #Code jika IP sudah public
     public function index(Request $request)
     {
-   
-    $ip = $request->input('ip', $request->ip());
-
-  
-    $data = $this->airVisualService->getNearestCityData($ip);
-    return response()->json($data);
-    }
+        try {
+            $ip = $request->input('ip', $request->ip());
     
+            $data = $this->airVisualService->getNearestCityData($ip);
+    
+            if (!$data) {
+                return response()->json([
+                    'message' => 'Data kualitas udara tidak ditemukan.',
+                ], 404);
+            }
+    
+            return response()->json($data);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mengambil data kualitas udara.',
+                'error' => $e->getMessage(), // Untuk debug, bisa dihapus di production
+            ], 500);
+        }
+    }
+      
 }
 
