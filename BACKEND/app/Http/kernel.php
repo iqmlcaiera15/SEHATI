@@ -11,6 +11,8 @@ class Kernel extends HttpKernel
         \Illuminate\Http\Middleware\SetCacheHeaders::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \Illuminate\Http\Middleware\HandleCors::class,
+
     ];
 
     protected $middlewareGroups = [
