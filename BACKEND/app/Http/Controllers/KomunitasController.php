@@ -25,7 +25,7 @@ class KomunitasController extends Controller
 
         ]);
 
-        DeteksiPenyakit::create([
+        Komunitas::create([
             'user_id' => $request->user_id,
             'judul' => $request->judul,
             'deskripsi' => $request->deskripsi,

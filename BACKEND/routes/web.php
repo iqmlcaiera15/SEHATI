@@ -45,6 +45,7 @@ Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
 #Saran Makanan
 Route::get('/Recovery', [DeteksiController::class, 'index']);
 Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
+
 Route::get('/home', [HomeProfileController::class, 'home']);
 
 #Prediksi Depresi
