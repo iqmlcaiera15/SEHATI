@@ -12,7 +12,10 @@ class VerifyCsrfToken extends BaseVerifier
      * @var array
      */
     protected $except = [
-        'api/*', // Menonaktifkan CSRF untuk route api/*
     ];
 
+    public function handle(Request $request, Closure $next)
+    {
+        return $next($request);
+    }
 }

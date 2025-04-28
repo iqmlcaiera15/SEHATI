@@ -9,15 +9,13 @@ class Kernel extends HttpKernel
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ];
 
     protected $middlewareGroups = [
         'web' => [
-            // Menghapus CSRF untuk web (untuk aplikasi web biasa tetap perlu CSRF)
-            // \App\Http\Middleware\VerifyCsrfToken::class,
+
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,

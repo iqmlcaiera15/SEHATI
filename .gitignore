@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 /vendor
 composer.json
 composer.lock
@@ -10,3 +11,8 @@ BACKEND/composer.json
 BACKEND/composer.json
 BACKEND/composer.lock
 BACKEND/composer.json
+=======
+composer.json
+composer.lock
+/vendor
+>>>>>>> Stashed changes
