@@ -16,7 +16,7 @@ class Kernel extends HttpKernel
 
     protected $middlewareGroups = [
         'web' => [
-            // Hapus CSRF kalau mau
+            // Menghapus CSRF untuk web (untuk aplikasi web biasa tetap perlu CSRF)
             // \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
@@ -24,6 +24,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \Barryvdh\Cors\HandleCors::class,  // CORS middleware
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],

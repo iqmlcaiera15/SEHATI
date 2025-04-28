@@ -1,14 +1,21 @@
 <?php
 
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | Laravel CORS Options
+    |--------------------------------------------------------------------------
+    |
+    | The allowed origins, methods, and headers for cross-origin requests.
+    |
+    */
+    'supports_credentials' => false,
 
-    'paths' => ['api/*', '*'],
-    'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'],  // Bisa diganti dengan domain frontend tertentu
+    'allowed_origins' => ['*'],  // Mengizinkan semua domain (Anda bisa mengganti dengan domain tertentu jika ingin lebih ketat)
     'allowed_origins_patterns' => [],
-    'allowed_headers' => ['*'],
+    'allowed_headers' => ['*'],  // Mengizinkan semua header
+    'allowed_methods' => ['*'],  // Mengizinkan semua metode (GET, POST, PUT, DELETE, dll.)
     'exposed_headers' => [],
-    'max_age' => 3600,  // Setel preflight request cache selama 1 jam
-    'supports_credentials' => false, // Ganti ke true jika diperlukan untuk cookie/authorization header
-
+    'max_age' => 0,
+    'hosts' => [],
 ];
