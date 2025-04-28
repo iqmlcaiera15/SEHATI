@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Komunitas extends Model
+class DeteksiPenyakit extends Model
 {
     use HasFactory;
 
@@ -16,6 +16,7 @@ class Komunitas extends Model
         'user_id', 
         'judul', 
         'deskripsi', 
+        'tekanan_darah', 
         'komen', 
         'likes'
     ];
