@@ -5,18 +5,23 @@ class ApiServicePosts {
   // Base URL of your Railway API
   static const String baseUrl = 'https://sehatiapp-production.up.railway.app';
   
+
+  
   // Fetch all posts from API
   static Future<List<PostModel>> fetchPosts() async {
     final response = await http.get(Uri.parse('https://sehatiapp-production.up.railway.app/komunitas'));
     
     if (response.statusCode == 200) {
-      final List<dynamic> jsonData = json.decode(response.body);
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+      final List<dynamic> jsonData = jsonResponse['data'] ?? [];
+
       return jsonData.map((json) => PostModel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load posts: ${response.statusCode}');
     }
   }
-  
+
   // Add a new post
   static Future<PostModel> createPost(PostModel post) async {
     final response = await http.post(
