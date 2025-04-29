@@ -14,12 +14,9 @@ class AirQualityController extends Controller
         $this->airVisualService = $airVisualService;
     }
 
-    /**
-     * Get list of air quality stations for a given city.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+
+
+
     public function getStations(Request $request)
     {
         // Ambil parameter dari query string atau gunakan default
