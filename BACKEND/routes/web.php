@@ -49,7 +49,7 @@ Route::get('/home', [HomeProfileController::class, 'home']);
 
 #Prediksi Depresi
 Route::get('/prediksidepresi', [PrediksiDepresiController::class, 'index']);
-Route::post('/prediksidepresi', [PrediksiDepresiController::class, 'store']);
+Route::post('/prediksidepresi/store', [PrediksiDepresiController::class, 'store']);
 Route::get('/prediksidepresi/{id}', [PrediksiDepresiController::class, 'show']);
 Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class, 'deletebyID']);
 
