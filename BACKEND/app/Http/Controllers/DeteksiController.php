@@ -16,6 +16,15 @@ class DeteksiController extends Controller
         ]);
     }
 
+    public function indexlatest()
+    {
+        $DeteksiPenyakit = DeteksiPenyakit::latest()->first();
+
+        return response()->json([
+            'DeteksiPenyakit' => $DeteksiPenyakit
+        ]);
+    }
+    
 
     public function store(Request $request)
     {   try {
