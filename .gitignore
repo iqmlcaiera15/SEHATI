@@ -1,3 +1,4 @@
-*.json
-*.lock
+
+composer.json
+composer.lock
 /vendor

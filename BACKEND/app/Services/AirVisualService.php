@@ -7,40 +7,36 @@ use Illuminate\Support\Facades\Http;
 class AirVisualService
 {
     /**
-     * Get nearest city data based on IP.
+     * Get the list of supported stations in a specified city.
      *
-     * @param string $ip
+     * @param string $city
+     * @param string $state
+     * @param string $country
      * @return array
      */
-    public function index($ip)
+    public function getStations($city, $state, $country)
     {
         $apiKey = config('services.airvisual.key');
 
-        \Log::info('Making request to AirVisual API', [
-            'ip' => $ip,
+        \Log::info('Making request to AirVisual API to get stations', [
+            'city' => $city,
+            'state' => $state,
+            'country' => $country,
             'api_key' => $apiKey,
         ]);
     
-        $response = Http::withHeaders([
-        ])->get("http://api.airvisual.com/v2/nearest_city", [
+        $response = Http::get("http://api.airvisual.com/v2/stations", [
+            'city' => 'Bandung',
+            'state' => 'West Java',
+            'country' => 'Indonesia',
             'key' => $apiKey,
         ]);
-    
+        
         if ($response->successful()) {
-            return $response->json();
-        }
-    
-        // Log error details
-        \Log::error('AirVisual API Error', [
-            'status' => $response->status(),
-            'body' => $response->body(),
-        ]);
-    
-        return [
-            'error' => 'Unable to fetch data from AirVisual API',
-            'status' => $response->status(),
-        ];
+            return response()->json($response->json());
+        } else {
+            return response()->json(['error' => 'Unable to fetch data', 'status' => $response->status()]);
+        }        
+        
     }
 }
-
-

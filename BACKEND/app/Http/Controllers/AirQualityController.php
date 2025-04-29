@@ -15,17 +15,19 @@ class AirQualityController extends Controller
     }
 
 
-    #Code jika IP sudah public
-    public function index(Request $request)
-    {
-   
-    $ip = $request->input('ip', $request->ip());
-    
-    dd($ip);
-  
-    $data = $this->airVisualService->getNearestCityData($ip);
-    return response()->json($data);
-    }
-    
-}
 
+
+    public function getStations(Request $request)
+    {
+        // Ambil parameter dari query string atau gunakan default
+        $city = $request->input('city', 'Bandung');
+        $state = $request->input('state', 'West Java');
+        $country = $request->input('country', 'Indonesia');
+        
+        // Dapatkan data stasiun dari AirVisualService
+        $data = $this->airVisualService->getStations($city, $state, $country);
+
+        // Return data stasiun dalam format JSON
+        return response()->json($data);
+    }
+}

@@ -2,9 +2,9 @@
 
 return [
 
-    'paths' => ['api/*', '*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', '*'], // Bebaskan semua endpoint
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['*'], // <-- Sementara izinkan semua origin, nanti bisa dibatasi
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

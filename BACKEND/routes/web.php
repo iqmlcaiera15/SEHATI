@@ -1,18 +1,15 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\DeteksiController;
 use App\Http\Controllers\AirQualityController;
 use App\Http\Controllers\CatatanController;
 use App\Http\Controllers\PostpartumController;
 use App\Http\Controllers\KomunitasController;
-
 use App\Http\Controllers\PrediksiDepresiController;
 use App\Http\Controllers\RekomendasiMakananController;
 use App\Http\Controllers\KickCounterController;
 use App\Http\Controllers\SkorEpdsController;
-
-
 
 
 #Air Quality
@@ -69,13 +66,16 @@ Route::get('/kick-counter', [KickCounterController::class, 'index']);
 Route::post('/kick-counter', [KickCounterController::class, 'store']);
 
 
+#Login Register 
+Route::post('login', [AuthController::class, 'login']);
 
-#TOKEN
+
+#TOKEN 
 Route::get('token', function () {
     return csrf_token();
 });
 
-
+#Home
 Route::get('/', function () {
     return view('welcome');
 });
