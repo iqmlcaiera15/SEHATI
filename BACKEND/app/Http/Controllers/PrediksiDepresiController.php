@@ -169,7 +169,7 @@ class PrediksiDepresiController extends Controller
 
     private function predictDepresi($data)
     {
-        $response = Http::post('http://127.0.0.1:5000/predict', [
+        $response = Http::post('https://sehatiapp-production.up.railway.app/predict', [
             'features' => array_values($data)
         ]);
 
