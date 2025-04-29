@@ -66,7 +66,7 @@ class DeteksiController extends Controller
             ]);
             
             // Kirim data ke API ML Railway
-            $response = Http::post('https://sehatiml-production.up.railway.app/predict', [
+            $response = Http::post('https://sehatiapp-production.up.railway.app/predictdeteksi', [
                 'diabetes' => [
                     'Pregnancies' => $request->pregnancies ?? 0,
                     'BS' => $request->bs,
