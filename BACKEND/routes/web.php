@@ -55,7 +55,7 @@ Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class,
 
 
 #EPDS
-Route::post('/epds', [SkorEpdsController::class, 'store']);
+Route::post('/epds/store', [SkorEpdsController::class, 'store']);
 Route::get('/epds', [SkorEpdsController::class, 'index']);
 Route::get('/epds/{id}', [SkorEpdsController::class, 'show']);
 
@@ -65,7 +65,7 @@ Route::get('/rekomendasimakanan/{id}', [RekomendasiMakananController::class, 'sh
 
 #Kick Counter
 Route::get('/kick-counter', [KickCounterController::class, 'index']);
-Route::post('/kick-counter', [KickCounterController::class, 'store']);
+Route::post('/kick-counter/store', [KickCounterController::class, 'store']);
 
 
 #Login Register 
