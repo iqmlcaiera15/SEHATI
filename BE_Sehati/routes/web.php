@@ -10,6 +10,10 @@ use App\Http\Controllers\PrediksiDepresiController;
 use App\Http\Controllers\RekomendasiMakananController;
 use App\Http\Controllers\KickCounterController;
 use App\Http\Controllers\SkorEpdsController;
+use App\Http\Controllers\PredictionController;
+use App\Http\Controllers\WaterIntakeController;
+use App\Http\Controllers\PregnancyCalculatorController;
+use App\Http\Controllers\FetalMonitoringController;
 
 
 #Air Quality
@@ -37,10 +41,13 @@ Route::post('/deteksi/store', [DeteksiController::class, 'store']);
 Route::delete('/deteksi/history/deleteAll', [DeteksiController::class, 'deleteAll']);
 Route::delete('/deteksi/history/{id}', [DeteksiController::class, 'deleteById']);
 
-#Postpartum Recovery Tracker 
+#Postpartum Recovery Tracker
 Route::get('/Recovery', [DeteksiController::class, 'index']);
 Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
 
+#Saran Makanan
+Route::get('/Recovery', [DeteksiController::class, 'index']);
+Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
 
 Route::get('/home', [HomeProfileController::class, 'home']);
 
@@ -50,8 +57,9 @@ Route::post('/prediksidepresi/store', [PrediksiDepresiController::class, 'store'
 Route::get('/prediksidepresi/{id}', [PrediksiDepresiController::class, 'show']);
 Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class, 'deletebyID']);
 
+
 #EPDS
-Route::post('/epds/store', [SkorEpdsController::class, 'store']);
+Route::post('/epds', [SkorEpdsController::class, 'store']);
 Route::get('/epds', [SkorEpdsController::class, 'index']);
 Route::get('/epds/{id}', [SkorEpdsController::class, 'show']);
 
@@ -61,14 +69,43 @@ Route::get('/rekomendasimakanan/{id}', [RekomendasiMakananController::class, 'sh
 
 #Kick Counter
 Route::get('/kick-counter', [KickCounterController::class, 'index']);
-Route::post('/kick-counter/store', [KickCounterController::class, 'store']);
+Route::post('/kick-counter', [KickCounterController::class, 'store']);
+
+#Prediksi Metode Persalinan
+Route::get('/predictions', [PredictionController::class, 'index']);
+Route::get('/predictions/{id}', [PredictionController::class, 'show']);
+Route::post('/predictions', [PredictionController::class, 'store']);
+Route::put('/predictions/{id}', [PredictionController::class, 'update']);
+Route::delete('/predictions/{id}', [PredictionController::class, 'destroy']);
+
+#Water Intake
+Route::post('/water-intake', [WaterIntakeController::class, 'store']);
+Route::get('/water-intake', [WaterIntakeController::class, 'index']);
+Route::get('/water-intake/{id}', [WaterIntakeController::class, 'show']);
+Route::put('/water-intake/{id}', [WaterIntakeController::class, 'update']);
+Route::delete('/water-intake/{id}', [WaterIntakeController::class, 'destroy']);
+
+#Kalkulator HPL
+Route::get('pregnancy-calculators', [PregnancyCalculatorController::class, 'index']);
+Route::post('pregnancy-calculators', [PregnancyCalculatorController::class, 'store']);
+Route::get('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'show']);
+Route::put('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'update']);
+Route::delete('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'destroy']);
 
 
-#Login Register 
+#Fetal Monitoring
+Route::get('fetal-monitorings', [FetalMonitoringController::class, 'index']);
+Route::post('fetal-monitorings', [FetalMonitoringController::class, 'store']);
+Route::get('fetal-monitorings/{id}', [FetalMonitoringController::class, 'show']);
+Route::put('fetal-monitorings/{id}', [FetalMonitoringController::class, 'update']);
+Route::delete('fetal-monitorings/{id}', [FetalMonitoringController::class, 'destroy']);
+
+
+#Login Register
 Route::post('login', [AuthController::class, 'login']);
 
 
-#TOKEN 
+#TOKEN
 Route::get('token', function () {
     return csrf_token();
 });
