@@ -17,6 +17,20 @@ class ApiService {
     }
   }
 
+    static Future<Map<String, dynamic>> fetchDeteksiDataLatest() async {
+    final response = await http.get(
+      Uri.parse('https://sehatiapp-production.up.railway.app/deteksi/latest'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return Map<String, dynamic>.from(data['DeteksiPenyakit']);
+    } else {
+      throw Exception('Failed to fetch deteksi data');
+    }
+  }
+
+
   static Future<Map<String, dynamic>> submitDeteksiData(Map<String, dynamic> formData) async {
       final response = await http.post(
         Uri.parse('https://sehatiapp-production.up.railway.app/deteksi/store'),
@@ -24,6 +38,7 @@ class ApiService {
         body: json.encode(formData),
       );
       if (response.statusCode == 201) {
+        
         return json.decode(response.body);
       } else {
         throw Exception('Failed to submit deteksi dataa');

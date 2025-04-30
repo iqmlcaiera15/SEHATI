@@ -18,6 +18,15 @@ class KomunitasController extends Controller
         ]);
     }
     
+     public function indexlatest()
+    {
+        $Komunitas = Komunitas::latest()->first();
+
+        return response()->json([
+            'Komunitas' => $Komunitas
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

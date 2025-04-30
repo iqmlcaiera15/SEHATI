@@ -13,6 +13,20 @@ class ApiServicePosts {
     
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  
+      final List<dynamic> jsonData = jsonResponse['data'] ?? [];
+
+      return jsonData.map((json) => PostModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load posts: ${response.statusCode}');
+    }
+  }
+
+    static Future<List<PostModel>> fetchPostsLates() async {
+    final response = await http.get(Uri.parse('https://sehatiapp-production.up.railway.app/komunitas/latest'));
+    
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
       final List<dynamic> jsonData = jsonResponse['data'] ?? [];
 

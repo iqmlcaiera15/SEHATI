@@ -59,7 +59,6 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     try {
       // Panggil API Service yang sudah kamu buat
       final result = await ApiService.submitDeteksiData(formData);
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
