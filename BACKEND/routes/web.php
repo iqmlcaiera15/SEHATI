@@ -41,9 +41,6 @@ Route::delete('/deteksi/history/{id}', [DeteksiController::class, 'deleteById'])
 Route::get('/Recovery', [DeteksiController::class, 'index']);
 Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
 
-#Saran Makanan
-Route::get('/Recovery', [DeteksiController::class, 'index']);
-Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
 
 Route::get('/home', [HomeProfileController::class, 'home']);
 
@@ -52,7 +49,6 @@ Route::get('/prediksidepresi', [PrediksiDepresiController::class, 'index']);
 Route::post('/prediksidepresi/store', [PrediksiDepresiController::class, 'store']);
 Route::get('/prediksidepresi/{id}', [PrediksiDepresiController::class, 'show']);
 Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class, 'deletebyID']);
-
 
 #EPDS
 Route::post('/epds/store', [SkorEpdsController::class, 'store']);
