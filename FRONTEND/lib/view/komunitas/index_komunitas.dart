@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Sehati/services/api/api_service_komunitas.dart'; 
+import 'package:Sehati/view/homeprofile/home.dart'; // Import disease index page
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({Key? key}) : super(key: key);
@@ -208,7 +209,7 @@ class _CommunityPageState extends State<CommunityPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            "Postingan pilihan oleh Telkom University",
+                            "Postingan pilihan oleh Sehati",
                             style: TextStyle(
                               color: Color(0xFF1E293B),
                               fontSize: 14,
@@ -333,10 +334,10 @@ class _CommunityPageState extends State<CommunityPage> {
             );
           } else if (index == 0) {
             // Navigasi ke halaman Beranda (jika Anda punya halaman Beranda terpisah)
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => const BerandaPage()),
-            // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+             );
           } else if (index == 3) {
             // Navigasi ke halaman Tersimpan
             // Navigator.push(

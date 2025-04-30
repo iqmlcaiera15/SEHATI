@@ -16,6 +16,15 @@ class DeteksiController extends Controller
         ]);
     }
 
+    public function indexlatest()
+    {
+        $DeteksiPenyakit = DeteksiPenyakit::latest()->first();
+
+        return response()->json([
+            'DeteksiPenyakit' => $DeteksiPenyakit
+        ]);
+    }
+    
 
     public function store(Request $request)
     {   try {
@@ -57,7 +66,7 @@ class DeteksiController extends Controller
             ]);
             
             // Kirim data ke API ML Railway
-            $response = Http::post('https://sehatiml-production.up.railway.app/predict', [
+            $response = Http::post('https://sehatiml-production.up.railway.app//predictdeteksi', [
                 'diabetes' => [
                     'Pregnancies' => $request->pregnancies ?? 0,
                     'BS' => $request->bs,

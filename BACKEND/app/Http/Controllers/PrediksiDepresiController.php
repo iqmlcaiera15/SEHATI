@@ -169,14 +169,19 @@ class PrediksiDepresiController extends Controller
 
     private function predictDepresi($data)
     {
-        $response = Http::post('http://127.0.0.1:5000/predict', [
+        $response = Http::post('https://sehatimldepresi-production.up.railway.app/predict', [
+            // $response = Http::post('http://127.0.0.1:5000/predict', [
             'features' => array_values($data)
         ]);
-
+    
         if ($response->failed()) {
-            throw new \Exception("Gagal memanggil Flask API");
+            $status = $response->status();
+            $body = $response->body();
+    
+            throw new \Exception("Gagal memanggil Flask API. Status: $status. Respons: $body");
         }
-
+    
         return $response->json()['prediction'] ?? null;
     }
+    
 }

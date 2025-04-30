@@ -4,6 +4,8 @@ import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; // Import disease index page
 import 'package:Sehati/view/komunitas/index_komunitas.dart'; // Import disease index page
 
+import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart'; // Import disease index page
+
 void main() {
   runApp(const SehatiApp());
 }
@@ -459,46 +461,65 @@ class _HomePageState extends State<HomePage> {
                     
                     // Health Tips Section
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Tips Kesehatan Kehamilan',
-                            style: TextStyle(
-                              color: Color(0xFF1E293B),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Fitur Kesehatan Kehamilan lainnya',
+                          style: TextStyle(
+                            color: Color(0xFF1E293B),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 16),
-                          Container(
-                            height: 180,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                _buildTipCard(
-                                  'Nutrisi Penting Ibu Hamil',
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 180,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  // TODO: Navigasi ke halaman NutrisiPage
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => RekomendasiMakananPage()));
+                                },
+                                child: _buildTipCard(
+                                  'Makanan Dengan Nutrisi Penting Untuk Ibu Hamil',
                                   'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
                                   Icons.restaurant,
                                 ),
-                                _buildTipCard(
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  // TODO: Navigasi ke halaman OlahragaPage
+                                  // Navigator.push(context, MaterialPageRoute(builder: (context) => OlahragaPage()));
+                                },
+                                child: _buildTipCard(
                                   'Olahraga Ringan',
                                   'Jalan santai dan yoga untuk ibu hamil',
                                   Icons.directions_walk,
                                 ),
-                                _buildTipCard(
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  // TODO: Navigasi ke halaman TidurPage
+                                  // Navigator.push(context, MaterialPageRoute(builder: (context) => TidurPage()));
+                                },
+                                child: _buildTipCard(
                                   'Pola Tidur Sehat',
                                   'Istirahat cukup untuk kesehatan ibu dan janin',
                                   Icons.hotel,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                  ),
+
                     
                     // Spacer at the bottom
                     const SizedBox(height: 75),

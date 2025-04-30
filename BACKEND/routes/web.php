@@ -20,6 +20,7 @@ Route::get('/kualitasudara', [AirQualityController::class, 'index']);
 Route::get('/komunitas', [KomunitasController::class, 'index']);
 Route::post('/komunitas/add', [KomunitasController::class, 'store']);
 Route::get('/komunitas/history', [KomunitasController::class, 'history']);
+Route::get('/komunitas/latest', [KomunitasController::class, 'indexlatest']);
 Route::delete('/komunitas/history/deleteAll', [KomunitasController::class, 'deleteAll']);
 Route::delete('/komunitas/history/{id}', [KomunitasController::class, 'deleteById']);
 
@@ -31,6 +32,7 @@ Route::delete('/catatan/history/{id}', [CatatanController::class, 'deleteById'])
 
 #Deteksi Penyakit
 Route::get('/deteksi/history', [DeteksiController::class, 'index']);
+Route::get('/deteksi/latest', [DeteksiController::class, 'indexlatest']);
 Route::post('/deteksi/store', [DeteksiController::class, 'store']);
 Route::delete('/deteksi/history/deleteAll', [DeteksiController::class, 'deleteAll']);
 Route::delete('/deteksi/history/{id}', [DeteksiController::class, 'deleteById']);
@@ -47,7 +49,7 @@ Route::get('/home', [HomeProfileController::class, 'home']);
 
 #Prediksi Depresi
 Route::get('/prediksidepresi', [PrediksiDepresiController::class, 'index']);
-Route::post('/prediksidepresi', [PrediksiDepresiController::class, 'store']);
+Route::post('/prediksidepresi/store', [PrediksiDepresiController::class, 'store']);
 Route::get('/prediksidepresi/{id}', [PrediksiDepresiController::class, 'show']);
 Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class, 'deletebyID']);
 
