@@ -3,6 +3,7 @@ import 'package:Sehati/services/api/api_service_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; // Import disease index page
 import 'package:Sehati/view/komunitas/index_komunitas.dart'; // Import disease index page
+import 'package:Sehati/view/prediksidepresi/index_depresi.dart';
 
 void main() {
   runApp(const SehatiApp());
@@ -286,12 +287,17 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
                               _buildServiceItem(
-                                'Kalkulator HPL', 
-                                Icons.calendar_month_outlined,
-                                () {
-                                  // Navigate to HPL calculator
-                                },
-                              ),
+                                  'Prediksi Depresi Antenatal', 
+                                  Icons.assignment_outlined,
+                                  () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => IndexDepresi(),
+                                      ),
+                                    );
+                                  },
+                                ),
                               _buildServiceItem(
                                 'Konsultasi', 
                                 Icons.chat_outlined,
