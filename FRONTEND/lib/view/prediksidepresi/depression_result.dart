@@ -458,7 +458,7 @@ class DepressionResult extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const DepressionHistoryView(),
+                        builder: (context) => const Historyview(),
                       ),
                     );
                   },

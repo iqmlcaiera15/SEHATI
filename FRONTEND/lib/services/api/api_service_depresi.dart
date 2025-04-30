@@ -31,7 +31,7 @@ class DepressionService {
   Future<Map<String, dynamic>> submitEpdsQuestionnaire(List<int> answers) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/skor-epds'),
+        Uri.parse('$baseUrl/epds/store'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -55,7 +55,7 @@ class DepressionService {
   Future<List<dynamic>> getDepressionHistory() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/prediksi-depresi'),
+        Uri.parse('$baseUrl/prediksidepresi'),
         headers: {
           'Accept': 'application/json',
         },
@@ -75,7 +75,7 @@ class DepressionService {
   Future<Map<String, dynamic>> getDepressionRecord(String id) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/prediksi-depresi/$id'),
+        Uri.parse('$baseUrl/prediksidepresi/{id}'),
         headers: {
           'Accept': 'application/json',
         },

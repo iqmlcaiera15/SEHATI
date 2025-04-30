@@ -340,7 +340,7 @@ class _DepressionHomePageState extends State<DepressionHomePage> {
                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DepressionHistoryView(),
+                                builder: (context) => const Historyview(),
                               ),
                             );
                           },
