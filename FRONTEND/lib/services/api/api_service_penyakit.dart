@@ -17,7 +17,7 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> fetchDeteksiDataLatest() async {
+    static Future<Map<String, dynamic>> fetchDeteksiDataLatest() async {
     final response = await http.get(
       Uri.parse('https://sehatiapp-production.up.railway.app/deteksi/latest'),
     );
