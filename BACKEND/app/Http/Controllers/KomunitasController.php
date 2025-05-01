@@ -30,17 +30,18 @@ class KomunitasController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required',
+            // 'user_id' => 'required',
             'judul' => 'required',
             'deskripsi' => 'required',
         ]);
 
         $komunitas = Komunitas::create([
-            'user_id' => $request->user_id,
+            // 'user_id' => $request->user_id,
             'judul' => $request->judul,
             'deskripsi' => $request->deskripsi,
-            'komen' => 0, // Inisialisasi dengan 0 komentar
+            'gambar' => $request->gambar,
             'likes' => 0, // Inisialisasi dengan 0 likes
+            
         ]);
         
         return response()->json([
