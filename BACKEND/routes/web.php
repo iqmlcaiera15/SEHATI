@@ -59,7 +59,7 @@ Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class,
 
 
 #EPDS
-Route::post('/epds', [SkorEpdsController::class, 'store']);
+Route::post('/epds/store', [SkorEpdsController::class, 'store']);
 Route::get('/epds', [SkorEpdsController::class, 'index']);
 Route::get('/epds/{id}', [SkorEpdsController::class, 'show']);
 
