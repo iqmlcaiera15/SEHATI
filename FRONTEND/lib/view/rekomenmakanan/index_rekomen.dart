@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'dart:convert';
 import 'package:Sehati/services/api/api_service_rekomen.dart'; 
 
@@ -14,6 +15,22 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
   String _selectedFilter = 'Semua';
   final List<String> _filters = ['Semua', 'Hamil', 'Menyusui'];
   TextEditingController _searchController = TextEditingController();
+  
+  // Helper method to ensure image URLs are properly formatted
+  String _getCompleteImageUrl(String imageUrl) {
+    // Check if the URL already has the http or https protocol
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // Check if the URL is a relative path
+    if (imageUrl.startsWith('/')) {
+      return '${ApiServiceRekomen.baseUrl}$imageUrl';
+    }
+    
+    // If it's just a filename or partial path, construct the full URL
+    return '${ApiServiceRekomen.baseUrl}/$imageUrl';
+  }
 
   @override
   void initState() {
@@ -23,7 +40,7 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
 
   void _loadMakananData() {
     setState(() {
-      _makananData = ApiService.fetchMakananData();
+      _makananData = ApiServiceRekomen.fetchMakananData();
     });
   }
 
@@ -260,19 +277,54 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
             borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             child: item['gambar'] != null && item['gambar'].toString().isNotEmpty
                 ? Image.network(
-                    item['gambar'],
+                    _getCompleteImageUrl(item['gambar']),
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    headers: {
+                      'Cache-Control': 'no-cache',  // Prevents caching issues
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        height: 180,
+                        width: double.infinity,
+                        color: Color(0xFFAEE2FF).withOpacity(0.3),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF4DBAFF),
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / 
+                                  loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
                     errorBuilder: (context, error, stackTrace) {
+                      print('Error loading image: $error');
                       return Container(
                         height: 180,
                         width: double.infinity,
                         color: Color(0xFFAEE2FF),
-                        child: Icon(
-                          Icons.image_not_supported,
-                          size: 48,
-                          color: Colors.white,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.image_not_supported,
+                              size: 48,
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Gambar tidak tersedia',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },

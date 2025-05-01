@@ -3,7 +3,7 @@ import 'package:Sehati/services/api/api_service_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; // Import disease index page
 import 'package:Sehati/view/komunitas/index_komunitas.dart'; // Import disease index page
-
+import 'package:Sehati/view/polusiudara/index_polusi.dart'; // Import disease index page
 import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart'; // Import disease index page
 
 void main() {
@@ -482,7 +482,6 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  // TODO: Navigasi ke halaman NutrisiPage
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => RekomendasiMakananPage()));
                                 },
                                 child: _buildTipCard(
@@ -493,8 +492,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               InkWell(
                                 onTap: () {
-                                  // TODO: Navigasi ke halaman OlahragaPage
-                                  // Navigator.push(context, MaterialPageRoute(builder: (context) => OlahragaPage()));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPolusi()));
                                 },
                                 child: _buildTipCard(
                                   'Olahraga Ringan',
