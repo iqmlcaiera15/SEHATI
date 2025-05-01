@@ -23,8 +23,8 @@ class AirQualityController extends Controller
     public function getCityData(Request $request)
     {
         // Get parameters from query string or use defaults for Bandung
-        $city = $request->input('city', 'Kota Bandung');
-        $state = $request->input('state', 'Jawa Barat');
+        $city = $request->input('city', 'Bandung');
+        $state = $request->input('state', 'West Java');
         $country = $request->input('country', 'Indonesia');
         
         // Get city data from AirVisualService

@@ -17,7 +17,7 @@ use App\Http\Controllers\FetalMonitoringController;
 
 
 #Air Quality
-Route::get('/kualitasudara', [AirQualityController::class, 'index']);
+Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
 
 
 #Komunitas
