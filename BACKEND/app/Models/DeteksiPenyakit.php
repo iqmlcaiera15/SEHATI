@@ -13,6 +13,7 @@ class DeteksiPenyakit extends Model
     protected $primaryKey = 'deteksi_id';
 
     protected $fillable = [
+        'nama',
         'pregnancies', 
         'bs', 
         'blood_pressure', 
