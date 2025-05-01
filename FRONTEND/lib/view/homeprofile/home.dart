@@ -4,6 +4,7 @@ import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; // Import disease index page
 import 'package:Sehati/view/komunitas/index_komunitas.dart'; // Import disease index page
 import 'package:Sehati/view/prediksidepresi/index_depresi.dart';
+import 'package:Sehati/view/kickcounter/index_kickcounter.dart';
 
 void main() {
   runApp(const SehatiApp());
@@ -305,6 +306,18 @@ class _HomePageState extends State<HomePage> {
                                   // Navigate to consultation page
                                 },
                               ),
+                              _buildServiceItem(
+                                  'Hitung Tendangan Bayi', 
+                                  Icons.monitor_heart_outlined,
+                                  () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => IndexKickCounter(),
+                                      ),
+                                    );
+                                  },
+                                ),
                             ],
                           ),
                         ],
