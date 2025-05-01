@@ -119,7 +119,7 @@ class PrediksiDepresiController extends Controller
 
     private function categorizeUmur($umur)
     {
-        if ($umur =< 30) return 0;
+        if ($umur <= 30) return 0;
         elseif ($umur >= 31 && $umur <= 35) return 1;
         elseif ($umur >= 36 && $umur <= 40) return 2;
         elseif ($umur >= 41 && $umur <= 45) return 3;
@@ -146,7 +146,7 @@ class PrediksiDepresiController extends Controller
     {
         $reverseMapping = [
             'umur' => [
-                0 => '=< 30',
+                0 => '0-30',
                 1 => '31-35',
                 2 => '36-40',
                 3 => '41-45',
