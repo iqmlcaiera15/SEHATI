@@ -20,9 +20,26 @@ class _CommunityPageState extends State<CommunityPage> {
     _loadPosts();
   }
 
-  void _loadPosts() {
+    Future<void> _loadPosts() async {
     setState(() {
-      _posts = ApiServicePosts.fetchPosts();
+      isLoading = true;
+      _posts = ApiServicePosts.fetchPosts().then((result) {
+        setState(() {
+          isLoading = false;
+        });
+        return result;
+      }).catchError((error) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading posts: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        throw error; // Re-throw to be caught by FutureBuilder
+      });
     });
   }
 
@@ -240,6 +257,9 @@ class _CommunityPageState extends State<CommunityPage> {
                       child: FutureBuilder<List<PostModel>>(
                         future: _posts,
                         builder: (context, snapshot) {
+                              print('Snapshot state: ${snapshot.connectionState}');
+                              print('Snapshot data: ${snapshot.data}');
+                              print('Snapshot error: ${snapshot.error}');
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Center(
                               child: CircularProgressIndicator(color: Color(0xFF4DBAFF)),
@@ -557,98 +577,104 @@ class _CommunityPageState extends State<CommunityPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Tambahkan Komentar',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
-                ),
+        // Use Builder to get a context that's below the Scaffold
+        return Builder(
+          builder: (innerContext) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 16,
+                right: 16,
+                top: 16,
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: commentController,
-                decoration: InputDecoration(
-                  hintText: 'Tulis komentar...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF4DBAFF)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF4DBAFF), width: 2),
-                  ),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Batal',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontFamily: 'Poppins',
-                      ),
+                  const Text(
+                    'Tambahkan Komentar',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (commentController.text.isNotEmpty && post.id != null) {
-                        try {
-                          await ApiServicePosts.addComment(post.id!, commentController.text);
-                          _loadPosts(); // Reload posts to update comments count
-                          Navigator.pop(context);
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error adding comment: $e')),
-                          );
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4DBAFF),
-                      shape: RoundedRectangleBorder(
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: commentController,
+                    decoration: InputDecoration(
+                      hintText: 'Tulis komentar...',
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF4DBAFF)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF4DBAFF), width: 2),
                       ),
                     ),
-                    child: const Text(
-                      'Kirim',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
+                    maxLines: 3,
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(innerContext);
+                        },
+                        child: const Text(
+                          'Batal',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (commentController.text.isNotEmpty && post.id != null) {
+                            try {
+                              await ApiServicePosts.addComment(post.id!, commentController.text);
+                              _loadPosts(); // Reload posts to update comments count
+                              Navigator.pop(innerContext);
+                              // Show success message using the outer context
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Komentar berhasil ditambahkan')),
+                              );
+                            } catch (e) {
+                              // Show error message using the inner context
+                              ScaffoldMessenger.of(innerContext).showSnackBar(
+                                SnackBar(content: Text('Error adding comment: $e')),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4DBAFF),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Kirim',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
-  
   void _showCreatePostDialog() {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
@@ -656,6 +682,7 @@ class _CommunityPageState extends State<CommunityPage> {
     showDialog(
       context: context,
       builder: (context) {
+        // Create a separate BuildContext for the dialog
         return AlertDialog(
           title: const Text(
             'Buat Postingan Baru',
@@ -697,25 +724,65 @@ class _CommunityPageState extends State<CommunityPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (titleController.text.isNotEmpty && descriptionController.text.isNotEmpty) {
+                // Validate inputs
+                if (titleController.text.isEmpty || descriptionController.text.isEmpty) {
+                  // Use the outer context to show the SnackBar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Judul dan deskripsi tidak boleh kosong')),
+                  );
+                  return;
+                }
+                
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
+                
+                try {
+                  // Create post model
                   final newPost = PostModel(
                     judul: titleController.text,
                     deskripsi: descriptionController.text,
                   );
                   
-                  try {
-                    await ApiServicePosts.createPost(newPost);
-                    _loadPosts(); // Reload posts
-                    Navigator.pop(context);
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Postingan berhasil dibuat')),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error creating post: $e')),
-                    );
-                  }
+                  // Call API service
+                  await ApiServicePosts.createPost(newPost);
+                  
+                  // Close loading dialog
+                  Navigator.pop(context);
+                  
+                  // Close form dialog
+                  Navigator.pop(context);
+                  
+                  // Clear text fields
+                  titleController.clear();
+                  descriptionController.clear();
+                  
+                  // Reload posts
+                  _loadPosts();
+                  
+                  // Show success message using the outer context
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Postingan berhasil dibuat'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } catch (e) {
+                  // Close loading dialog
+                  Navigator.pop(context);
+                  
+                  // Show error message using the outer context
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error membuat postingan: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(
