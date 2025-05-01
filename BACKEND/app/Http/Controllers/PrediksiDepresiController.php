@@ -119,12 +119,11 @@ class PrediksiDepresiController extends Controller
 
     private function categorizeUmur($umur)
     {
-        if ($umur < 25) return 0;
-        elseif ($umur >= 25 && $umur <= 30) return 1;
-        elseif ($umur >= 31 && $umur <= 35) return 2;
-        elseif ($umur >= 36 && $umur <= 40) return 3;
-        elseif ($umur >= 41 && $umur <= 45) return 4;
-        elseif ($umur >= 46 && $umur <= 50) return 5;
+        if ($umur =< 30) return 0;
+        elseif ($umur >= 31 && $umur <= 35) return 1;
+        elseif ($umur >= 36 && $umur <= 40) return 2;
+        elseif ($umur >= 41 && $umur <= 45) return 3;
+        elseif ($umur >= 46 && $umur <= 50) return 4;
         else return null; // umur di luar jangkauan
     }
 
@@ -147,12 +146,11 @@ class PrediksiDepresiController extends Controller
     {
         $reverseMapping = [
             'umur' => [
-                0 => '< 25',
-                1 => '25-30',
-                2 => '31-35',
-                3 => '36-40',
-                4 => '41-45',
-                5 => '46-50'
+                0 => '=< 30',
+                1 => '31-35',
+                2 => '36-40',
+                3 => '41-45',
+                4 => '46-50',
             ],
             'merasa_sedih' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
             'mudah_tersinggung' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
@@ -169,14 +167,19 @@ class PrediksiDepresiController extends Controller
 
     private function predictDepresi($data)
     {
-        $response = Http::post('https://sehatimldepresi-production.up.railway.app//predict', [
+        $response = Http::post('https://sehatimldepresi-production.up.railway.app/predict', [
+            // $response = Http::post('http://127.0.0.1:5000/predict', [
             'features' => array_values($data)
         ]);
-
+    
         if ($response->failed()) {
-            throw new \Exception("Gagal memanggil Flask API");
+            $status = $response->status();
+            $body = $response->body();
+    
+            throw new \Exception("Gagal memanggil Flask API. Status: $status. Respons: $body");
         }
-
+    
         return $response->json()['prediction'] ?? null;
     }
+    
 }
