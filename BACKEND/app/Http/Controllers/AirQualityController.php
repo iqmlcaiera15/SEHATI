@@ -14,20 +14,23 @@ class AirQualityController extends Controller
         $this->airVisualService = $airVisualService;
     }
 
-
-
-
-    public function getStations(Request $request)
+    /**
+     * Get air quality data for a specific city.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCityData(Request $request)
     {
-        // Ambil parameter dari query string atau gunakan default
-        $city = $request->input('city', 'Bandung');
-        $state = $request->input('state', 'West Java');
+        // Get parameters from query string or use defaults for Bandung
+        $city = $request->input('city', 'Kota Bandung');
+        $state = $request->input('state', 'Jawa Barat');
         $country = $request->input('country', 'Indonesia');
         
-        // Dapatkan data stasiun dari AirVisualService
-        $data = $this->airVisualService->getStations($city, $state, $country);
+        // Get city data from AirVisualService
+        $data = $this->airVisualService->getCityData($city, $state, $country);
 
-        // Return data stasiun dalam format JSON
+        // Return data in JSON format
         return response()->json($data);
     }
 }
