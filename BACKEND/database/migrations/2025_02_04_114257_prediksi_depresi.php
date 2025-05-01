@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\SkorEpds;
 
 return new class extends Migration {
     public function up()
@@ -21,6 +22,12 @@ return new class extends Migration {
             $table->timestamps();
         });
     }
+
+    public function epds()
+    {
+        return $this->hasOne(SkorEpds::class, 'prediksi_depresi_id');
+    }
+
 
     public function down()
     {
