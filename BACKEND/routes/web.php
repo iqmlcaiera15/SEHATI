@@ -69,7 +69,7 @@ Route::get('/rekomendasimakanan/{id}', [RekomendasiMakananController::class, 'sh
 
 #Kick Counter
 Route::get('/kick-counter', [KickCounterController::class, 'index']);
-Route::post('/kick-counter', [KickCounterController::class, 'store']);
+Route::post('/kick-counter/store', [KickCounterController::class, 'store']);
 
 #Prediksi Metode Persalinan
 Route::get('/predictions', [PredictionController::class, 'index']);
