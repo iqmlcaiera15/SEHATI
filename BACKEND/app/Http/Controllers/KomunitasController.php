@@ -19,17 +19,25 @@ class KomunitasController extends Controller
 
     public function indexid(Request $request)
     {
+        \Log::info('post_id received:', ['post_id' => $request->post_id]);
         
-        $komunitass = Komunitas::find($request->post_id);
-        dd($request->all());
-        if (!$komunitass) {
+
+        if (!$request->post_id) {
+            return response()->json([
+                'message' => 'Parameter post_id tidak dikirim.'
+            ], 400);
+        }
+        
+        $komunitas = Komunitas::find($request->post_id);
+    
+        if (!$komunitas) {
             return response()->json([
                 'message' => 'Data tidak ditemukan untuk post_id: ' . $request->post_id
             ], 404);
         }
     
         return response()->json([
-            'Komunitas' => $komunitass
+            'Komunitas' => $komunitas
         ]);
     }
     
