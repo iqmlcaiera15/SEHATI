@@ -54,8 +54,8 @@ class KomunitasController extends Controller
     public function addComment(Request $request, $postId)
     {
         $request->validate([
-            'user_id' => 'required',
-            'isi_komentar' => 'required',
+            // 'user_id' => 'required',
+            'komentar' => 'required',
         ]);
 
         // Cek apakah post dengan id tersebut ada
@@ -69,10 +69,10 @@ class KomunitasController extends Controller
         }
 
         // Buat komentar
-        $komentar = Komentar::create([
+        $komentarkomunitas = KomentarKomunitas::create([
             'komunitas_id' => $postId,
-            'user_id' => $request->user_id,
-            'isi_komentar' => $request->isi_komentar,
+            // 'user_id' => $request->user_id,
+            'komentar' => $request->komentar,
         ]);
 
         // Update jumlah komentar di tabel Komunitas

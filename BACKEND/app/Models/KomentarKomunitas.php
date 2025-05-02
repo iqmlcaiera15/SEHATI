@@ -9,7 +9,7 @@ class KomentarKomunitas extends Model
 {
     use HasFactory;
 
-    protected $table = 'komentar_komunitas';
+    protected $table = 'komentarkomunitas';
 
     protected $fillable = [
         'post_id',
