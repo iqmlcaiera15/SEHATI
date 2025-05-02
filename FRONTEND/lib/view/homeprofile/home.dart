@@ -306,18 +306,6 @@ class _HomePageState extends State<HomePage> {
                                   // Navigate to consultation page
                                 },
                               ),
-                              _buildServiceItem(
-                                  'Hitung Tendangan Bayi', 
-                                  Icons.monitor_heart_outlined,
-                                  () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => IndexKickCounter(),
-                                      ),
-                                    );
-                                  },
-                                ),
                             ],
                           ),
                         ],
@@ -493,28 +481,61 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(height: 16),
                           Container(
-                            height: 180,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                _buildTipCard(
-                                  'Nutrisi Penting Ibu Hamil',
-                                  'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
-                                  Icons.restaurant,
-                                ),
-                                _buildTipCard(
-                                  'Olahraga Ringan',
-                                  'Jalan santai dan yoga untuk ibu hamil',
-                                  Icons.directions_walk,
-                                ),
-                                _buildTipCard(
-                                  'Pola Tidur Sehat',
-                                  'Istirahat cukup untuk kesehatan ibu dan janin',
-                                  Icons.hotel,
-                                ),
-                              ],
-                            ),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Fitur Kesehatan Kehamilan lainnya',
+                          style: TextStyle(
+                            color: Color(0xFF1E293B),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 180,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              // InkWell(
+                              //   onTap: () {
+                              //     Navigator.push(context, MaterialPageRoute(builder: (context) => RekomendasiMakananPage()));
+                              //   },
+                              //   child: _buildTipCard(
+                              //     'Makanan Dengan Nutrisi Penting Untuk Ibu Hamil',
+                              //     'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
+                              //     Icons.restaurant,
+                              //   ),
+                              // ),
+                              // InkWell(
+                              //   onTap: () {
+                              //     Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPolusi()));
+                              //   },
+                              //   child: _buildTipCard(
+                              //     'Olahraga Ringan',
+                              //     'Jalan santai dan yoga untuk ibu hamil',
+                              //     Icons.directions_walk,
+                              //   ),
+                              // ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexKickCounter()));
+                                },
+                                child: _buildTipCard(
+                                  'Hitung Tendangan Bayi',
+                                  'Hitung tendangan untuk memantau kesehatan bayi',
+                                  Icons.monitor_heart,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                         ],
                       ),
                     ),

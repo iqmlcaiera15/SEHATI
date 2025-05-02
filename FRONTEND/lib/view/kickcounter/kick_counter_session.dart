@@ -198,228 +198,230 @@ class _KickCounterSessionState extends State<KickCounterSession> {
               ),
           ],
         ),
-        body: Column(
-          children: [
-            // Timer Display
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Durasi',
-                    style: TextStyle(
-                      color: Color(0xFF4C617F),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _formatDuration(_elapsedSeconds),
-                    style: const TextStyle(
-                      color: Color(0xFF1E293B),
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  LinearProgressIndicator(
-                    value: _elapsedSeconds < 7200 ? _elapsedSeconds / 7200 : 1.0, // 2 hours = 7200 seconds
-                    backgroundColor: const Color(0xFFE2E8F0),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4DBAFF)),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Target: 10 tendangan dalam 2 jam',
-                    style: TextStyle(
-                      color: const Color(0xFF4C617F),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  if (_elapsedSeconds >= 7200)
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFC5C9C).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFFC5C9C)),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Timer Display
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
-                      child: const Text(
-                        'Waktu 2 jam telah berlalu. Jika tendangan kurang dari 10, konsultasikan dengan dokter.',
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Durasi',
                         style: TextStyle(
-                          color: Color(0xFFFC5C9C),
+                          color: Color(0xFF4C617F),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _formatDuration(_elapsedSeconds),
+                        style: const TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      LinearProgressIndicator(
+                        value: _elapsedSeconds < 7200 ? _elapsedSeconds / 7200 : 1.0, // 2 hours = 7200 seconds
+                        backgroundColor: const Color(0xFFE2E8F0),
+                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4DBAFF)),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Target: 10 tendangan dalam 2 jam',
+                        style: TextStyle(
+                          color: const Color(0xFF4C617F),
                           fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      if (_elapsedSeconds >= 7200)
+                        Container(
+                          margin: const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFC5C9C).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFFC5C9C)),
+                          ),
+                          child: const Text(
+                            'Waktu 2 jam telah berlalu. Jika tendangan kurang dari 10, konsultasikan dengan dokter.',
+                            style: TextStyle(
+                              color: Color(0xFFFC5C9C),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                
+                // Kick Count Display
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Jumlah Tendangan',
+                        style: TextStyle(
+                          color: Color(0xFF4C617F),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '$_kickCount',
+                        style: const TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 48,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: List.generate(
+                          10,
+                          (index) => Expanded(
+                            child: Container(
+                              height: 8,
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              decoration: BoxDecoration(
+                                color: index < _kickCount
+                                    ? const Color(0xFF4DBAFF)
+                                    : const Color(0xFFE2E8F0),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Kick Button
+                Container(
+                  margin: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: _recordKick,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xFF4DBAFF), Color(0xFF2D9CFF)],
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4DBAFF).withOpacity(0.3),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.touch_app,
+                              color: Colors.white,
+                              size: 48,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Ketuk setiap kali bayi menendang',
+                        style: TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                    ),
-                ],
-              ),
-            ),
-            
-            // Kick Count Display
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    ],
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Jumlah Tendangan',
-                    style: TextStyle(
-                      color: Color(0xFF4C617F),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '$_kickCount',
-                    style: const TextStyle(
-                      color: Color(0xFF1E293B),
-                      fontSize: 48,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: List.generate(
-                      10,
-                      (index) => Expanded(
-                        child: Container(
-                          height: 8,
-                          margin: const EdgeInsets.symmetric(horizontal: 2),
-                          decoration: BoxDecoration(
-                            color: index < _kickCount
-                                ? const Color(0xFF4DBAFF)
-                                : const Color(0xFFE2E8F0),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const Spacer(),
-            
-            // Kick Button
-            Container(
-              margin: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: _recordKick,
-                    child: Container(
-                      width: 160,
-                      height: 160,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFF4DBAFF), Color(0xFF2D9CFF)],
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF4DBAFF).withOpacity(0.3),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.touch_app,
-                          color: Colors.white,
-                          size: 64,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Ketuk setiap kali bayi menendang',
-                    style: TextStyle(
-                      color: Color(0xFF1E293B),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            
-            // Reset Button
-            if (_kickCount > 0 || _elapsedSeconds > 0)
-              TextButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Mulai Ulang?'),
-                      content: const Text(
-                        'Apakah Anda ingin memulai sesi baru? Data saat ini akan hilang.',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Batal'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            _resetSession();
-                          },
-                          child: const Text('Mulai Ulang'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4DBAFF),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.refresh, color: Color(0xFF4C617F)),
-                label: const Text(
-                  'Mulai Ulang Sesi',
-                  style: TextStyle(color: Color(0xFF4C617F)),
                 ),
-              ),
-            
-            const SizedBox(height: 24),
-          ],
+                
+                // Reset Button
+                if (_kickCount > 0 || _elapsedSeconds > 0)
+                  TextButton.icon(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Mulai Ulang?'),
+                          content: const Text(
+                            'Apakah Anda ingin memulai sesi baru? Data saat ini akan hilang.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Batal'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _resetSession();
+                              },
+                              child: const Text('Mulai Ulang'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF4DBAFF),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.refresh, color: Color(0xFF4C617F)),
+                    label: const Text(
+                      'Mulai Ulang Sesi',
+                      style: TextStyle(color: Color(0xFF4C617F)),
+                    ),
+                  ),
+                
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
         ),
       ),
     );
