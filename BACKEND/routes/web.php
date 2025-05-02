@@ -25,9 +25,9 @@ Route::get('/komunitas', [KomunitasController::class, 'index']);
 Route::post('/komunitas/add', [KomunitasController::class, 'store']);
 Route::delete('/komunitas/history/deleteAll', [KomunitasController::class, 'deleteAll']);
 Route::delete('/komunitas/history/{id}', [KomunitasController::class, 'deleteById']);
-Route::get('/komunitas/komen/add/{id}', [KomunitasController::class, 'addComment']);
-Route::get('/komunitas/like/add/{id}', [KomunitasController::class, 'addLike']);
-Route::get('/komunitas/komen/{id}', [KomunitasController::class, 'getComments']);
+Route::post('/komunitas/komen/add/{id}', [KomunitasController::class, 'addComment']);
+Route::post('/komunitas/like/add/{id}', [KomunitasController::class, 'addLike']);
+Route::post('/komunitas/komen/{id}', [KomunitasController::class, 'getComments']);
 
 #Catatan Kunjungan
 Route::get('/catatan/history', [CatatanController::class, 'index']);

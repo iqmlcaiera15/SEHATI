@@ -13,9 +13,17 @@ return new class extends Migration
     {
         Schema::create('komenkomunitas', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('post_id');
+            // $table->string('user_id'); 
+            $table->string('komentar');
             $table->timestamps();
+
+            $table->foreign('post_id')->references('post_id')->on('komunitas')->onDelete('cascade');
         });
     }
+
+     
+    
 
     /**
      * Reverse the migrations.
