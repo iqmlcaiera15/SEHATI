@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('komenkomunitas', function (Blueprint $table) {
+        Schema::create('komentarkomunitas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('post_id');
+            $table->unsignedBigInteger('post_id')->nullable();
             // $table->string('user_id'); 
             $table->string('komentar');
             $table->timestamps();

@@ -80,7 +80,7 @@ class KomunitasController extends Controller
         return response()->json([
             'status' => 'berhasil',
             'message' => 'Comment added successfully',
-            'data' => $komentar
+            // 'data' => $komentar
         ], 201);
     }
 
