@@ -99,7 +99,7 @@ class KomunitasController extends Controller
 
         // Ambil semua komentar untuk post ini
         $comments = Komentar::where('komunitas_id', $postId)
-                            ->orderBy('created_at', 'desc')
+                            ->orderBy('created_at', 'komentar')
                             ->with('user') // Tambahkan relasi user jika ada
                             ->get();
         
