@@ -69,7 +69,7 @@ class KomunitasController extends Controller
 
         // Buat komentar
         $komentarkomunitas = KomentarKomunitas::create([
-            'komunitas_id' => $postId,
+            // 'komunitas_id' => $postId,
             // 'user_id' => $request->user_id,
             'komentar' => $request->komentar,
         ]);
