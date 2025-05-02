@@ -541,7 +541,7 @@ class _CommunityPageState extends State<CommunityPage> {
                   ),
                   _buildActionButton(
                     Icons.comment_outlined, 
-                    "Komentar (${post.komen})",
+                    "Komentar (${post.komentar})",
                     () => _showCommentSheet(post),
                   ),
                   _buildActionButton(
@@ -661,6 +661,7 @@ class _CommunityPageState extends State<CommunityPage> {
                       onPressed: () async {
                         if (commentController.text.isNotEmpty && post.id != null) {
                           try {
+                            
                             await ApiServicePosts.addComment(post.id!, commentController.text);
                             _loadPosts(); // Reload posts to update comments count
                             Navigator.pop(context);

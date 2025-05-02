@@ -495,9 +495,9 @@ class _HomePageState extends State<HomePage> {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPolusi()));
                                 },
                                 child: _buildTipCard(
-                                  'Olahraga Ringan',
-                                  'Jalan santai dan yoga untuk ibu hamil',
-                                  Icons.directions_walk,
+                                  'Cek Kualitas Udara',
+                                  'Cek Kualitas Udara Untuk Bandung dan Sekitarnya',
+                                  Icons.wind_power_sharp,
                                 ),
                               ),
                               InkWell(

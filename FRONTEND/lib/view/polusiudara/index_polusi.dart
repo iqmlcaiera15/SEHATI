@@ -277,7 +277,7 @@ class _IndexPolusiState extends State<IndexPolusi> {
                             const Text(
                               'Indeks Kualitas Udara (AQI)',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -308,7 +308,7 @@ class _IndexPolusiState extends State<IndexPolusi> {
                                       Text(
                                         aqiCategory,
                                         style: const TextStyle(
-                                          color: Colors.white,
+                                          color: Colors.black,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -322,7 +322,7 @@ class _IndexPolusiState extends State<IndexPolusi> {
                             const Text(
                               'Berdasarkan US EPA Air Quality Index',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 12,
                               ),
                             ),

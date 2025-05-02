@@ -33,7 +33,7 @@ static Future<List<PostModel>> fetchPosts() async {
             judul: postJson['judul'] ?? '',
             deskripsi: postJson['deskripsi'] ?? '',
             likes: int.tryParse(postJson['likes']?.toString() ?? '0') ?? 0,
-            komen: postJson['komen'] != null 
+            komentar: postJson['komentar'] != null 
                 ? int.tryParse(postJson['komen'].toString()) ?? 0 
                 : 0,
             // You may need to adjust these based on what fields your API provides
@@ -114,7 +114,7 @@ static String _formatTimeAgo(String dateString) {
   // Update likes count
   static Future<bool> updateLikes(int postId, int likes) async {
     final response = await http.patch(
-      Uri.parse('$baseUrl/posts/$postId'),
+      Uri.parse('$baseUrl/komunitas/like/add/$postId'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'likes': likes}),
     );
@@ -125,7 +125,7 @@ static String _formatTimeAgo(String dateString) {
   // Add a comment to a post
   static Future<bool> addComment(int postId, String comment) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/posts/$postId/comments'),
+      Uri.parse('$baseUrl/komunitas/komen/add/$postId'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'comment': comment}),
     );
@@ -140,7 +140,7 @@ class PostModel {
   final String judul;
   final String deskripsi;
   final int likes;
-  final int komen;
+  final int komentar;
   final String? userImage; // Optional: for user profile image
   final String? username;   // Optional: for user name
   final String? timeAgo;    // Optional: for post timestamp
@@ -150,7 +150,7 @@ class PostModel {
     required this.judul,
     required this.deskripsi,
     this.likes = 0,
-    this.komen = 0,
+    this.komentar = 0,
     this.userImage,
     this.username,
     this.timeAgo,
@@ -173,7 +173,7 @@ factory PostModel.fromJson(Map<String, dynamic> json) {
     judul: json['judul']?.toString() ?? json['title']?.toString() ?? '',
     deskripsi: json['deskripsi']?.toString() ?? json['description']?.toString() ?? json['content']?.toString() ?? '',
     likes: safeInt(json['likes']) ?? safeInt(json['like_count']) ?? 0,
-    komen: safeInt(json['komen']) ?? safeInt(json['comment_count']) ?? 0,
+    komentar: safeInt(json['komen']) ?? safeInt(json['comment_count']) ?? 0,
     username: json['username']?.toString() ?? json['user_name']?.toString() ?? json['name']?.toString() ?? 'User',
     userImage: json['userImage']?.toString() ?? json['user_image']?.toString() ?? json['avatar']?.toString() ?? 'assets/images/default_user.png',
     timeAgo: json['timeAgo']?.toString() ?? json['time_ago']?.toString() ?? json['created_at']?.toString() ?? 'baru saja',
@@ -185,7 +185,7 @@ factory PostModel.fromJson(Map<String, dynamic> json) {
     return {
       'judul': judul,
       'deskripsi': deskripsi,
-      'komen': komen,
+      'komen': komentar,
       'likes': likes,
     };
   }
