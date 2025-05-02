@@ -9,7 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.2
-  intl: ^0.18.1 # Ganti dengan versi terbaru jika perlu
+
 
 dev_dependencies:
   flutter_test:
