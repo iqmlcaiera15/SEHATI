@@ -12,7 +12,7 @@ class DepressionResult extends StatelessWidget {
     Key? key,
     required this.isDepressed,
     required this.data,
-    this.score,
+    this.score, // This should now receive the EPDS score
   }) : super(key: key);
 
   // Get the formatted date

@@ -27,51 +27,55 @@ class DepressionService {
     }
   }
 
-  // Method to submit EPDS questionnaire data
   Future<Map<String, dynamic>> submitEpdsQuestionnaire(Map<String, dynamic> data) async {
   try {
+    // Convert individual q1, q2, etc. into an array
     final List<int> answersArray = [];
-      for (int i = 1; i <= 10; i++) {
-        answersArray.add(data['q$i'] as int);
-      }
-      
-      // Prepare the request payload
-      final payload = {
-        'prediksi_depresi_id': data['prediksi_depresi_id'],
-        'answers': answersArray,
-      };
-    // data sudah berisi 'prediksi_depresi_id' dan jawaban-jawaban kuesioner
+    for (int i = 1; i <= 10; i++) {
+      answersArray.add(data['q$i'] as int);
+    }
+    
+    // Prepare the request payload
+    final Map<String, dynamic> payload = {
+      'prediksi_depresi_id': data['prediksi_depresi_id'],
+      'answers': answersArray,
+    };
+
     final response = await http.post(
       Uri.parse('$baseUrl/epds/store'),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: jsonEncode(payload), // Menggunakan data yang sudah disiapkan sebelumnya
+      body: jsonEncode(payload),
     );
 
-    final responseBody = jsonDecode(response.body);
-
+    final responseBody = Map<String, dynamic>.from(jsonDecode(response.body));
+    
     if (response.statusCode == 201) {
-        // Format response to match what the Flutter app expects
-        return {
-          'status': 'success',
-          'message': responseBody['message'] ?? 'EPDS berhasil disimpan.',
-          'data': {
-            'hasil_prediksi': responseBody['score'] >= 10 ? 1 : 0,
-            'answers': responseBody['score'],
-            ...responseBody['data']
-          }
-        };
-      } else {
-        throw Exception(responseBody['error'] ?? 'Failed to submit EPDS questionnaire');
-      }
-    } catch (e) {
+      // Format response to match what the Flutter app expects
+      final int score = responseBody['score'] ?? 0;
+      
       return {
-        'status': 'error',
-        'message': e.toString(),
+        'status': 'success',
+        'message': responseBody['message'] ?? 'EPDS berhasil disimpan.',
+        'data': {
+          'hasil_prediksi': score >= 10 ? 1 : 0,
+          'answers': score, // This will be used as the EPDS score
+          ...(responseBody['data'] is Map 
+              ? Map<String, dynamic>.from(responseBody['data']) 
+              : {'data': responseBody['data']}),
+        }
       };
+    } else {
+      throw Exception(responseBody['error'] ?? 'Failed to submit EPDS questionnaire');
     }
+  } catch (e) {
+    return {
+      'status': 'error',
+      'message': e.toString(),
+    };
+  }
 }
 
   // Method to get depression history

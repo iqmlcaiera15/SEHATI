@@ -147,56 +147,61 @@ class _EpdsQuestionnaireState extends State<EpdsQuestionnaire> {
   }
 
   Future<void> _submitQuestionnaire() async {
-    setState(() {
-      _isLoading = true;
-    });
+  setState(() {
+    _isLoading = true;
+  });
 
-    try {
-      // Memproses jawaban untuk dikirim ke API
-      final Map<String, dynamic> finalAnswers = {
-        'prediksi_depresi_id': widget.prediksiDepresiId, // Menggunakan nama kolom yang sesuai dengan tabel
-      };
-      
-      // Menambahkan semua jawaban ke dalam map
-      for (int i = 0; i < _answers.length; i++) {
-        finalAnswers['q${i + 1}'] = _answers[i];
-      }
-      
-      // Panggil API dengan jawaban EPDS dan ID prediksi depresi
-      final response = await _service.submitEpdsQuestionnaire(finalAnswers);
-      
-      if (response['status'] == 'success') {
-        // Dapatkan hasil prediksi dan skor EPDS
-        final prediksi = response['data']['hasil_prediksi'];
-        final skorEpds = response['data']['answers'] ?? 0;
-        
-        if (!mounted) return;
-        
-        // Navigasi ke halaman hasil
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DepressionResult(
-              isDepressed: prediksi == 1,
-              data: response['data'],
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response["message"] ?? "Terjadi kesalahan"}')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+  try {
+    // Memproses jawaban untuk dikirim ke API
+    final Map<String, dynamic> finalAnswers = {
+      'prediksi_depresi_id': widget.prediksiDepresiId,
+    };
+    
+    // Menambahkan semua jawaban ke dalam map
+    for (int i = 0; i < _answers.length; i++) {
+      finalAnswers['q${i + 1}'] = _answers[i];
     }
+    
+    // Panggil API dengan jawaban EPDS dan ID prediksi depresi
+    final response = await _service.submitEpdsQuestionnaire(finalAnswers);
+    
+    if (response['status'] == 'success') {
+      // Extract the data more safely
+      final data = response['data'] as Map<String, dynamic>? ?? {};
+      final prediksi = data['hasil_prediksi'];
+      final skorEpds = data['score'] ?? 0;
+      
+      if (!mounted) return;
+      
+      // Navigasi ke halaman hasil dengan explicitly passing the score
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+             builder: (context) {
+              print('Data being sent to DepressionResult: isDepressed=$prediksi, score=$skorEpds, data=$data');
+              return DepressionResult(
+                isDepressed: prediksi == 1,
+                data: data,
+                score: skorEpds is int ? skorEpds : int.tryParse(skorEpds.toString()) ?? 0,
+              );
+             }
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${response["message"] ?? "Terjadi kesalahan"}')),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
 
   Widget _buildOptions(List<Map<String, dynamic>> options, int questionIndex) {
     return Column(

@@ -71,8 +71,8 @@ class _DepressionQuestionnaireState extends State<DepressionQuestionnaire> {
       'key': 'masalah_fokus',
       'options': [
         {'value': 'Tidak', 'text': 'Tidak'},
-        {'value': 'Kadang-kadang', 'text': 'Kadang-kadang'},
-        {'value': 'Ya', 'text': 'Ya, Sering'},
+        {'value': 'Ya', 'text': 'Ya'},
+        {'value': 'Sering', 'text': 'Sangat Sering'},
       ],
     },
     {
