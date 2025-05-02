@@ -22,6 +22,7 @@ Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
 
 #Komunitas
 Route::get('/komunitas', [KomunitasController::class, 'index']);
+Route::get('/komunitas/{id}', [KomunitasController::class, 'indexid']);
 Route::post('/komunitas/add', [KomunitasController::class, 'store']);
 Route::delete('/komunitas/history/deleteAll', [KomunitasController::class, 'deleteAll']);
 Route::delete('/komunitas/history/{id}', [KomunitasController::class, 'deleteById']);

@@ -16,6 +16,17 @@ class KomunitasController extends Controller
             'Komunitas' => $Komunitas
         ]);
     }
+
+    public function indexid(Request $request)
+{
+    $postId = $request->input('post_id'); // Ambil nilai post_id dari query parameter
+
+    $komunitas = Komunitas::where('post_id', $postId)->get();
+
+    return response()->json([
+        'Komunitas' => $komunitas
+    ]);
+}
     
      public function indexlatest()
     {
