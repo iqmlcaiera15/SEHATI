@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Komunitas;
-use App\Models\Komentar;
-use App\Models\Like;
+use App\Models\KomentarKomunitas;
 
 class KomunitasController extends Controller
 {
