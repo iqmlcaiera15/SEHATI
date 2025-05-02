@@ -742,13 +742,11 @@ class _CommunityPageState extends State<CommunityPage> {
                 onPressed: () async {
                   // Validate inputs
                   if (titleController.text.isEmpty || descriptionController.text.isEmpty) {
-                    Navigator.pop(context); // Close dialog first
-                    _showSnackBar('Judul dan deskripsi tidak boleh kosong');
+                    _scaffoldMessengerKey.currentState?.showSnackBar(
+                      const SnackBar(content: Text('Judul dan deskripsi tidak boleh kosong')),
+                    );
                     return;
                   }
-                  
-                  // Close dialog before showing loading indicator
-                  Navigator.pop(context);
                   
                   // Show loading indicator
                   showDialog(
@@ -770,26 +768,36 @@ class _CommunityPageState extends State<CommunityPage> {
                     await ApiServicePosts.createPost(newPost);
                     
                     // Close loading dialog
-                    Navigator.of(context).pop();
+                    if (mounted) Navigator.of(context, rootNavigator: true).pop();
                     
-                    // Clear text fields
-                    titleController.clear();
-                    descriptionController.clear();
+                    // Close form dialog
+                    if (mounted) Navigator.of(context).pop();
                     
                     // Reload posts
-                    _loadPosts();
+                    if (mounted) _loadPosts();
                     
                     // Show success message
-                    _showSnackBar(
-                      'Postingan berhasil dibuat',
-                      backgroundColor: Colors.green,
+                    _scaffoldMessengerKey.currentState?.showSnackBar(
+                      const SnackBar(
+                        content: Text('Postingan berhasil dibuat'),
+                        backgroundColor: Colors.green,
+                      ),
                     );
                   } catch (e) {
                     // Close loading dialog
-                    Navigator.of(context).pop();
+                    if (mounted) Navigator.of(context, rootNavigator: true).pop();
                     
                     // Show error message
-                    _showSnackBar('Error membuat postingan: ${e.toString()}');
+                    _scaffoldMessengerKey.currentState?.showSnackBar(
+                      SnackBar(
+                        content: Text('Error membuat postingan: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } finally {
+                    // Clear controllers
+                    titleController.dispose();
+                    descriptionController.dispose();
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -805,7 +813,7 @@ class _CommunityPageState extends State<CommunityPage> {
         },
       );
     }
-  }
+}
 
   // Entry point for the community feature
   class CommunityFeature extends StatelessWidget {
