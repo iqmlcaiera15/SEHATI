@@ -30,6 +30,16 @@ class DepressionService {
   // Method to submit EPDS questionnaire data
   Future<Map<String, dynamic>> submitEpdsQuestionnaire(Map<String, dynamic> data) async {
   try {
+    final List<int> answersArray = [];
+      for (int i = 1; i <= 10; i++) {
+        answersArray.add(data['q$i'] as int);
+      }
+      
+      // Prepare the request payload
+      final payload = {
+        'prediksi_depresi_id': data['prediksi_depresi_id'],
+        'answers': answersArray,
+      };
     // data sudah berisi 'prediksi_depresi_id' dan jawaban-jawaban kuesioner
     final response = await http.post(
       Uri.parse('$baseUrl/epds/store'),
@@ -37,17 +47,31 @@ class DepressionService {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: jsonEncode(data), // Menggunakan data yang sudah disiapkan sebelumnya
+      body: jsonEncode(payload), // Menggunakan data yang sudah disiapkan sebelumnya
     );
-    
+
+    final responseBody = jsonDecode(response.body);
+
     if (response.statusCode == 201) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to submit EPDS questionnaire: ${response.body}');
+        // Format response to match what the Flutter app expects
+        return {
+          'status': 'success',
+          'message': responseBody['message'] ?? 'EPDS berhasil disimpan.',
+          'data': {
+            'hasil_prediksi': responseBody['score'] >= 10 ? 1 : 0,
+            'answers': responseBody['score'],
+            ...responseBody['data']
+          }
+        };
+      } else {
+        throw Exception(responseBody['error'] ?? 'Failed to submit EPDS questionnaire');
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': e.toString(),
+      };
     }
-  } catch (e) {
-    throw Exception('Network error: $e');
-  }
 }
 
   // Method to get depression history
