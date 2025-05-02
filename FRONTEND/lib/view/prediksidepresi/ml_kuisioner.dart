@@ -71,8 +71,8 @@ class _DepressionQuestionnaireState extends State<DepressionQuestionnaire> {
       'key': 'masalah_fokus',
       'options': [
         {'value': 'Tidak', 'text': 'Tidak'},
-        {'value': 'Ya', 'text': 'Ya, kadang-kadang'},
-        {'value': 'Sering', 'text': 'Ya, sering'},
+        {'value': 'Kadang-kadang', 'text': 'Kadang-kadang'},
+        {'value': 'Ya', 'text': 'Ya, Sering'},
       ],
     },
     {
@@ -159,97 +159,147 @@ class _DepressionQuestionnaireState extends State<DepressionQuestionnaire> {
     }
   }
 
-  Future<void> _submitQuestionnaire() async {
-    setState(() {
-      _isLoading = true;
-    });
+  // Fungsi untuk mengevaluasi rule-based risk assessment
+  bool _isHighRisk() {
+    // Rule 1: Jika pengguna memiliki pikiran menyakiti diri sendiri (suicide_attempt = Ya)
+    if (_answers['suicide_attempt'] == 'Ya') {
+      return true;
+    }
     
-    try {
-      // Prepare the data for the API
-      final data = {
-        'umur': int.parse(_answers['umur']!),
-        'merasa_sedih': _answers['merasa_sedih'],
-        'mudah_tersinggung': _answers['mudah_tersinggung'],
-        'masalah_tidur': _answers['masalah_tidur'],
-        'masalah_fokus': _answers['masalah_fokus'],
-        'pola_makan': _answers['pola_makan'],
-        'merasa_bersalah': _answers['merasa_bersalah'],
-        'suicide_attempt': _answers['suicide_attempt'],
-      };
+    // Rule 2: Jika semua jawaban adalah "Ya" atau nilai tertinggi
+    int highRiskAnswerCount = 0;
+    
+    // Hitung berapa pertanyaan yang dijawab dengan risiko tinggi
+    if (_answers['merasa_sedih'] == 'Ya') highRiskAnswerCount++;
+    if (_answers['mudah_tersinggung'] == 'Ya') highRiskAnswerCount++;
+    if (_answers['masalah_tidur'] == 'Ya') highRiskAnswerCount++;
+    if (_answers['masalah_fokus'] == 'Ya') highRiskAnswerCount++;
+    if (_answers['pola_makan'] == 'Ya') highRiskAnswerCount++;
+    if (_answers['merasa_bersalah'] == 'Ya') highRiskAnswerCount++;
+    
+    // Jika 5 atau lebih jawaban menunjukkan risiko tinggi (dari 6 pertanyaan mood)
+    if (highRiskAnswerCount >= 5) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  Future<void> _submitQuestionnaire() async {
+  setState(() {
+    _isLoading = true;
+  });
+  
+  try {
+    // Prepare the data for the API
+    final data = {
+      'umur': int.parse(_answers['umur']!),
+      'merasa_sedih': _answers['merasa_sedih'],
+      'mudah_tersinggung': _answers['mudah_tersinggung'],
+      'masalah_tidur': _answers['masalah_tidur'],
+      'masalah_fokus': _answers['masalah_fokus'],
+      'pola_makan': _answers['pola_makan'],
+      'merasa_bersalah': _answers['merasa_bersalah'],
+      'suicide_attempt': _answers['suicide_attempt'],
+    };
+    
+    // Check if high risk based on answers before submitting to API
+    bool highRisk = _isHighRisk();
+    
+    // Submit the data
+    final response = await _service.submitDepressionQuestionnaire(data);
+    
+    // Handle the response based on the prediction result
+    if (response['status'] == 'success') {
+      final prediksi = response['data']['hasil_prediksi'];
       
-      // Submit the data
-      final response = await _service.submitDepressionQuestionnaire(data);
+      // Simpan ID hasil prediksi (untuk foreign key)
+      final int prediksiDepresiId = response['data']['id'] ?? 0; // ID dari hasil kuesioner depresi
       
-      // Handle the response based on the prediction result
-      if (response['status'] == 'success') {
-        final prediksi = response['data']['hasil_prediksi'];
+      // If depression is detected by ML or high risk rules are triggered
+      if (prediksi == 1 || highRisk) {
+        // Go to EPDS questionnaire
+        if (!mounted) return;
         
-        if (prediksi == 1) {
-          // If depression is detected, go to EPDS questionnaire
-          if (!mounted) return;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const EpdsQuestionnaire(),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EpdsQuestionnaire(
+              prediksiDepresiId: prediksiDepresiId, // Meneruskan ID sebagai foreign key
             ),
-          );
-        } else {
-          // If no depression detected, show the result
-          if (!mounted) return;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DepressionResult(
-                isDepressed: false,
-                data: response['data'],
-              ),
-            ),
-          );
-        }
+          ),
+        );
       } else {
-        // Handle error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response["message"] ?? "Terjadi kesalahan"}')),
+        // If no depression detected, show the result
+        if (!mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DepressionResult(
+              isDepressed: false,
+              data: response['data'],
+            ),
+          ),
         );
       }
-    } catch (e) {
+    } else {
+      // Handle error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error: ${response["message"] ?? "Terjadi kesalahan"}')),
       );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
+
 
   Widget _buildAgeInput() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: TextField(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: TextFormField(
         controller: _ageController,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          labelText: 'Masukkan umur',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          labelText: 'Umur',
+          hintText: 'Masukkan umur Anda',
           filled: true,
           fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF4DBAFF), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
+        style: const TextStyle(
+          fontSize: 16,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF1E293B),
         ),
       ),
     );
   }
 
-  Widget _buildOptions(List<Map<String, String>> options, String questionKey) {
+  Widget _buildOptions(List<Map<String, dynamic>> options, String questionKey) {
     return Column(
       children: options.map((option) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
           child: InkWell(
             onTap: () {
               setState(() {
-                _answers[questionKey] = option['value'];
+                _answers[questionKey] = option['value'] as String;
               });
             },
             child: Container(
@@ -269,7 +319,7 @@ class _DepressionQuestionnaireState extends State<DepressionQuestionnaire> {
                 ],
               ),
               child: Text(
-                option['text']!,
+                option['text'].toString(),
                 style: TextStyle(
                   color: _answers[questionKey] == option['value']
                       ? Colors.white
@@ -306,7 +356,7 @@ class _DepressionQuestionnaireState extends State<DepressionQuestionnaire> {
           },
         ),
         title: const Text(
-          'Kuesioner Depresi',
+          'Skrining Depresi',
           style: TextStyle(
             color: Color(0xFF1E293B),
             fontSize: 16,
@@ -395,15 +445,17 @@ class _DepressionQuestionnaireState extends State<DepressionQuestionnaire> {
                   ),
                 ),
                 
-                // Options or age input
-                currentQuestion['type'] == 'age'
-                    ? _buildAgeInput()
-                    : _buildOptions(
-                        List<Map<String, String>>.from(currentQuestion['options']),
-                        currentQuestion['key'],
-                      ),
-                
-                const Spacer(),
+                // Input or options depending on question type
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: currentQuestion['type'] == 'age'
+                        ? _buildAgeInput()
+                        : _buildOptions(
+                            List<Map<String, dynamic>>.from(currentQuestion['options']),
+                            currentQuestion['key'],
+                          ),
+                  ),
+                ),
                 
                 // Navigation buttons
                 Padding(

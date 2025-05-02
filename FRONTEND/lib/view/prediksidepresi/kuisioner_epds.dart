@@ -3,7 +3,12 @@ import 'package:Sehati/view/prediksidepresi/depression_result.dart';
 import 'package:Sehati/services/api/api_service_depresi.dart';
 
 class EpdsQuestionnaire extends StatefulWidget {
-  const EpdsQuestionnaire({Key? key}) : super(key: key);
+  final int prediksiDepresiId; // Add this field to receive the ID
+  
+  const EpdsQuestionnaire({
+    Key? key, 
+    required this.prediksiDepresiId, // Make it required
+  }) : super(key: key);
 
   @override
   State<EpdsQuestionnaire> createState() => _EpdsQuestionnaireState();
@@ -145,26 +150,43 @@ class _EpdsQuestionnaireState extends State<EpdsQuestionnaire> {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
-      // Convert nullable int list to non-nullable int list
-      final List<int> finalAnswers = _answers.map((answer) => answer ?? 0).toList();
+      // Memproses jawaban untuk dikirim ke API
+      final Map<String, dynamic> finalAnswers = {
+        'prediksi_depresi_id': widget.prediksiDepresiId, // Menggunakan nama kolom yang sesuai dengan tabel
+      };
       
-      // Submit the data
+      // Menambahkan semua jawaban ke dalam map
+      for (int i = 0; i < _answers.length; i++) {
+        finalAnswers['q${i + 1}'] = _answers[i];
+      }
+      
+      // Panggil API dengan jawaban EPDS dan ID prediksi depresi
       final response = await _service.submitEpdsQuestionnaire(finalAnswers);
       
-      // Navigate to results page
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DepressionResult(
-            isDepressed: true,
-            data: response['data'],
-            score: response['data']['total_score'] ?? 0,
+      if (response['status'] == 'success') {
+        // Dapatkan hasil prediksi dan skor EPDS
+        final prediksi = response['data']['hasil_prediksi'];
+        final skorEpds = response['data']['answers'] ?? 0;
+        
+        if (!mounted) return;
+        
+        // Navigasi ke halaman hasil
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DepressionResult(
+              isDepressed: prediksi == 1,
+              data: response['data'],
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response["message"] ?? "Terjadi kesalahan"}')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),

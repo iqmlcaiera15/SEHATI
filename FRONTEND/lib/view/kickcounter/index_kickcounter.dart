@@ -143,11 +143,6 @@ class _IndexKickCounterState extends State<IndexKickCounter> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset(
-                            'assets/images/empty_data.png', // Add this image to your assets
-                            width: 120,
-                            height: 120,
-                          ),
                           const SizedBox(height: 16),
                           const Text(
                             'Belum ada data tendangan bayi',

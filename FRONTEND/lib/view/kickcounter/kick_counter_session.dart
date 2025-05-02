@@ -71,7 +71,7 @@ class _KickCounterSessionState extends State<KickCounterSession> {
       final kickCounter = KickCounter(
         kickCount: _kickCount,
         recordedAt: _startTime!,
-        duration: _elapsedSeconds ~/ 60, // Convert seconds to minutes
+        duration: (_elapsedSeconds ~/ 60) > 0 ? (_elapsedSeconds ~/ 60) : 1,
       );
       
       await ApiServiceKickCounter.saveKickCounterData(kickCounter);

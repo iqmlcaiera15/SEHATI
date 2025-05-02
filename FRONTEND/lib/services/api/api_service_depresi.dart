@@ -28,28 +28,27 @@ class DepressionService {
   }
 
   // Method to submit EPDS questionnaire data
-  Future<Map<String, dynamic>> submitEpdsQuestionnaire(List<int> answers) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/epds/store'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'answers': answers,
-        }),
-      );
-
-      if (response.statusCode == 201) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Failed to submit EPDS questionnaire: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Network error: $e');
+  Future<Map<String, dynamic>> submitEpdsQuestionnaire(Map<String, dynamic> data) async {
+  try {
+    // data sudah berisi 'prediksi_depresi_id' dan jawaban-jawaban kuesioner
+    final response = await http.post(
+      Uri.parse('$baseUrl/epds/store'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(data), // Menggunakan data yang sudah disiapkan sebelumnya
+    );
+    
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to submit EPDS questionnaire: ${response.body}');
     }
+  } catch (e) {
+    throw Exception('Network error: $e');
   }
+}
 
   // Method to get depression history
   Future<List<dynamic>> getDepressionHistory() async {
@@ -75,7 +74,7 @@ class DepressionService {
   Future<Map<String, dynamic>> getDepressionRecord(String id) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/prediksidepresi/{id}'),
+        Uri.parse('$baseUrl/prediksidepresi/$id'),
         headers: {
           'Accept': 'application/json',
         },
