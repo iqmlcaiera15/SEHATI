@@ -123,27 +123,93 @@ static String _formatTimeAgo(String dateString) {
   }
   
   // Add a comment to a post
-  static Future<bool> addComment(int postId, String comment) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/komunitas/komen/add/$postId'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'comment': comment}),
+static Future<bool> addComment(int postId, String comment) async {
+  try {
+    // Debug info
+    print('Attempting to add comment to post ID: $postId');
+    
+    // Verify post exists first
+    final verifyResponse = await http.get(
+      Uri.parse('$baseUrl/komunitas/$postId'),
+      headers: {'Accept': 'application/json'},
     );
     
-    return response.statusCode == 201;
+    if (verifyResponse.statusCode != 200) {
+      throw Exception('Post with ID $postId not found (verify step)');
+    }
+
+    // Prepare request
+    final requestBody = {
+      'komentar': comment,
+      'post_id': postId.toString(), // Ensure string format
+    };
+    
+    print('Request body: $requestBody');
+    
+    // Make request
+    final response = await http.post(
+      Uri.parse('$baseUrl/komunitas/komen/add/$postId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(requestBody),
+    );
+    
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+    
+    // Handle response
+    if (response.statusCode == 201) {
+      return true;
+    } else if (response.statusCode == 404) {
+      throw Exception('Post not found. Please check the post ID');
+    } else {
+      throw Exception('Server error: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error in addComment: $e');
+    throw Exception('Failed to add comment: $e');
   }
 }
+  
+  // Metode alternatif jika API mengharapkan format berbeda
+    static Future<bool> addCommentAlternative(int postId, String comment) async {
+      try {
+        // Cara alternatif - kirim sebagai form data jika API mengharapkan format ini
+        final response = await http.post(
+          Uri.parse('$baseUrl/komunitas/komen/add'),
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+          },
+          body: {
+            'komentar': comment,
+            'post_id': postId.toString(),
+          },
+        );
+        
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        
+        return response.statusCode >= 200 && response.statusCode < 300;
+      } catch (e) {
+        print('Error di addCommentAlternative: $e');
+        throw Exception('Gagal menambahkan komentar: $e');
+      }
+    }
+  }
 
 // Post model representing data from API
 class PostModel {
-  final int? id;
+  final dynamic id; // Changed to dynamic to handle both string and int IDs
   final String judul;
   final String deskripsi;
   final int likes;
   final int komentar;
-  final String? userImage; // Optional: for user profile image
-  final String? username;   // Optional: for user name
-  final String? timeAgo;    // Optional: for post timestamp
+  final String? userImage;
+  final String? username;
+  final String? timeAgo;
 
   PostModel({
     this.id,
@@ -156,29 +222,38 @@ class PostModel {
     this.timeAgo,
   });
 
-  // Factory constructor to create a PostModel from JSON
-factory PostModel.fromJson(Map<String, dynamic> json) {
-  print('Parsing post: $json'); // Debug
-  
-  // Helper function to safely extract integer values
-  int? safeInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value);
-    return null;
+  // Helper method to safely get post ID as string (for API calls)
+  String? getIdAsString() {
+    if (id == null) return null;
+    return id.toString();
   }
 
-  return PostModel(
-    id: safeInt(json['id']),
-    judul: json['judul']?.toString() ?? json['title']?.toString() ?? '',
-    deskripsi: json['deskripsi']?.toString() ?? json['description']?.toString() ?? json['content']?.toString() ?? '',
-    likes: safeInt(json['likes']) ?? safeInt(json['like_count']) ?? 0,
-    komentar: safeInt(json['komen']) ?? safeInt(json['comment_count']) ?? 0,
-    username: json['username']?.toString() ?? json['user_name']?.toString() ?? json['name']?.toString() ?? 'User',
-    userImage: json['userImage']?.toString() ?? json['user_image']?.toString() ?? json['avatar']?.toString() ?? 'assets/images/default_user.png',
-    timeAgo: json['timeAgo']?.toString() ?? json['time_ago']?.toString() ?? json['created_at']?.toString() ?? 'baru saja',
-  );
-}
+  // Factory constructor to create a PostModel from JSON
+  factory PostModel.fromJson(Map<String, dynamic> json) {
+    print('Parsing post: $json'); // Debug
+    
+    // Helper function to safely extract integer values
+    int? safeInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    // Extract ID - try multiple possible field names
+    final postId = json['id'] ?? json['post_id'] ?? json['_id'];
+    
+    return PostModel(
+      id: postId, // Use the extracted ID
+      judul: json['judul']?.toString() ?? json['title']?.toString() ?? '',
+      deskripsi: json['deskripsi']?.toString() ?? json['description']?.toString() ?? json['content']?.toString() ?? '',
+      likes: safeInt(json['likes']) ?? safeInt(json['like_count']) ?? 0,
+      komentar: safeInt(json['komen']) ?? safeInt(json['comment_count']) ?? 0,
+      username: json['username']?.toString() ?? json['user_name']?.toString() ?? json['name']?.toString() ?? 'User',
+      userImage: json['userImage']?.toString() ?? json['user_image']?.toString() ?? json['avatar']?.toString() ?? 'assets/images/default_user.png',
+      timeAgo: json['timeAgo']?.toString() ?? json['time_ago']?.toString() ?? json['created_at']?.toString() ?? 'baru saja',
+    );
+  }
 
   // Convert PostModel to JSON for API requests
   Map<String, dynamic> toJson() {
@@ -187,6 +262,8 @@ factory PostModel.fromJson(Map<String, dynamic> json) {
       'deskripsi': deskripsi,
       'komen': komentar,
       'likes': likes,
+      // Conditionally add id if it exists
+      if (id != null) 'post_id': id.toString(),
     };
   }
 }
