@@ -57,6 +57,7 @@ class KomunitasController extends Controller
             'deskripsi' => $request->deskripsi,
             'gambar' => $request->gambar,
             'likes' => 0, // Inisialisasi dengan 0 likes
+            'komen' => 0, // Inisialisasi dengan 0 likes
             
         ]);
         
@@ -70,6 +71,7 @@ class KomunitasController extends Controller
     public function addComment(Request $request, $postId)
     {
         $request->validate([
+            'post_id' => 'required|exists:komunitas,id',
             // 'user_id' => 'required',
             'komentar' => 'required',
         ]);
@@ -86,7 +88,7 @@ class KomunitasController extends Controller
 
         // Buat komentar
         $komentarkomunitas = KomentarKomunitas::create([
-            // 'komunitas_id' => $postId,
+            'post_id' => $request->input('post_id'),
             // 'user_id' => $request->user_id,
             'komentar' => $request->komentar,
         ]);

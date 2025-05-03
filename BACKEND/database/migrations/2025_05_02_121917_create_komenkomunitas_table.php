@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('komentarkomunitas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('post_id')->nullable();
+            $table->foreignId('post_id')
+            ->constrained('komunitas')
+            ->onDelete('cascade');
             // $table->string('user_id'); 
             $table->string('komentar');
             $table->timestamps();
 
-            $table->foreign('post_id')->references('post_id')->on('komunitas')->onDelete('cascade');
+    
         });
     }
 

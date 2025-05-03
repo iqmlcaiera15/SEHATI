@@ -10,7 +10,7 @@ class Komunitas extends Model
     use HasFactory;
 
     protected $table = 'komunitas';
-    protected $primaryKey = 'post_id';
+  
 
     protected $fillable = [
         // 'user_id', 
@@ -23,7 +23,7 @@ class Komunitas extends Model
 
     public function komentar()
     {
-        return $this->hasMany(KomentarKomunitas::class, 'post_id');
+        return $this->hasMany(KomentarKomunitas::class, 'id');
     }
 
 }
