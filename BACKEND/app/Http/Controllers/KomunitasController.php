@@ -17,18 +17,11 @@ class KomunitasController extends Controller
         ]);
     }
 
-    public function indexid(Request $request)
+    public function indexid($id)
     {
-        \Log::info('post_id received:', ['post_id' => $request->post_id]);
         
-
-        if (!$request->post_id) {
-            return response()->json([
-                'message' => 'Parameter post_id tidak dikirim.'
-            ], 400);
-        }
-        
-        $komunitas = Komunitas::find($request->post_id);
+        $result = komunitas::findOrFail($id);
+        return response()->json($result);
     
         if (!$komunitas) {
             return response()->json([
