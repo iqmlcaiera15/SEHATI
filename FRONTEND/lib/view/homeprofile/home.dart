@@ -5,6 +5,7 @@ import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; // Import dise
 import 'package:Sehati/view/komunitas/index_komunitas.dart'; // Import disease index page
 import 'package:Sehati/view/prediksidepresi/index_depresi.dart';
 import 'package:Sehati/view/kickcounter/index_kickcounter.dart';
+import 'package:Sehati/view/postpartum/postpartum.dart';
 
 void main() {
   runApp(const SehatiApp());
@@ -528,6 +529,16 @@ class _HomePageState extends State<HomePage> {
                                   'Hitung Tendangan Bayi',
                                   'Hitung tendangan untuk memantau kesehatan bayi',
                                   Icons.monitor_heart,
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPostpartum()));
+                                },
+                                child: _buildTipCard(
+                                  'Perawatan PostPartum',
+                                  'Artikel perawatan setelah melahirkan',
+                                  Icons.healing,
                                 ),
                               ),
                             ],
