@@ -14,7 +14,7 @@ use App\Http\Controllers\PredictionController;
 use App\Http\Controllers\WaterIntakeController;
 use App\Http\Controllers\PregnancyCalculatorController;
 use App\Http\Controllers\FetalMonitoringController;
-
+use App\Http\Controllers\PostpartumArticleController;
 
 #Air Quality
 Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
@@ -101,6 +101,10 @@ Route::post('fetal-monitorings', [FetalMonitoringController::class, 'store']);
 Route::get('fetal-monitorings/{id}', [FetalMonitoringController::class, 'show']);
 Route::put('fetal-monitorings/{id}', [FetalMonitoringController::class, 'update']);
 Route::delete('fetal-monitorings/{id}', [FetalMonitoringController::class, 'destroy']);
+
+#PostPartum Article
+Route::get('/postpartum', [PostpartumArticleController::class, 'index']);
+Route::get('/postpartum/{id}', [PostpartumArticleController::class, 'show']);
 
 
 #Login Register
