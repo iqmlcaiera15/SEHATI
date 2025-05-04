@@ -14,16 +14,15 @@ class DepressionDetailView extends StatelessWidget {
   }) : super(key: key);
 
   String _getDepressionStatus(int score) {
-    if (score >= 13) {
-      return 'Depresi Berat';
-    } else if (score >= 10) {
-      return 'Depresi Sedang';
-    } else if (score >= 1) {
-      return 'Depresi Ringan';
-    } else {
-      return 'Tidak Ada Gejala Depresi';
-    }
+  if (score >= 14) {
+    return 'Risiko Tinggi Depresi';
+  } else if (score >= 12) {
+    return 'Kemungkinan Depresi';
+  } else {
+    return 'Gejala Ringan';
   }
+}
+
 
   Color _getStatusColor(int score) {
     if (score >= 13) {
@@ -37,26 +36,25 @@ class DepressionDetailView extends StatelessWidget {
     }
   }
 
-  String _getFormattedDate(String dateString) {
-    try {
-      final date = DateTime.parse(dateString);
-      return DateFormat('dd MMMM yyyy, HH:mm').format(date);
-    } catch (e) {
-      return dateString;
-    }
+  String _getFormattedDate(dynamic dateString) {
+  try {
+    if (dateString == null) return 'Tanggal tidak tersedia';
+    final date = DateTime.parse(dateString.toString());
+    return DateFormat('dd MMMM yyyy, HH:mm').format(date);
+  } catch (e) {
+    return dateString?.toString() ?? 'Tanggal tidak tersedia';
   }
+}
 
   String _getRecommendation(int score) {
-    if (score >= 13) {
-      return 'Segera konsultasikan dengan profesional kesehatan mental. Gejala depresi berat yang Anda alami memerlukan penanganan khusus dan dukungan medis.';
-    } else if (score >= 10) {
-      return 'Disarankan untuk berkonsultasi dengan profesional kesehatan mental. Gejala depresi sedang yang Anda alami sebaiknya tidak diabaikan.';
-    } else if (score >= 1) {
-      return 'Perhatikan kesehatan mental Anda. Cobalah teknik relaksasi dan manajemen stres. Jika gejala bertambah parah, konsultasikan dengan profesional.';
-    } else {
-      return 'Tetap jaga kesehatan mental dengan pola hidup sehat. Lakukan aktivitas yang menyenangkan dan tetap bersosialisasi dengan orang-orang terdekat.';
-    }
+  if (score >= 14) {
+    return 'Skor Anda menunjukkan risiko tinggi depresi. Segera lakukan penilaian diagnostik dan pengobatan dengan tenaga kesehatan profesional atau spesialis.';
+  } else if (score >= 12) {
+    return 'Skor Anda menunjukkan kemungkinan depresi. Disarankan untuk mendapatkan dukungan, edukasi, dan melakukan konsultasi dengan dokter layanan primer.';
+  } else {
+    return 'Skor Anda menunjukkan gejala ringan. Lakukan skrining ulang dalam 2–4 minggu dan pertimbangkan berkonsultasi dengan tenaga medis.';
   }
+}
 
   List<Map<String, dynamic>> _getQuestionAnswers() {
     // Contoh pertanyaan EPDS (Edinburgh Postnatal Depression Scale)

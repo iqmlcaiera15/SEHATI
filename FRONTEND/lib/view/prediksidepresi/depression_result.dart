@@ -34,29 +34,33 @@ class DepressionResult extends StatelessWidget {
 
     // EPDS Score severity levels
     if (score != null) {
-      if (score! >= 13) {
+      if (score! >= 14) {
         return {
-          'title': 'Depresi Berat',
-          'description': 'Skor EPDS Anda menunjukkan kemungkinan depresi berat. Sangat disarankan untuk segera berkonsultasi dengan profesional kesehatan mental.',
+          'title': 'Risiko Tinggi Depresi',
+          'description':
+              'Skor EPDS Anda menunjukkan risiko tinggi mengalami depresi. Diperlukan penilaian diagnostik dan pengobatan oleh profesional kesehatan atau spesialis.',
           'color': const Color(0xFFFF4D4D),
-          'buttonText': 'Temukan Bantuan',
+          'buttonText': 'Cari Bantuan Profesional',
         };
-      } else if (score! >= 10) {
+      } else if (score! >= 12) {
         return {
-          'title': 'Depresi Sedang',
-          'description': 'Skor EPDS Anda menunjukkan kemungkinan depresi sedang. Disarankan untuk berbicara dengan profesional kesehatan mental.',
+          'title': 'Kemungkinan Depresi',
+          'description':
+              'Skor EPDS Anda menunjukkan kemungkinan depresi. Disarankan untuk mendapat edukasi, pemantauan, dan rujukan ke dokter layanan primer.',
           'color': const Color(0xFFFFAA4D),
-          'buttonText': 'Temukan Bantuan',
+          'buttonText': 'Lihat Saran',
         };
       } else {
         return {
-          'title': 'Depresi Ringan',
-          'description': 'Skor EPDS Anda menunjukkan kemungkinan depresi ringan. Tetap perhatikan kesehatan mental Anda dan jangan ragu untuk mencari bantuan jika diperlukan.',
+          'title': 'Gejala Ringan',
+          'description':
+              'Skor EPDS Anda menunjukkan gejala ringan. Lakukan re-screen dalam 2–4 minggu dan pertimbangkan konsultasi dengan tenaga medis.',
           'color': const Color(0xFFFFE04D),
-          'buttonText': 'Kembali ke Dashboard',
+          'buttonText': 'Lihat Saran',
         };
-      }
+      } 
     }
+
 
     // Default for initial screening (should not reach here)
     return {
@@ -491,9 +495,11 @@ class DepressionResult extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: OutlinedButton(
                     onPressed: () {
-                      // TODO: Implement share functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Bagikan hasil dengan dokter atau konselor Anda')),
+                      Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomePage(),
+                      ),
                       );
                     },
                     style: OutlinedButton.styleFrom(
@@ -506,7 +512,7 @@ class DepressionResult extends StatelessWidget {
                       minimumSize: const Size(double.infinity, 56),
                     ),
                     child: const Text(
-                      'Bagikan Hasil',
+                      'Kembali ke Dashboard',
                       style: TextStyle(
                         fontSize: 16,
                         fontFamily: 'Poppins',

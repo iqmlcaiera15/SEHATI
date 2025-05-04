@@ -1,89 +1,11 @@
+import 'package:Sehati/providers/depression_history_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:Sehati/view/prediksidepresi/detail_result.dart';
 
-// Provider untuk mengelola state
-class DepressionHistoryProvider with ChangeNotifier {
-  bool isLoading = true;
-  List<dynamic> historyItems = [];
-  String errorMessage = '';
+// Assuming the DepressionHistoryProvider is in the same file or imported
 
-  DepressionHistoryProvider() {
-    fetchHistory();
-  }
-
-  Future<void> fetchHistory() async {
-    isLoading = true;
-    errorMessage = '';
-    notifyListeners();
-
-    try {
-      // Ganti URL dengan endpoint API sesuai kebutuhan
-      final response = await http.get(
-        Uri.parse('YOUR_API_BASE_URL/epds'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          // Tambahkan header authorization jika diperlukan
-          // 'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        historyItems = data;
-        isLoading = false;
-        notifyListeners();
-      } else {
-        errorMessage = 'Gagal memuat data: ${response.statusCode}';
-        isLoading = false;
-        notifyListeners();
-      }
-    } catch (e) {
-      errorMessage = 'Terjadi kesalahan: $e';
-      isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  String getFormattedDate(String dateString) {
-    try {
-      final date = DateTime.parse(dateString);
-      return DateFormat('dd MMMM yyyy, HH:mm').format(date);
-    } catch (e) {
-      return dateString;
-    }
-  }
-
-  String getDepressionStatus(int score) {
-    if (score >= 13) {
-      return 'Depresi Berat';
-    } else if (score >= 10) {
-      return 'Depresi Sedang';
-    } else if (score >= 1) {
-      return 'Depresi Ringan';
-    } else {
-      return 'Tidak Ada Gejala Depresi';
-    }
-  }
-
-  Color getStatusColor(int score) {
-    if (score >= 13) {
-      return const Color(0xFFFF4D4D);
-    } else if (score >= 10) {
-      return const Color(0xFFFFAA4D);
-    } else if (score >= 1) {
-      return const Color(0xFFFFE04D);
-    } else {
-      return const Color(0xFF4DBAFF);
-    }
-  }
-}
-
-// Stateless Widget
 class Historyview extends StatelessWidget {
   const Historyview({Key? key}) : super(key: key);
 
@@ -170,12 +92,6 @@ class Historyview extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  'assets/images/no_data.png', // Ganti dengan asset yang sesuai
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
-                ),
                 const SizedBox(height: 16),
                 const Text(
                   'Belum ada riwayat prediksi',
@@ -207,25 +123,43 @@ class Historyview extends StatelessWidget {
           itemCount: provider.historyItems.length,
           itemBuilder: (context, index) {
             final item = provider.historyItems[index];
-            final score = item['score'] as int;
+            final bool hasEpds = item['has_epds'] ?? false;
+            final int score = item['score'] as int? ?? 0;
+            final int? hasilPrediksi = item['hasil_prediksi'] as int?;
             final date = provider.getFormattedDate(item['created_at']);
-            final status = provider.getDepressionStatus(score);
-            final statusColor = provider.getStatusColor(score);
+            final status = provider.getDepressionStatus(score, hasEpds, hasilPrediksi);
+            final statusColor = provider.getStatusColor(score, hasEpds, hasilPrediksi);
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DepressionDetailView(
-                        score: score,
-                        data: item,
-                        id: item['id'],
+                  if (hasEpds) {
+                    final epdsData = item['epds_data'];
+                    // Properly cast the data to Map<String, dynamic>
+                    final castData = epdsData is Map ? Map<String, dynamic>.from(epdsData) : <String, dynamic>{};
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DepressionDetailView(
+                          score: score,
+                          data: castData,
+                          id: item['id'],
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  } else {
+                    // Properly cast the prediksi data
+                    final castItem = Map<String, dynamic>.from(item);
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => _buildPrediksiDetailPage(context, castItem),
+                      ),
+                    );
+                  }
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
@@ -277,7 +211,7 @@ class Historyview extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              'Skor: $score',
+                              hasEpds ? 'Skor: $score' : (hasilPrediksi == 1 ? 'Potensi' : 'Aman'),
                               style: TextStyle(
                                 color: statusColor,
                                 fontSize: 14,
@@ -298,6 +232,20 @@ class Historyview extends StatelessWidget {
                           fontWeight: FontWeight.w400,
                         ),
                       ),
+                      if (!hasEpds && hasilPrediksi == 0)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            'Hasil prediksi awal',
+                            style: TextStyle(
+                              color: const Color(0xFF4C617F),
+                              fontSize: 12,
+                              fontFamily: 'Poppins',
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -306,6 +254,291 @@ class Historyview extends StatelessWidget {
           },
         );
       },
+    );
+  }
+  
+  // Helper method to create a basic detail page for prediksi results without EPDS
+  Widget _buildPrediksiDetailPage(BuildContext context, Map<String, dynamic> prediksi) {
+    final hasilPrediksi = prediksi['hasil_prediksi'] as int? ?? 0;
+  
+  // Safely handle the date string
+      String dateStr;
+      try {
+        dateStr = prediksi['created_at']?.toString() ?? DateTime.now().toIso8601String();
+      } catch (e) {
+        dateStr = DateTime.now().toIso8601String();
+      }
+      
+      final date = DateFormat('dd MMMM yyyy, HH:mm').format(
+        DateTime.tryParse(dateStr) ?? DateTime.now()
+      );
+      
+      final status = hasilPrediksi == 1 ? 'Berpotensi Depresi' : 'Tidak Ada Gejala Depresi';
+      final statusColor = hasilPrediksi == 1 ? const Color(0xFFFFAA4D) : const Color(0xFF4DBAFF);
+  
+    
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Detail Hasil Prediksi Awal',
+          style: TextStyle(
+            color: Color(0xFF1E293B),
+            fontSize: 16,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Status Card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          hasilPrediksi == 1 ? Icons.warning_rounded : Icons.check_circle_rounded,
+                          color: statusColor,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      status,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontSize: 20,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      date,
+                      style: const TextStyle(
+                        color: Color(0xFF4C617F),
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Rekomendasi
+              const Text(
+                'Rekomendasi',
+                style: TextStyle(
+                  color: Color(0xFF1E293B),
+                  fontSize: 16,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  hasilPrediksi == 1
+                      ? 'Berdasarkan hasil prediksi awal, Anda berpotensi mengalami depresi. Kami sarankan untuk melakukan tes EPDS lebih lanjut untuk evaluasi lebih mendetail.'
+                      : 'Berdasarkan hasil prediksi awal, Anda tidak menunjukkan gejala depresi. Tetap jaga kesehatan mental Anda dengan pola hidup sehat dan seimbang.',
+                  style: const TextStyle(
+                    color: Color(0xFF1E293B),
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w400,
+                    height: 1.6,
+                  ),
+                ),
+              ),
+
+              if (hasilPrediksi == 1) ...[
+                const SizedBox(height: 24),
+                
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Navigate to EPDS test
+                      // You can implement this navigation later
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Navigasi ke tes EPDS akan diimplementasikan')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4DBAFF),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: const Text(
+                      'Lakukan Tes EPDS',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 24),
+
+              // Tombol bantuan
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFE2E8F0),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Butuh Bantuan?',
+                      style: TextStyle(
+                        color: Color(0xFF1E293B),
+                        fontSize: 16,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Jika Anda memerlukan bantuan segera, hubungi layanan konseling atau hotline berikut:',
+                      style: TextStyle(
+                        color: Color(0xFF4C617F),
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                        height: 1.6,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // Implementasi untuk menghubungi hotline
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF4DBAFF),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
+                            ),
+                            icon: const Icon(Icons.phone),
+                            label: const Text(
+                              'Hotline',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // Implementasi untuk menghubungi konselor
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF4DBAFF),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(
+                                  color: Color(0xFF4DBAFF),
+                                  width: 1,
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
+                            ),
+                            icon: const Icon(Icons.chat_bubble_outline),
+                            label: const Text(
+                              'Konselor',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
