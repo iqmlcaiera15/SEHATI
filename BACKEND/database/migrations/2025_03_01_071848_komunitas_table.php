@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('deskripsi');
             $table->string('gambar')->nullable();
             $table->integer('komen')->nullable();
-            $table->integer('likes')->nullable();
+            $table->integer('Apresiasi')->nullable();
             $table->timestamps();
         });
     }

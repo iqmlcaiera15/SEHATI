@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('deteksipenyakit', function (Blueprint $table) {
             $table->id('deteksi_id'); 
+            $table->string('bidan')->nullable(); 
             $table->string('nama')->nullable(); 
             $table->integer('pregnancies')->nullable(); 
             $table->integer('bs'); 
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->integer('diastolic_bp'); 
             $table->integer('heart_rate'); 
             $table->decimal('body_temp', 5, 2)->nullable(); 
+
         
             // Kolom hasil prediksi
             $table->boolean('diabetes_prediction')->nullable(); 

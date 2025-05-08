@@ -134,7 +134,7 @@ class KomunitasController extends Controller
         ]);
 
         // Cek apakah post dengan id tersebut ada
-        $post = Komunitas::find($postId);
+        $post = Komunitas::find($Id);
         
         if (!$post) {
             return response()->json([
