@@ -13,9 +13,7 @@ return new class extends Migration
     {
         Schema::create('deteksipenyakit', function (Blueprint $table) {
             $table->id('deteksi_id'); 
-            $table->foreignId('user_id')
-            ->constrained('users')
-            ->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('bidan_id')->nullable(); 
             $table->string('nama')->nullable(); 
             $table->integer('pregnancies')->nullable(); 
