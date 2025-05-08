@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'providers' => [
+    Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+],
 ];
