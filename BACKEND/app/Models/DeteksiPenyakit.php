@@ -35,6 +35,8 @@ class DeteksiPenyakit extends Model
         'maternal_health_prediction'
     ];
     
-    
-
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

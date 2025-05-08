@@ -9,13 +9,16 @@ class DeteksiController extends Controller
 {
     public function index()
     {
-        $DeteksiPenyakit = DeteksiPenyakit::all();
-
+        $user = Auth::user(); // Ambil user dari JWT
+    
+        // Ambil data DeteksiPenyakit hanya milik user tersebut
+        $deteksiPenyakit = DeteksiPenyakit::where('user_id', $user->id)->get();
+    
         return response()->json([
-            'DeteksiPenyakit' => $DeteksiPenyakit
+            'DeteksiPenyakit' => $deteksiPenyakit
         ]);
     }
-
+    
     public function indexlatest()
     {
         $DeteksiPenyakit = DeteksiPenyakit::latest()->first();
@@ -66,7 +69,7 @@ class DeteksiController extends Controller
             ]);
             
             // Kirim data ke API ML Railway
-            $response = Http::post('https://sehatiml-production.up.railway.app//predictdeteksi', [
+            $response = Http::post('https://sehatiml-production.up.railway.app/predictdeteksi', [
                 'diabetes' => [
                     'Pregnancies' => $request->pregnancies ?? 0,
                     'BS' => $request->bs,
