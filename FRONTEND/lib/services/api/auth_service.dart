@@ -7,7 +7,7 @@ class AuthService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // Base URL API Anda
-  final String _baseUrl = 'https://sehatiapp-production.up.railway.app';
+  final String _baseUrl = 'https://sehatiapp-production.up.railway.app/api';
 
   // Simpan token
   Future<void> _saveToken(String token) async {

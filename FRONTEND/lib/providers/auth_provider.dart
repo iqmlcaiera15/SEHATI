@@ -17,6 +17,12 @@ class AuthProvider extends ChangeNotifier {
     _checkAuthentication();
   }
 
+  // Add this new method to clear errors
+  void clearErrors() {
+    _error = null;
+    notifyListeners();
+  }
+
   Future<void> _checkAuthentication() async {
     final token = await _authService.getToken();
     if (token != null) {
