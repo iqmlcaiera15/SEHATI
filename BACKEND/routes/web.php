@@ -28,7 +28,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
 });
 
 // Semua route terproteksi
-Route::group(['middleware' => 'auth:api'], function () {
+Route::group(['middleware' => 'auth:web'], function () {
     // Air Quality
     Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
 
