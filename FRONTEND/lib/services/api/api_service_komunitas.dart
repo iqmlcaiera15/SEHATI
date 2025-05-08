@@ -1,29 +1,113 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Add this import
 
 class ApiServicePosts {
   // Base URL of your Railway API
-  static const String baseUrl = 'https://sehatiapp-production.up.railway.app';
+  static const String baseUrl = 'https://sehatiapp-production.up.railway.app/api';
   
-
+  // Helper method to get token
+  static Future<String?> _getToken() async {
+    final storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'jwt_token');
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+    return token;
+  }
   
-  // Fetch all posts from API
   static Future<List<PostModel>> fetchPosts() async {
-    final response = await http.get(Uri.parse('https://sehatiapp-production.up.railway.app/komunitas'));
-    
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  
-      final List<dynamic> jsonData = jsonResponse['data'] ?? [];
+    try {
+      // Get JWT token
+      final token = await _getToken();
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/komunitas'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-      return jsonData.map((json) => PostModel.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load posts: ${response.statusCode}');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> decodedData = json.decode(response.body);
+        print('Decoded data: $decodedData');
+
+        // Check if the response has the 'Komunitas' key (capital K)
+        if (decodedData.containsKey('Komunitas') && decodedData['Komunitas'] is List) {
+          final List<dynamic> postsList = decodedData['Komunitas'];
+          print('Found ${postsList.length} posts in Komunitas key');
+          
+          // Map each item in the list to a PostModel
+          return postsList.map<PostModel>((postJson) {
+            return PostModel(
+              id: postJson['post_id'], // Use post_id instead of id
+              judul: postJson['judul'] ?? '',
+              deskripsi: postJson['deskripsi'] ?? '',
+              likes: int.tryParse(postJson['likes']?.toString() ?? '0') ?? 0,
+              komentar: postJson['komentar'] != null 
+                  ? int.tryParse(postJson['komen'].toString()) ?? 0 
+                  : 0,
+              // You may need to adjust these based on what fields your API provides
+              username: 'User', // Default
+              userImage: 'assets/images/default_user.png', // Default
+              timeAgo: postJson['created_at'] != null 
+                  ? _formatTimeAgo(postJson['created_at'].toString())
+                  : 'baru saja',
+            );
+          }).toList();
+        } else {
+          print('No Komunitas key found or it is not a list');
+          return [];
+        }
+      } else {
+        throw Exception('Failed to load posts: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Exception in fetchPosts: $e');
+      throw Exception('Failed to fetch posts: $e');
     }
   }
 
-    static Future<List<PostModel>> fetchPostsLates() async {
-    final response = await http.get(Uri.parse('https://sehatiapp-production.up.railway.app/komunitas/latest'));
+  // Helper function to format the API timestamp into a "time ago" format
+  static String _formatTimeAgo(String dateString) {
+    try {
+      final DateTime date = DateTime.parse(dateString);
+      final Duration difference = DateTime.now().difference(date);
+      
+      if (difference.inDays > 365) {
+        return '${(difference.inDays / 365).floor()} tahun yang lalu';
+      } else if (difference.inDays > 30) {
+        return '${(difference.inDays / 30).floor()} bulan yang lalu';
+      } else if (difference.inDays > 0) {
+        return '${difference.inDays} hari yang lalu';
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours} jam yang lalu';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes} menit yang lalu';
+      } else {
+        return 'baru saja';
+      }
+    } catch (e) {
+      print('Error formatting date: $e');
+      return 'baru saja';
+    }
+  }
+
+  static Future<List<PostModel>> fetchPostsLates() async {
+    // Get JWT token
+    final token = await _getToken();
+    
+    final response = await http.get(
+      Uri.parse('$baseUrl/komunitas/latest'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      }
+    );
     
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -38,9 +122,15 @@ class ApiServicePosts {
 
   // Add a new post
   static Future<PostModel> createPost(PostModel post) async {
+    // Get JWT token
+    final token = await _getToken();
+    
     final response = await http.post(
-      Uri.parse('$baseUrl/posts'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('$baseUrl/komunitas/add'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
       body: json.encode(post.toJson()),
     );
     
@@ -53,9 +143,15 @@ class ApiServicePosts {
   
   // Update likes count
   static Future<bool> updateLikes(int postId, int likes) async {
+    // Get JWT token
+    final token = await _getToken();
+    
     final response = await http.patch(
-      Uri.parse('$baseUrl/posts/$postId'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('$baseUrl/komunitas/like/add/$postId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
       body: json.encode({'likes': likes}),
     );
     
@@ -64,50 +160,145 @@ class ApiServicePosts {
   
   // Add a comment to a post
   static Future<bool> addComment(int postId, String comment) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/posts/$postId/comments'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'comment': comment}),
-    );
-    
-    return response.statusCode == 201;
+    try {
+      // Get JWT token
+      final token = await _getToken();
+      
+      // Debug info
+      print('Attempting to add comment to post ID: $postId');
+      
+      // Verify post exists first
+      final verifyResponse = await http.get(
+        Uri.parse('$baseUrl/komunitas/$postId'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      
+      if (verifyResponse.statusCode != 200) {
+        throw Exception('Post with ID $postId not found (verify step)');
+      }
+
+      // Prepare request
+      final requestBody = {
+        'komentar': comment,
+        'post_id': postId.toString(), // Ensure string format
+      };
+      
+      print('Request body: $requestBody');
+      
+      // Make request
+      final response = await http.post(
+        Uri.parse('$baseUrl/komunitas/komen/add/$postId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode(requestBody),
+      );
+      
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      
+      // Handle response
+      if (response.statusCode == 201) {
+        return true;
+      } else if (response.statusCode == 404) {
+        throw Exception('Post not found. Please check the post ID');
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error in addComment: $e');
+      throw Exception('Failed to add comment: $e');
+    }
+  }
+  
+  // Metode alternatif jika API mengharapkan format berbeda
+  static Future<bool> addCommentAlternative(int postId, String comment) async {
+    try {
+      // Get JWT token
+      final token = await _getToken();
+      
+      // Cara alternatif - kirim sebagai form data jika API mengharapkan format ini
+      final response = await http.post(
+        Uri.parse('$baseUrl/komunitas/komen/add'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: {
+          'komentar': comment,
+          'post_id': postId.toString(),
+        },
+      );
+      
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (e) {
+      print('Error di addCommentAlternative: $e');
+      throw Exception('Gagal menambahkan komentar: $e');
+    }
   }
 }
 
 // Post model representing data from API
 class PostModel {
-  final int? id;
+  final dynamic id; // Changed to dynamic to handle both string and int IDs
   final String judul;
   final String deskripsi;
   final int likes;
-  final int komen;
-  final String? userImage; // Optional: for user profile image
-  final String? username;   // Optional: for user name
-  final String? timeAgo;    // Optional: for post timestamp
+  final int komentar;
+  final String? userImage;
+  final String? username;
+  final String? timeAgo;
 
   PostModel({
     this.id,
     required this.judul,
     required this.deskripsi,
     this.likes = 0,
-    this.komen = 0,
+    this.komentar = 0,
     this.userImage,
     this.username,
     this.timeAgo,
   });
 
+  // Helper method to safely get post ID as string (for API calls)
+  String? getIdAsString() {
+    if (id == null) return null;
+    return id.toString();
+  }
+
   // Factory constructor to create a PostModel from JSON
   factory PostModel.fromJson(Map<String, dynamic> json) {
+    print('Parsing post: $json'); // Debug
+    
+    // Helper function to safely extract integer values
+    int? safeInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    // Extract ID - try multiple possible field names
+    final postId = json['id'] ?? json['post_id'] ?? json['_id'];
+    
     return PostModel(
-      id: json['id'],
-      judul: json['judul'] ?? '',
-      deskripsi: json['deskripsi'] ?? '',
-      likes: json['likes'] ?? 0,
-      komen: json['komen'] ?? 0,
-      // Optional fields with default placeholders
-      username: json['username'] ?? 'User',
-      userImage: json['userImage'] ?? 'assets/images/default_user.png',
-      timeAgo: json['timeAgo'] ?? 'baru saja',
+      id: postId, // Use the extracted ID
+      judul: json['judul']?.toString() ?? json['title']?.toString() ?? '',
+      deskripsi: json['deskripsi']?.toString() ?? json['description']?.toString() ?? json['content']?.toString() ?? '',
+      likes: safeInt(json['likes']) ?? safeInt(json['like_count']) ?? 0,
+      komentar: safeInt(json['komen']) ?? safeInt(json['comment_count']) ?? 0,
+      username: json['username']?.toString() ?? json['user_name']?.toString() ?? json['name']?.toString() ?? 'User',
+      userImage: json['userImage']?.toString() ?? json['user_image']?.toString() ?? json['avatar']?.toString() ?? 'assets/images/default_user.png',
+      timeAgo: json['timeAgo']?.toString() ?? json['time_ago']?.toString() ?? json['created_at']?.toString() ?? 'baru saja',
     );
   }
 
@@ -116,8 +307,10 @@ class PostModel {
     return {
       'judul': judul,
       'deskripsi': deskripsi,
-      'komen': komen,
+      'komen': komentar,
       'likes': likes,
+      // Conditionally add id if it exists
+      if (id != null) 'post_id': id.toString(),
     };
   }
 }
