@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:Sehati/models/user_model.dart';
 
+
 class AuthService {
   final Dio _dio = Dio();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -56,7 +57,12 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final String token = response.data['authorization']['token'];
-        await _saveToken(token);
+        await _saveToken(token); // Simpan token menggunakan FlutterSecureStorage
+
+        // Jangan gunakan SharedPreferences di sini, karena token disimpan di FlutterSecureStorage
+        final storedToken = await _storage.read(key: 'jwt_token'); // Ambil token dari FlutterSecureStorage
+        print("Token yang disimpan: $storedToken");
+
         return User.fromJson(response.data['user']);
       }
       return null;

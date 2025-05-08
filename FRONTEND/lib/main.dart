@@ -5,6 +5,7 @@ import 'package:Sehati/view/homeprofile/home.dart';
 import 'package:Sehati/view/registerlogin/login_screen.dart'; 
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); // WAJIB untuk inisialisasi plugin
   runApp(const MyApp());
 }
 

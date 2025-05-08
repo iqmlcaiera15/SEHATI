@@ -536,7 +536,7 @@ class _CommunityPageState extends State<CommunityPage> {
                 children: [
                   _buildActionButton(
                     Icons.thumb_up_outlined, 
-                    "Suka (${post.likes})",
+                    "Apresiasi (${post.likes})",
                     () => _handleLikePost(post),
                   ),
                   _buildActionButton(
