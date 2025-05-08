@@ -24,7 +24,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            \Barryvdh\Cors\HandleCors::class,  // CORS middleware
+            \Fruitcake\Cors\HandleCors::class, // CORS middleware
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
