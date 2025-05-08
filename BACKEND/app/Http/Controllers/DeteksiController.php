@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\DeteksiPenyakit;
+use Illuminate\Support\Facades\Auth;
 
 class DeteksiController extends Controller
 {
