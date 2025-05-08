@@ -1,3 +1,5 @@
+<?php
+
 return [
     'defaults' => [
         'guard' => 'api',  // Default guard yang digunakan
