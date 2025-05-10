@@ -17,8 +17,58 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+            $table->string('role')->nullable();
+
+            //IBU HAMIL
+            $table->date('tanggal_lahir')->nullable();
+            $table->integer('usia')->nullable();
+            $table->text('alamat')->nullable();
+            $table->string('nomor_telepon')->nullable();
+            $table->string('pendidikan_terakhir')->nullable();
+            $table->string('pekerjaan')->nullable();
+            $table->string('golongan_darah')->nullable();
+            $table->string('nama_suami')->nullable();
+            $table->string('telepon_suami')->nullable();
+            $table->integer('usia_suami')->nullable();
+            $table->string('pekerjaan_suami')->nullable();
+            // $table->integer('jumlah_kehamilan_sebelumnya')->nullable();
+            // $table->integer('jumlah_anak_hidup')->nullable();
+            // $table->date('hpht')->nullable();
+            // $table->text('riwayat_penyakit_ibu')->nullable();
+            // $table->text('riwayat_alergi')->nullable();
+            // $table->string('riwayat_imunisasi_tt')->nullable();
+            // $table->text('riwayat_kehamilan_sebelumnya')->nullable();
+            // $table->boolean('kehamilan_direncanakan')->nullable();
+            // $table->string('kontrasepsi_sebelum_hamil')->nullable();
+            // $table->string('nomor_kk')->nullable();
+            // $table->string('nomor_bpjs')->nullable();
+            // $table->string('preferensi_faskes')->nullable();
+            // $table->string('nama_kontak_darurat')->nullable();
+            // $table->string('telepon_kontak_darurat')->nullable();
+
+            //BIDAN
+            $table->string('nomor_str')->unique()->nullable();
+            $table->date('masa_berlaku_str')->nullable();
+            $table->string('nomor_sipb')->unique()->nullable();
+            $table->date('masa_berlaku_sipb')->nullable();
+            $table->string('tempat_praktik')->nullable();
+            $table->text('alamat_praktik')->nullable();
+            $table->string('telepon_tempat_praktik')->nullable();
+            $table->string('spesialisasi')->nullable();
+            $table->string('nik')->nullable();
+
+            //DINKES
+              $table->string('nama_dinas')->nullable();
+              $table->text('alamat_kantor')->nullable();
+              $table->string('website')->nullable();
+              $table->string('logo')->nullable();
+              $table->string('nama_admin')->nullable();
+              $table->string('nip')->nullable();
+              $table->string('jabatan')->nullable();
+              $table->string('foto_ktp')->nullable();
+
+              $table->rememberToken();
+              $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
