@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Validator;
 class UserController extends Controller
 {
     public function isidata(Request $request)
-    {
+    {   
+        $userId = auth()->id();
         // Validasi data yang masuk termasuk user_id
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id', // Pastikan user_id ada di database
