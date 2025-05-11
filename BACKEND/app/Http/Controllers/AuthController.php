@@ -16,36 +16,41 @@ class AuthController extends Controller
     }
 
     public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+{
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $token = Auth::guard('api')->login($user);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User registered successfully',
-            'user' => $user,
-            'authorization' => [
-                'token' => $token,
-                'type' => 'bearer',
-            ]
-        ]);
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 422);
     }
 
+    // Tambahkan logging untuk debugging
+    \Log::info('Attempting to create user with data: ' . json_encode($request->only(['name', 'email'])));
+    
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+    ]);
+    
+    // Verifikasi bahwa user benar-benar dibuat
+    \Log::info('User created: ' . ($user ? 'Yes, ID: ' . $user->id : 'No'));
+
+    $token = Auth::guard('api')->login($user);
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'User registered successfully',
+        'user' => $user,
+        'authorization' => [
+            'token' => $token,
+            'type' => 'bearer',
+        ]
+    ]);
+}
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
