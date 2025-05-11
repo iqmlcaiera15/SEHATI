@@ -4,15 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
     public function isidata(Request $request)
     {
-        // Validasi data yang masuk
+        // Validasi data yang masuk termasuk user_id
         $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id', // Pastikan user_id ada di database
             'tanggal_lahir' => 'nullable|date',
             'usia' => 'nullable|integer',
             'alamat' => 'nullable|string',
@@ -24,15 +24,22 @@ class UserController extends Controller
             'telepon_suami' => 'nullable|string|max:20',
             'usia_suami' => 'nullable|integer',
             'pekerjaan_suami' => 'nullable|string|max:255',
-            'role' => 'required|string|in:ibu_hamil', // Pastikan role diatur sebagai 'ibu_hamil'
+            'role' => 'required|string|in:ibu_hamil',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Simpan data ke model User
-        $user = User::create([
+        // Cari user berdasarkan ID
+        $user = User::find($request->user_id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User tidak ditemukan'], 404);
+        }
+
+        // Update data user yang sudah ada
+        $user->update([
             'tanggal_lahir' => $request->tanggal_lahir,
             'usia' => $request->usia,
             'alamat' => $request->alamat,
@@ -44,9 +51,12 @@ class UserController extends Controller
             'telepon_suami' => $request->telepon_suami,
             'usia_suami' => $request->usia_suami,
             'pekerjaan_suami' => $request->pekerjaan_suami,
-            'role' => $request->role, // Pastikan nilai 'ibu_hamil' terkirim
+            'role' => $request->role,
         ]);
 
-        return response()->json(['message' => 'Data ibu hamil berhasil disimpan!'], 201);
+        return response()->json([
+            'message' => 'Data ibu hamil berhasil diperbarui!',
+            'data' => $user
+        ], 200);
     }
 }
