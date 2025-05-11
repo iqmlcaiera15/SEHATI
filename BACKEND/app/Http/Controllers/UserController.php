@@ -24,7 +24,6 @@ class UserController extends Controller
             'telepon_suami' => 'nullable|string|max:20',
             'usia_suami' => 'nullable|integer',
             'pekerjaan_suami' => 'nullable|string|max:255',
-            'role' => 'required|string|in:ibu_hamil',
         ]);
 
         if ($validator->fails()) {
@@ -51,7 +50,6 @@ class UserController extends Controller
             'telepon_suami' => $request->telepon_suami,
             'usia_suami' => $request->usia_suami,
             'pekerjaan_suami' => $request->pekerjaan_suami,
-            'role' => $request->role,
         ]);
 
         return response()->json([
