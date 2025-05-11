@@ -28,12 +28,18 @@ class AuthService {
   // Register user
   Future<User?> register(String name, String email, String password, String passwordConfirmation) async {
     try {
+      // Print data untuk debugging
+      print('Sending registration data: $name, $email, password length: ${password.length}, confirmation length: ${passwordConfirmation.length}');
+      
       final response = await _dio.post('$_baseUrl/auth/register', data: {
         'name': name,
         'email': email,
         'password': password,
-        'password_confirmation': passwordConfirmation,
+        'password_confirmation': passwordConfirmation, // Pastikan ini dikirim dengan benar
       });
+
+      print('Response status: ${response.statusCode}');
+      print('Response data: ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final String token = response.data['authorization']['token'];
@@ -42,7 +48,8 @@ class AuthService {
       }
       return null;
     } on DioException catch (e) {
-      print(e.response?.data);
+      print('Error response: ${e.response?.data}');
+      print('Error message: ${e.message}');
       return null;
     }
   }
