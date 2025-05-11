@@ -17,6 +17,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
 {
+    \Log::info('Register request received', ['data' => $request->all()]);
     $validator = Validator::make($request->all(), [
         'name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users',
@@ -26,7 +27,7 @@ class AuthController extends Controller
     if ($validator->fails()) {
         return response()->json($validator->errors(), 422);
     }
-
+    \Log::info('Validation passed');
     // Tambahkan logging untuk debugging
     \Log::info('Attempting to create user with data: ' . json_encode($request->only(['name', 'email'])));
     
