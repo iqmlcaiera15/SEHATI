@@ -7,7 +7,7 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
   bool _isLoading = false;
   String? _error;
-
+  User? get currentUser => _user;
   User? get user => _user;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
@@ -48,6 +48,7 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
   }
+
 
   Future<bool> login(String email, String password) async {
     _isLoading = true;

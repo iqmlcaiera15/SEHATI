@@ -1,7 +1,7 @@
+import 'package:Sehati/view/homeprofile/dataprep.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Sehati/providers/auth_provider.dart';
-import 'package:Sehati/view/homeprofile/home.dart';
 import 'package:Sehati/view/registerlogin/login_screen.dart'; // Import login screen
 
 class RegisterScreen extends StatefulWidget {
@@ -230,7 +230,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     // Successfully registered, navigate to home screen
                                     Navigator.of(context).pushAndRemoveUntil(
                                       MaterialPageRoute(
-                                        builder: (_) => const HomePage(),
+                                        builder: (_) => DataFormPage(),
                                       ),
                                       (route) => false, // Remove all routes from stack
                                     );
