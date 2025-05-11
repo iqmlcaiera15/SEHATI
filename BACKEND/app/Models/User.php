@@ -13,6 +13,26 @@ class User extends Authenticatable implements JWTSubject
 
     protected $fillable = [
         'name', 'email', 'password',
+        'role',
+        // BIDAN
+        'nomor_str',
+        'masa_berlaku_str',
+        'nomor_sipb',
+        'masa_berlaku_sipb',
+        'tempat_praktik',
+        'alamat_praktik',
+        'telepon_tempat_praktik',
+        'spesialisasi',
+        'nik',
+        // DINKES
+        'nama_dinas',
+        'alamat_kantor',
+        'website',
+        'logo',
+        'nama_admin',
+        'nip',
+        'jabatan',
+        'foto_ktp',
     ];
 
     protected $hidden = [
@@ -33,5 +53,30 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Check if user is a bidan
+     * 
+     * @return bool
+     */
+    public function isBidan()
+    {
+        return $this->hasRole('bidan');
+    }
+
+    /**
+     * Check if user is dinkes staff
+     * 
+     * @return bool
+     */
+    public function isDinkes()
+    {
+        return $this->hasRole('dinkes');
     }
 }

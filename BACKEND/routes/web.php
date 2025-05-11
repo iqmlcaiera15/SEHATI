@@ -1,44 +1,68 @@
 <?php
 
-
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\HomeController;
 
-// Grup untuk guest (yang belum login)
-Route::middleware('guest')->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
 
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    // Route Proses Login
-    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-    // Route view form register bidan
-    Route::get('/register/bidan', function () {
-        return view('auth.register-bidan-dinkes', ['role' => 'bidan']);
-    })->name('register.bidan');
-    
-    Route::get('/register/dinkes', function () {
-        return view('auth.register-bidan-dinkes', ['role' => 'dinas_kesehatan']);
-    })->name('register.dinkes');
-
-    // Route proses register (digunakan bersama)
-    Route::post('/register/process', [AuthController::class, 'register'])
-        ->name('register.process');
-});
-
-// Grup untuk auth (yang sudah login)
-Route::middleware('auth')->group(function () {
-    // Route setelah registrasi berhasil
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
-        ->name('admin.dashboard')
-        ->middleware('role:bidan,dinas_kesehatan');
-});
-
-
-// CSRF Token
-Route::get('/token', function () {
-    return csrf_token();
-});
-
-// Welcome
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Authentication Routes (if you're using Laravel's default auth)
+Auth::routes();
+
+// Custom Registration Routes
+Route::get('/register/bidan', [RegisterController::class, 'showBidanRegistrationForm'])->name('register.bidan.form');
+Route::post('/register/bidan', [RegisterController::class, 'registerBidan'])->name('register.bidan');
+
+Route::get('/register/dinkes', [RegisterController::class, 'showDinkesRegistrationForm'])->name('register.dinkes.form');
+Route::post('/register/dinkes', [RegisterController::class, 'registerDinkes'])->name('register.dinkes');
+
+// Protected Routes for Bidan - Using the check.role middleware
+Route::middleware(['auth'])->prefix('bidan')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('bidan.dashboard');
+    })->name('bidan.dashboard');
+    
+
+    // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
+    // Add more bidan routes here
+});
+
+Route::get('bidan/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
+
+
+// Protected Routes for Dinkes - Using the check.role middleware
+Route::middleware(['auth'])->prefix('dinkes')->group(function () {
+    // Route::get('/dashboard', function () {
+    //     return view('dinkes.dashboard');
+    // })->name('dinkes.dashboard');
+    
+    // Add more dinkes routes here
+});
+
+Route::get('dinkes/dashboard', [HomeController::class, 'index_dinkes'])->name('dinkes.dashboard');
+
+// Home route (redirect based on role)
+Route::get('/home', function() {
+    if (auth()->check()) {
+        if (auth()->user()->role === 'bidan') {
+            return redirect()->route('bidan.dashboard');
+        } elseif (auth()->user()->role === 'dinkes') {
+            return redirect()->route('dinkes.dashboard');
+        }
+    }
+    
+    return redirect()->route('login');
+})->name('home');

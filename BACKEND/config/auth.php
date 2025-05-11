@@ -2,13 +2,13 @@
 
 return [
     'defaults' => [
-        'guard' => 'api',  // Default guard yang digunakan
+        'guard' => 'web',  // Default guard yang digunakan
         'passwords' => 'users',
     ],
 
     'guards' => [
         'web' => [
-            'driver' => 'jwt',
+            'driver' => 'session',
             'provider' => 'users',
         ],
         'api' => [
