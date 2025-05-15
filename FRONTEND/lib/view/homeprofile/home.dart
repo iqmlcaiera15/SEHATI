@@ -467,21 +467,6 @@ class _HomePageState extends State<HomePage> {
                     
                     // Health Tips Section
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Tips Kesehatan Kehamilan',
-                            style: TextStyle(
-                              color: Color(0xFF1E293B),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     child: Column(
@@ -547,9 +532,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                        ],
-                      ),
-                    ),
+                  
                     
                     // Spacer at the bottom
                     const SizedBox(height: 75),
