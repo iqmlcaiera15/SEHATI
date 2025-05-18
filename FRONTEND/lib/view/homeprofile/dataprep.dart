@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:Sehati/view/homeprofile/home.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DataFormPage extends StatefulWidget {
   @override
@@ -10,6 +11,7 @@ class DataFormPage extends StatefulWidget {
 
 class _DataFormPageState extends State<DataFormPage> {
   final _formKey = GlobalKey<FormState>();
+  final _secureStorage = FlutterSecureStorage(); // Secure storage instance
   
   // Controller untuk setiap field
   TextEditingController tanggalLahirController = TextEditingController();
@@ -24,14 +26,30 @@ class _DataFormPageState extends State<DataFormPage> {
   TextEditingController usiaSuamiController = TextEditingController();
   TextEditingController pekerjaanSuamiController = TextEditingController();
 
+  // Method to get JWT token from secure storage
+  Future<String?> getJwtToken() async {
+    return await _secureStorage.read(key: 'jwt_token');
+  }
+
   // Fungsi untuk submit data ke API
   Future<void> submitForm() async {
     if (_formKey.currentState!.validate()) {
       try {
+        // Get the JWT token from secure storage
+        final token = await getJwtToken();
+        
+        if (token == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Anda belum login. Silakan login terlebih dahulu.')),
+          );
+          return;
+        }
+        
         final response = await http.post(
           Uri.parse('https://sehatiapp-production.up.railway.app/api/isidata'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token', // Add JWT token in header
           },
           body: jsonEncode(<String, dynamic>{
             'tanggal_lahir': tanggalLahirController.text,
@@ -54,10 +72,19 @@ class _DataFormPageState extends State<DataFormPage> {
             context,
             MaterialPageRoute(builder: (context) => HomePage()),
           );
+          
+          // Tampilkan pesan sukses
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Data berhasil disimpan')),
+          );
         } else {
+          // Parse error message
+          Map<String, dynamic> responseData = json.decode(response.body);
+          String errorMsg = responseData['message'] ?? 'Gagal mengirim data';
+          
           // Jika terjadi error
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal mengirim data: ${response.body}')),
+            SnackBar(content: Text(errorMsg)),
           );
         }
       } catch (e) {
@@ -275,4 +302,3 @@ class _DataFormPageState extends State<DataFormPage> {
     super.dispose();
   }
 }
-
