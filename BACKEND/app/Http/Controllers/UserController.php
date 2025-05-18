@@ -10,10 +10,15 @@ class UserController extends Controller
 {
     public function isidata(Request $request)
     {   
+        // Mendapatkan user dari JWT token
         $userId = auth()->id();
-        // Validasi data yang masuk termasuk user_id
+        
+        if (!$userId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        
+        // Validasi data yang masuk (tanpa validasi user_id)
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id', // Pastikan user_id ada di database
             'tanggal_lahir' => 'nullable|date',
             'usia' => 'nullable|integer',
             'alamat' => 'nullable|string',
@@ -31,8 +36,8 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Cari user berdasarkan ID
-        $user = User::find($request->user_id);
+        // Cari user berdasarkan ID dari token JWT
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['message' => 'User tidak ditemukan'], 404);
