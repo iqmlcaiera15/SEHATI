@@ -15,6 +15,7 @@ use App\Http\Controllers\PregnancyCalculatorController;
 use App\Http\Controllers\FetalMonitoringController;
 use App\Http\Controllers\PostpartumArticleController;
 use App\Http\Controllers\HomeProfileController;
+use App\Http\Controllers\UserProfileController;
 
 use Illuminate\Support\Facades\Route;
 
