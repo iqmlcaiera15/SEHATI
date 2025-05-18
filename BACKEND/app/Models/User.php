@@ -27,6 +27,7 @@ class User extends Authenticatable implements JWTSubject
         'telepon_suami',
         'usia_suami',
         'pekerjaan_suami',
+        'saldo_total',
         
         // BIDAN
         'nomor_str',
@@ -47,6 +48,7 @@ class User extends Authenticatable implements JWTSubject
         'nip',
         'jabatan',
         'foto_ktp',
+        'admin_id'
     ];
 
     protected $hidden = [

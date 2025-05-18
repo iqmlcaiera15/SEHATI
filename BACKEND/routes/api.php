@@ -120,6 +120,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/protected-data', function () {
         return response()->json(['message' => 'Data protected by JWT']);
     });
+
+
 });
 
 // CSRF Token

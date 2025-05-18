@@ -52,7 +52,20 @@ Route::middleware(['auth'])->prefix('dinkes')->group(function () {
     // Add more dinkes routes here
 });
 
-Route::get('dinkes/dashboard', [HomeController::class, 'index_dinkes'])->name('dinkes.dashboard');
+    Route::get('dinkes/dashboard', [HomeController::class, 'index_dinkes'])->name('dinkes.dashboard');
+
+    // INSETIF
+    Route::post('saldo/{userId}', [SaldoController::class, 'Saldo']);
+    // Route::post('/tambah', [SaldoController::class, 'tambahSaldo'])->middleware('role:dinkes');
+    Route::post('saldo/tambah', [SaldoController::class, 'tambahSaldo']);
+        // Ambil riwayat saldo ibu hamil tertentu
+    Route::get('/riwayat/{userId}', [SaldoController::class, 'getRiwayatSaldo']);
+        // Ambil daftar ibu hamil beserta saldo mereka (hanya admin)
+    Route::get('/daftar-ibu-hamil', [SaldoController::class, 'getDaftarIbuHamil'])->middleware('role:admin');
+        // Batalkan transaksi (hanya admin level 2 ke atas)
+    Route::post('/batalkan/{transaksiId}', [SaldoController::class, 'batalkanTransaksi'])->middleware('role:admin');
+        // Laporan transaksi saldo (hanya admin)
+    Route::get('/laporan', [SaldoController::class, 'getLaporanTransaksi'])->middleware('role:admin');
 
 // Home route (redirect based on role)
 Route::get('/home', function() {
