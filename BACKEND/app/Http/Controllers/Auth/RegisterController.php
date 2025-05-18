@@ -134,6 +134,7 @@ class RegisterController extends Controller
             'nip' => $request->nip,
             'jabatan' => $request->jabatan,
             'foto_ktp' => $fotoKtpPath,
+            'admin_id' => Auth::id(), // ID admin 
         ]);
 
         event(new Registered($user));
