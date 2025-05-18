@@ -44,7 +44,7 @@ class HomeController extends Controller
         $prediksiDepresi = PrediksiDepresi::all();
         $prediksiJanin = Prediction::all();
 
-        return view('bidan.dashboard', [
+        return view('dinkes.dashboardd', [
             'ibuHamil' => $ibuHamil,
             'deteksiPenyakit' => $deteksiPenyakit,
             'prediksiDepresi' => $prediksiDepresi,

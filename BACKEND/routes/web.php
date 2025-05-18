@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\HomeController;
-
+use App\Http\Controllers\InsentifController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,14 +48,20 @@ Route::middleware(['auth'])->prefix('dinkes')->group(function () {
     // Route::get('/dashboard', function () {
     //     return view('dinkes.dashboard');
     // })->name('dinkes.dashboard');
-    
+    Route::get('dashboard', [HomeController::class, 'index_dinkes'])->name('dinkes.dashboardd');
+    Route::get('saldo/{userId}', [InsentifController::class, 'Saldo'])->name('dinkes.dinkessaldo');
+    Route::get('saldo/{userId}/riwayat', [InsentifController::class, 'getRiwayatSaldo'])->name('dinkes.riwayat.saldo');
+    Route::get('saldo/{userId}/laporan', [InsentifController::class, 'getLaporanSaldo'])->name('dinkes.laporan.saldo');
+    Route::get('/dinkes/saldo/{id}/tambah', [InsentifController::class, 'showTambahSaldoForm'])->name('dinkes.form.tambah.saldo');
+    Route::post('saldo/{userId}', [InsentifController::class, 'tambahSaldo'])->name('dinkes.tambah.saldo');
     // Add more dinkes routes here
+    
 });
 
-    Route::get('dinkes/dashboard', [HomeController::class, 'index_dinkes'])->name('dinkes.dashboard');
+    Route::get('saldo/{userId}', [InsentifController::class, 'Saldo'])->name('dinkes.dinkessaldo');
 
     // INSETIF
-    Route::post('saldo/{userId}', [SaldoController::class, 'Saldo']);
+    // Route::get('saldo/{userId}', [InsentifController::class, 'Saldo']);
     // Route::post('/tambah', [SaldoController::class, 'tambahSaldo'])->middleware('role:dinkes');
     Route::post('saldo/tambah', [SaldoController::class, 'tambahSaldo']);
         // Ambil riwayat saldo ibu hamil tertentu

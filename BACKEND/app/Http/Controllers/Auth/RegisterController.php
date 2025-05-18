@@ -140,6 +140,6 @@ class RegisterController extends Controller
 
         auth()->login($user);
 
-        return redirect()->route('dinkes.dashboard');
+        return redirect()->route('dinkes.dashboardd');
     }
 }

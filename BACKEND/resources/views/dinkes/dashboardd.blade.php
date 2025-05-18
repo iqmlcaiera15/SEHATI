@@ -13,7 +13,7 @@
             <div class="card bg-primary text-white mb-4">
                 <div class="card-body">
                     <h4>{{ $ibuHamil->count() }}</h4>
-                    Total Ibu Hamil
+                    Total Daftar Ibu Hamil Sehati
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
                     <a class="small text-white stretched-link" href="#">Lihat Detail</a>
@@ -77,8 +77,8 @@
                             </div>
                             <hr>
                             <div class="row mb-2">
-                                <div class="col-md-4 fw-bold">NIK</div>
-                                <div class="col-md-8">{{ $ibu->nik ?? '-' }}</div>
+                                <div class="col-md-4 fw-bold">Usia</div>
+                                <div class="col-md-8">{{ $ibu->usia ?? '-' }}</div>
                             </div>
                             <div class="row mb-2">
                                 <div class="col-md-4 fw-bold">Email</div>
@@ -95,8 +95,8 @@
                         </div>
                         <div class="card-footer">
                             <div class="d-flex justify-content-between">
-                                <a href="#" class="btn btn-sm btn-primary">Detail</a>
-                                <a href="#" class="btn btn-sm btn-success">Riwayat Kesehatan</a>
+                                <a href="{{ url('dinkes/saldo/' . $ibu->id) }}" class="btn btn-sm btn-success">Detail</a>
+                                <a href="#weqweqe" class="btn btn-sm btn-success">Riwayat Kesehatan</a>
                             </div>
                         </div>
                     </div>

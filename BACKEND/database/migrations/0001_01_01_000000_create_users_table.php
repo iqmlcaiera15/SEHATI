@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role')->nullable();
+            $table->integer('admin_id')->nullable();
 
             //IBU HAMIL
             $table->date('tanggal_lahir')->nullable();
