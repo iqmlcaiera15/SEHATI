@@ -153,7 +153,7 @@ class KomunitasController extends Controller
             $existingLike->delete();
             
             // Kurangi jumlah likes di tabel Komunitas
-            $post->decrement('likes');
+            $post->decrement('Apresiasi');
             
             return response()->json([
                 'status' => 'berhasil',
@@ -168,7 +168,7 @@ class KomunitasController extends Controller
             ]);
             
             // Tambah jumlah likes di tabel Komunitas
-            $post->increment('likes');
+            $post->increment('Apresiasi');
             
             return response()->json([
                 'status' => 'berhasil',
