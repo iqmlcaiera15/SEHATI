@@ -90,7 +90,7 @@
                             </div>
                             <div class="row mb-2">
                                 <div class="col-md-4 fw-bold">No. HP</div>
-                                <div class="col-md-8">{{ $ibu->no_hp ?? '-' }}</div>
+                                <div class="col-md-8">{{ $ibu->nomor_telepon ?? '-' }}</div>
                             </div>
                         </div>
                         <div class="card-footer">

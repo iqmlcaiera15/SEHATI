@@ -28,6 +28,7 @@ class DeteksiPenyakit extends Model
         'diastolic_bp', 
         'heart_rate', 
         'body_temp', 
+        'user_id',
     
         // Kolom hasil prediksi
         'diabetes_prediction', 

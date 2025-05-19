@@ -2,8 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsentifController;
+use App\Http\Controllers\DeteksiDesktopController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -29,12 +31,21 @@ Route::post('/register/bidan', [RegisterController::class, 'registerBidan'])->na
 Route::get('/register/dinkes', [RegisterController::class, 'showDinkesRegistrationForm'])->name('register.dinkes.form');
 Route::post('/register/dinkes', [RegisterController::class, 'registerDinkes'])->name('register.dinkes');
 
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('auth.login');
+Route::post('/login', [LoginController::class, 'login'])->name('login');
+
 // Protected Routes for Bidan - Using the check.role middleware
 Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::get('/dashboard', function () {
         return view('bidan.dashboard');
     })->name('bidan.dashboard');
-    
+    Route::get('/deteksi', [DeteksiDesktopController::class, 'index'])->name('deteksi.index');
+    Route::get('/deteksi/create', [DeteksiDesktopController::class, 'create'])->name('deteksi.create');
+    Route::post('/deteksi', [DeteksiDesktopController::class, 'store'])->name('deteksi.store');
+    Route::get('/deteksi/{id}', [DeteksiDesktopController::class, 'show'])->name('deteksi.show');
+    Route::get('/deteksi/latest', [DeteksiDesktopController::class, 'indexlatest'])->name('deteksi.latest');
+    Route::get('/deteksi/delete-all', [DeteksiDesktopController::class, 'deleteAll'])->name('deteksi.deleteAll');
+    Route::delete('/deteksi/{id}', [DeteksiDesktopController::class, 'destroy'])->name('deteksi.destroy');
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
     // Add more bidan routes here
@@ -49,6 +60,8 @@ Route::middleware(['auth'])->prefix('dinkes')->group(function () {
     //     return view('dinkes.dashboard');
     // })->name('dinkes.dashboard');
     Route::get('dashboard', [HomeController::class, 'index_dinkes'])->name('dinkes.dashboardd');
+
+    //Insentif
     Route::get('saldo/{userId}', [InsentifController::class, 'Saldo'])->name('dinkes.dinkessaldo');
     Route::get('saldo/{userId}/riwayat', [InsentifController::class, 'getRiwayatSaldo'])->name('dinkes.riwayat.saldo');
     Route::get('saldo/{userId}/laporan', [InsentifController::class, 'getLaporanSaldo'])->name('dinkes.laporan.saldo');

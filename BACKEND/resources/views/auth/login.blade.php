@@ -12,19 +12,30 @@
                 </div>
 
                 <div class="card-body">
-                    <form id="loginForm">
+                    <form method="POST" action="{{ route('login') }}">
                         @csrf
                         
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input id="email" type="email" class="form-control" name="email" required autocomplete="email" autofocus>
-                            <div class="invalid-feedback" id="emailError"></div>
+                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input id="password" type="password" class="form-control" name="password" required autocomplete="current-password">
-                            <div class="invalid-feedback" id="passwordError"></div>
+                            <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="remember">
+                                Ingat Saya
+                            </label>
                         </div>
 
                         <div class="d-grid gap-2">
@@ -45,62 +56,4 @@
         </div>
     </div>
 </div>
-
-<script>
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = {
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value
-    };
-
-    // Reset error states
-    document.getElementById('email').classList.remove('is-invalid');
-    document.getElementById('password').classList.remove('is-invalid');
-    document.getElementById('emailError').textContent = '';
-    document.getElementById('passwordError').textContent = '';
-
-    fetch('/api/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => { throw err; });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.redirect_to) {
-            // Redirect untuk bidan/dinkes
-            window.location.href = data.redirect_to;
-        } else {
-            // Handle untuk ibu hamil (mobile/API)
-            localStorage.setItem('auth_token', data.authorization.token);
-            window.location.href = '/mobile/dashboard';
-        }
-    })
-    .catch(error => {
-        if (error.errors) {
-            // Handle validation errors
-            if (error.errors.email) {
-                document.getElementById('email').classList.add('is-invalid');
-                document.getElementById('emailError').textContent = error.errors.email[0];
-            }
-            if (error.errors.password) {
-                document.getElementById('password').classList.add('is-invalid');
-                document.getElementById('passwordError').textContent = error.errors.password[0];
-            }
-        } else if (error.message) {
-            // Handle login error
-            alert(error.message);
-        }
-    });
-});
-</script>
 @endsection

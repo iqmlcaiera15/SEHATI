@@ -43,7 +43,7 @@
                                     </a>
                                     
                                     <div class="text-center mt-3">
-                                        <p>Sudah memiliki akun? <a href="{{ route('login') }}" class="fw-bold">Masuk di sini</a></p>
+                                        <p>Sudah memiliki akun? <a href="{{ route('auth.login') }}" class="fw-bold">Masuk di sini</a></p>
                                     </div>
                                 </div>
                             </div>

@@ -103,6 +103,7 @@ class RegisterController extends Controller
             'nama_admin' => ['required', 'string'],
             'nip' => ['required', 'string'],
             'jabatan' => ['required', 'string'],
+            'admin_id' => Auth::id(), // ID admin 
         ]);
 
         if ($validator->fails()) {
