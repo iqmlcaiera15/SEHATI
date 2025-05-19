@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsentifController;
 use App\Http\Controllers\DeteksiDesktopController;
+use App\Http\Controllers\PrediksiDepresiDesktopController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -46,6 +47,9 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::get('/deteksi/latest', [DeteksiDesktopController::class, 'indexlatest'])->name('deteksi.latest');
     Route::get('/deteksi/delete-all', [DeteksiDesktopController::class, 'deleteAll'])->name('deteksi.deleteAll');
     Route::delete('/deteksi/{id}', [DeteksiDesktopController::class, 'destroy'])->name('deteksi.destroy');
+
+    Route::get('/depresi', [PrediksiDepresiDesktopController::class, 'index'])->name('depresi.index');
+    Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.delete');
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
     // Add more bidan routes here

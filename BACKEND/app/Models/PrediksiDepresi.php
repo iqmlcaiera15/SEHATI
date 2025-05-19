@@ -22,4 +22,9 @@ class PrediksiDepresi extends Model
         'suicide_attempt',
         'hasil_prediksi'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

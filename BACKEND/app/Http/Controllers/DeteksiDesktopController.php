@@ -46,7 +46,7 @@ class DeteksiDesktopController extends Controller
         return redirect()->route('deteksi.show', ['id' => $deteksiPenyakit->id]);
     }
     
-     public function store(Request $request)
+    public function store(Request $request)
     {
         try {
             $validated = $request->validate([
@@ -66,16 +66,16 @@ class DeteksiDesktopController extends Controller
                 'heart_rate' => 'nullable|numeric',
                 'body_temp' => 'nullable|numeric',
             ]);
-    
+
             // Dapatkan user dari auth
             $user = Auth::user();
             if (!$user) {
                 return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu');
             }
-    
+
             // Simpan ke database
             $deteksi = DeteksiPenyakit::create([
-                'user_id' => $user->id,
+                'bidan_id' => $user->id,
                 'nama' => $request->nama,
                 'pregnancies' => $request->pregnancies,
                 'age' => $request->age,
@@ -92,52 +92,86 @@ class DeteksiDesktopController extends Controller
                 'heart_rate' => $request->heart_rate,
                 'body_temp' => $request->body_temp,
             ]);
-    
-            // Kirim ke model ML
-            $response = Http::post('https://sehatiml-production.up.railway.app/predictdeteksi', [
+
+            // Format data sesuai dengan yang bekerja di Postman
+            $requestData = [
                 'diabetes' => [
-                    'Pregnancies' => $request->pregnancies ?? 0,
-                    'BS' => $request->bs,
-                    'BloodPressure' => $request->blood_pressure,
-                    'SkinThickness' => $request->skin_thickness ?? 0,
-                    'BMI' => $request->bmi,
-                    'Age' => $request->age,
+                    'Pregnancies' => (int)$request->pregnancies,
+                    'BS' => (float)$request->bs,
+                    'BloodPressure' => (float)$request->blood_pressure,
+                    'SkinThickness' => (float)($request->skin_thickness ?? 0),
+                    'BMI' => (float)$request->bmi,
+                    'Age' => (int)$request->age
                 ],
                 'hypertension' => [
-                    'sex' => $request->sex,
-                    'Age' => $request->age,
-                    'currentSmoker' => $request->current_smoker,
-                    'cigsPerDay' => $request->cigs_per_day,
-                    'BPMeds' => $request->bp_meds,
-                    'diabetes' => $request->bs > 140 ? 1 : 0,
-                    'SystolicBP' => $request->systolic_bp,
-                    'DiastolicBP' => $request->diastolic_bp,
-                    'BMI' => $request->bmi,
-                    'Heartrate' => $request->heart_rate,
-                    'BS' => $request->bs,
+                    'sex' => (int)($request->sex ?? 0),
+                    'Age' => (int)$request->age,
+                    'currentSmoker' => (int)($request->current_smoker ?? 0),
+                    'cigsPerDay' => (int)($request->cigs_per_day ?? 0),
+                    'BPMeds' => (int)($request->bp_meds ?? 0),
+                    'diabetes' => (int)($request->bs > 140 ? 1 : 0),
+                    'SystolicBP' => (float)($request->systolic_bp ?? 120),
+                    'DiastolicBP' => (float)($request->diastolic_bp ?? 80),
+                    'BMI' => (float)$request->bmi,
+                    'Heartrate' => (float)($request->heart_rate ?? 70),
+                    'BS' => (float)$request->bs
                 ],
                 'maternal_health' => [
-                    'Age' => $request->age,
-                    'SystolicBP' => $request->systolic_bp,
-                    'DiastolicBP' => $request->diastolic_bp,
-                    'BS' => $request->bs,
-                    'BodyTemp' => $request->body_temp,
-                    'HeartRate' => $request->heart_rate,
-                ],
-            ]);
-    
+                    'Age' => (int)$request->age,
+                    'SystolicBP' => (float)($request->systolic_bp ?? 120),
+                    'DiastolicBP' => (float)($request->diastolic_bp ?? 80),
+                    'BS' => (float)$request->bs,
+                    'BodyTemp' => (float)($request->body_temp ?? 36.6),
+                    'HeartRate' => (float)($request->heart_rate ?? 70)
+                ]
+            ];
+
+            // Log the request for debugging
+            \Log::info('Sending request to ML API:', $requestData);
+
+            // Kirim ke model ML dengan headers
+            $response = Http::post('https://sehatiml-production.up.railway.app/predictdeteksi', $requestData);
+
+            // Debug response
+            \Log::info('API Response Status: ' . $response->status());
+            \Log::info('API Response Body: ' . $response->body());
+
+            // Parse response
             $prediction = $response->json();
             
-            // Update hasil prediksi
-            $deteksi->update([
-                'diabetes_prediction' => $prediction['diabetes_prediction'],
-                'hypertension_prediction' => $prediction['hypertension_prediction'],
-                'maternal_health_prediction' => $prediction['maternal_health_prediction'],
-            ]);
-    
-            return redirect()->route('deteksi.show', $deteksi->id)
-                ->with('success', 'Data berhasil disimpan dan prediksi telah diterima');
+            // Check if we have valid prediction results
+            if (isset($prediction['diabetes_prediction']) && 
+                isset($prediction['hypertension_prediction']) && 
+                isset($prediction['maternal_health_prediction'])) {
                 
+                // Update hasil prediksi
+                $deteksi->update([
+                    'diabetes_prediction' => $prediction['diabetes_prediction'],
+                    'hypertension_prediction' => $prediction['hypertension_prediction'],
+                    'maternal_health_prediction' => $prediction['maternal_health_prediction'],
+                ]);
+
+                return redirect()->route('deteksi.show', $deteksi->deteksi_id)
+                    ->with('success', 'Data berhasil disimpan dan prediksi telah diterima');
+            } 
+            // Check if we have error messages
+            else if (isset($prediction['diabetes_error']) || 
+                    isset($prediction['hypertension_error']) || 
+                    isset($prediction['maternal_health_error'])) {
+                
+                \Log::error('ML API returned errors: ' . json_encode($prediction));
+                
+                return redirect()->route('deteksi.show', $deteksi->deteksi_id)
+                    ->with('warning', 'Data disimpan tetapi layanan prediksi mengalami masalah teknis. Silakan coba lagi nanti.');
+            }
+            // Unexpected response format
+            else {
+                \Log::error('Unexpected response format from ML API: ' . json_encode($prediction));
+                
+                return redirect()->route('deteksi.show', $deteksi->deteksi_id)
+                    ->with('warning', 'Data disimpan tetapi format respon prediksi tidak sesuai. Silakan hubungi administrator.');
+            }
+                    
         } catch (\Exception $e) {
             \Log::error('Error in DeteksiPenyakit store: ' . $e->getMessage());
             return redirect()->back()
