@@ -183,7 +183,7 @@ public function addComment(Request $request, $postId)
             ], 200);
         } else {
             // User hasn't liked, add like
-            Like::create([
+            Komunitas::create([
                 'post_id' => $postId, // Changed from komunitas_id to post_id to match frontend
                 'user_id' => $user->id,
             ]);

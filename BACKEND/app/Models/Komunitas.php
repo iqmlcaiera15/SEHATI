@@ -13,7 +13,7 @@ class Komunitas extends Model
     protected $primaryKey = 'post_id';
 
     protected $fillable = [
-        // 'user_id', 
+        'user_id', 
         'judul', 
         'deskripsi', 
         'gambar', 
@@ -24,6 +24,11 @@ class Komunitas extends Model
     public function komentar()
     {
         return $this->hasMany(KomentarKomunitas::class, 'id');
+    }
+
+        public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
 }
