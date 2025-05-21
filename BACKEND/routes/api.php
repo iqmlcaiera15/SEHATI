@@ -16,7 +16,6 @@ use App\Http\Controllers\FetalMonitoringController;
 use App\Http\Controllers\PostpartumArticleController;
 use App\Http\Controllers\HomeProfileController;
 use App\Http\Controllers\UserController;
-
 use Illuminate\Support\Facades\Route;
 
 // Auth routes - Pindahkan ke api.php jika menggunakan API
