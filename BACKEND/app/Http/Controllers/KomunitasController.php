@@ -8,6 +8,7 @@ use App\Models\KomentarKomunitas;
 
 class KomunitasController extends Controller
 {
+    
     public function index()
     {
         $Komunitas = Komunitas::all();
@@ -70,6 +71,7 @@ class KomunitasController extends Controller
 
 public function addComment(Request $request, $postId)
 {
+    $user = Auth::user(); // Ambil user dari JWT
     $request->validate([
         'komentar' => 'required|string|max:1000',
     ]);
@@ -91,7 +93,7 @@ public function addComment(Request $request, $postId)
     // Create the comment
     try {
         $komentarKomunitas = KomentarKomunitas::create([
-            'post_id' => $postId, // Use the URL parameter
+            'post_id' => $User,
             'user_id' => $userId, // Use authenticated user ID
             'komentar' => $request->komentar,
         ]);
