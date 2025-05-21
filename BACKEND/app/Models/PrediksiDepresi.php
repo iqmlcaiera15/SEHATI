@@ -12,6 +12,7 @@ class PrediksiDepresi extends Model
     protected $table = 'prediksi_depresi';
 
     protected $fillable = [
+        'user_id',
         'umur',
         'merasa_sedih',
         'mudah_tersinggung',
