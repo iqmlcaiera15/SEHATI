@@ -61,7 +61,7 @@ class KomunitasController extends Controller
             'judul' => $request->judul,
             'deskripsi' => $request->deskripsi,
             'gambar' => $request->gambar,
-            'Apresiasi' => 0, // Inisialisasi dengan 0 likes
+            'apresiasi' => 0, // Inisialisasi dengan 0 likes
             'komen' => 0, // Inisialisasi dengan 0 likes
             
         ]);
@@ -179,13 +179,13 @@ public function addComment(Request $request, $postId)
             $existingLike->delete();
             
             // Decrease like count
-            $post->decrement('Apresiasi');
+            $post->decrement('apresiasi');
             
             return response()->json([
                 'status' => 'berhasil',
                 'message' => 'Post unliked successfully',
                 'is_liked' => false,
-                'Apresiasi' => $post->Apresiasi // Return the updated count
+                'apresiasi' => $post->apresiasi // Return the updated count
             ], 200);
         } else {
             // User hasn't liked, add like
@@ -195,13 +195,13 @@ public function addComment(Request $request, $postId)
             ]);
             
             // Increase like count
-            $post->increment('Apresiasi');
+            $post->increment('apresiasi');
             
             return response()->json([
                 'status' => 'berhasil',
                 'message' => 'Post liked successfully',
                 'is_liked' => true,
-                'Apresiasi' => $post->Apresiasi // Return the updated count
+                'apresiasi' => $post->apresiasi // Return the updated count
             ], 201);
         }
     }
