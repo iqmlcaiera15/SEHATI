@@ -164,7 +164,7 @@ public function addComment(Request $request, $postId)
         }
 
         // Check if user already liked this post
-        $existingLike = Like::where('post_id', $postId)
+        $existingLike = Komunitas::where('post_id', $postId)
                             ->where('user_id', $user->id)
                             ->first();
         
