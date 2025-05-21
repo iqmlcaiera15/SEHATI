@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:Sehati/services/api/api_service_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; // Import disease index page
@@ -7,11 +6,6 @@ import 'package:Sehati/view/komunitas/index_komunitas.dart'; // Import disease i
 import 'package:Sehati/view/prediksidepresi/index_depresi.dart';
 import 'package:Sehati/view/kickcounter/index_kickcounter.dart';
 import 'package:Sehati/view/postpartum/postpartum.dart';
-import 'package:Sehati/view/polusiudara/index_polusi.dart'; 
-import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart';
-import 'package:Sehati/providers/auth_provider.dart';
-import 'package:Sehati/services/api/dio_client.dart';
-import 'package:Sehati/view/registerlogin/login_screen.dart';
 
 void main() {
   runApp(const SehatiApp());
@@ -21,17 +15,7 @@ class SehatiApp extends StatelessWidget {
   const SehatiApp({super.key});
   
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sehati App',
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        primaryColor: const Color(0xFF4DBAFF),
-        fontFamily: 'Poppins',
-      ),
-      home: const HomePage(),
-    );
-  }
+  State<CommunityPage> createState() => _CommunityPageState();
 }
 
 class HomePage extends StatefulWidget {
@@ -44,42 +28,69 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<dynamic>> _recentData;
   int _currentIndex = 0;
-  final DioClient _dioClient = DioClient();
-  String _protectedData = '';
-  bool _isLoading = false;
   
   @override
   void initState() {
     super.initState();
     _loadRecentData();
-    _fetchProtectedData();
   }
 
-  void _loadRecentData() {
-    setState(() {
-      // Limit to only 3 most recent entries
-      _recentData = ApiService.fetchDeteksiData().then((data) {
-        return data.take(3).toList();
-      });
-    });
-  }
-
-  Future<void> _fetchProtectedData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+  Future<void> _loadPosts() async {
+    if (!mounted) return;
+    
+    setState(() => isLoading = true);
+    
     try {
-      final response = await _dioClient.get('/protected-data');
-      setState(() {
-        _protectedData = response.data['message'];
-        _isLoading = false;
-      });
+      final posts = await ApiServicePosts.fetchPosts();
+      if (mounted) {
+        setState(() {
+          _posts = Future.value(posts);
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _protectedData = '';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() => isLoading = false);
+        _showSnackBar('Error: ${e.toString()}');
+        _posts = Future.value([]);
+      }
+    }
+  }
+
+  // Helper function to safely show SnackBar
+  void _showSnackBar(String message, {Color backgroundColor = Colors.red}) {
+    if (!mounted) return;
+    
+    _scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+
+  // Helper function to format the API timestamp into a "time ago" format
+  static String _formatTimeAgo(String dateString) {
+    try {
+      final DateTime date = DateTime.parse(dateString);
+      final Duration difference = DateTime.now().difference(date);
+      
+      if (difference.inDays > 365) {
+        return '${(difference.inDays / 365).floor()} tahun yang lalu';
+      } else if (difference.inDays > 30) {
+        return '${(difference.inDays / 30).floor()} bulan yang lalu';
+      } else if (difference.inDays > 0) {
+        return '${difference.inDays} hari yang lalu';
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours} jam yang lalu';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes} menit yang lalu';
+      } else {
+        return 'baru saja';
+      }
+    } catch (e) {
+      print('Error formatting date: $e');
+      return 'baru saja';
     }
   }
 
@@ -177,36 +188,16 @@ class _HomePageState extends State<HomePage> {
                     letterSpacing: 0.12,
                   ),
                 ),
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, _) {
-                    return GestureDetector(
-                      onTap: () async {
-                        if (authProvider.isAuthenticated) {
-                          final success = await authProvider.logout();
-                          if (success && mounted) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => const LoginScreen(),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: const BoxDecoration(),
-                        child: Stack(
-                          children: [
-                            authProvider.isAuthenticated
-                                ? const Icon(Icons.logout, size: 24, color: Color(0xFF4C617F))
-                                : const SizedBox(),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                Container(
+                  width: 24,
+                  height: 24,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: const BoxDecoration(),
+                  child: const Stack(
+                    children: [
+                      // Notification icon could be placed here
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -234,34 +225,27 @@ class _HomePageState extends State<HomePage> {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 24),
-                      child: Consumer<AuthProvider>(
-                        builder: (context, authProvider, _) {
-                          final user = authProvider.user;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user != null 
-                                    ? 'Selamat Datang, ${user.name}!' 
-                                    : 'Selamat Datang, Bunda!',
-                                style: const TextStyle(
-                                  color: Color(0xFF1E293B),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Pantau kesehatan kehamilan Anda bersama Sehati',
-                                style: const TextStyle(
-                                  color: Color(0xFF4C617F),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Selamat Datang, Bunda!',
+                            style: TextStyle(
+                              color: Color(0xFF1E293B),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Pantau kesehatan kehamilan Anda bersama Sehati',
+                            style: TextStyle(
+                              color: const Color(0xFF4C617F),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     
@@ -288,9 +272,9 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.calendar_today, color: Colors.white, size: 18),
+                              Icon(Icons.calendar_today, color: Colors.white, size: 18),
                               const SizedBox(width: 8),
-                              const Text(
+                              Text(
                                 'Minggu ke-28',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -396,10 +380,10 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 },
-                                child: const Text(
+                                child: Text(
                                   'Lihat Semua',
                                   style: TextStyle(
-                                    color: Color(0xFF4DBAFF),
+                                    color: const Color(0xFF4DBAFF),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -434,12 +418,12 @@ class _HomePageState extends State<HomePage> {
                                         child: Center(
                                           child: Column(
                                             children: [
-                                              const Icon(Icons.folder_open, color: Color(0xFF4DBAFF), size: 48),
+                                              Icon(Icons.folder_open, color: const Color(0xFF4DBAFF), size: 48),
                                               const SizedBox(height: 8),
-                                              const Text(
+                                              Text(
                                                 'Belum ada data kesehatan',
                                                 style: TextStyle(
-                                                  color: Color(0xFF4C617F),
+                                                  color: const Color(0xFF4C617F),
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -465,7 +449,7 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                                 ),
-                                                child: const Text(
+                                                child: Text(
                                                   'Tambah Data Baru',
                                                   style: TextStyle(
                                                     color: Colors.white,
@@ -483,8 +467,8 @@ class _HomePageState extends State<HomePage> {
                                       shrinkWrap: true,
                                       physics: const NeverScrollableScrollPhysics(),
                                       itemCount: data.length,
-                                      separatorBuilder: (context, index) => const Divider(
-                                        color: Color(0xFFD9D9D9),
+                                      separatorBuilder: (context, index) => Divider(
+                                        color: const Color(0xFFD9D9D9),
                                         thickness: 1,
                                       ),
                                       itemBuilder: (context, index) {
@@ -521,7 +505,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     
-                    // Health Tips Section - Fixed version
+                    // Health Tips Section
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
@@ -529,7 +513,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Fitur Kesehatan Kehamilan lainnya',
+                            'Tips Kesehatan Kehamilan',
                             style: TextStyle(
                               color: Color(0xFF1E293B),
                               fontSize: 16,
@@ -537,138 +521,74 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          SizedBox(
-                            height: 180,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const RekomendasiMakananPage()));
-                                  },
-                                  child: _buildTipCard(
-                                    'Makanan Dengan Nutrisi Penting Untuk Ibu Hamil',
-                                    'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
-                                    Icons.restaurant,
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const IndexPolusi()));
-                                  },
-                                  child: _buildTipCard(
-                                    'Cek Kualitas Udara',
-                                    'Cek Kualitas Udara Untuk Bandung dan Sekitarnya',
-                                    Icons.wind_power_sharp,
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    // TODO: Navigasi ke halaman TidurPage
-                                    // Navigator.push(context, MaterialPageRoute(builder: (context) => TidurPage()));
-                                  },
-                                  child: _buildTipCard(
-                                    'Pola Tidur Sehat',
-                                    'Istirahat cukup untuk kesehatan ibu dan janin',
-                                    Icons.hotel,
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => IndexKickCounter()));
-                                  },
-                                  child: _buildTipCard(
-                                    'Hitung Tendangan Bayi',
-                                    'Hitung tendangan untuk memantau kesehatan bayi',
-                                    Icons.monitor_heart,
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPostpartum()));
-                                  },
-                                  child: _buildTipCard(
-                                    'Perawatan PostPartum',
-                                    'Artikel perawatan setelah melahirkan',
-                                    Icons.healing,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Fitur Kesehatan Kehamilan lainnya',
+                          style: TextStyle(
+                            color: Color(0xFF1E293B),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
-                      ),
-                    ),
-
-                    // Protected Data Section (only shown if authenticated)
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, _) {
-                        if (!authProvider.isAuthenticated || _protectedData.isEmpty) {
-                          return const SizedBox();
-                        }
-                        
-                        return Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 180,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
                             children: [
-                              const Text(
-                                'Data Pribadi',
-                                style: TextStyle(
-                                  color: Color(0xFF1E293B),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                              // InkWell(
+                              //   onTap: () {
+                              //     Navigator.push(context, MaterialPageRoute(builder: (context) => RekomendasiMakananPage()));
+                              //   },
+                              //   child: _buildTipCard(
+                              //     'Makanan Dengan Nutrisi Penting Untuk Ibu Hamil',
+                              //     'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
+                              //     Icons.restaurant,
+                              //   ),
+                              // ),
+                              // InkWell(
+                              //   onTap: () {
+                              //     Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPolusi()));
+                              //   },
+                              //   child: _buildTipCard(
+                              //     'Olahraga Ringan',
+                              //     'Jalan santai dan yoga untuk ibu hamil',
+                              //     Icons.directions_walk,
+                              //   ),
+                              // ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexKickCounter()));
+                                },
+                                child: _buildTipCard(
+                                  'Hitung Tendangan Bayi',
+                                  'Hitung tendangan untuk memantau kesehatan bayi',
+                                  Icons.monitor_heart,
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPostpartum()));
+                                },
+                                child: _buildTipCard(
+                                  'Perawatan PostPartum',
+                                  'Artikel perawatan setelah melahirkan',
+                                  Icons.healing,
                                 ),
-                                child: _isLoading
-                                    ? const Center(child: CircularProgressIndicator(color: Color(0xFF4DBAFF)))
-                                    : Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _protectedData,
-                                            style: const TextStyle(
-                                              color: Color(0xFF1E293B),
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                          ElevatedButton(
-                                            onPressed: _fetchProtectedData,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: const Color(0xFF4DBAFF),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              'Refresh Data',
-                                              style: TextStyle(color: Colors.white),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
                               ),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                      ],
+                    ),
+                  ),
+                        ],
+                      ),
                     ),
                     
                     // Spacer at the bottom
@@ -687,7 +607,7 @@ class _HomePageState extends State<HomePage> {
           // Action menu button
         },
         backgroundColor: const Color(0xFFAEE2FF),
-        child: const Icon(Icons.grid_view, color: Color(0xFF414549)),
+        child: Icon(Icons.grid_view, color: const Color(0xFF414549)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
@@ -707,7 +627,7 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -738,8 +658,8 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFF1E293B),
+            style: TextStyle(
+              color: const Color(0xFF1E293B),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -784,8 +704,8 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 12),
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF1E293B),
+            style: TextStyle(
+              color: const Color(0xFF1E293B),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -793,8 +713,8 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 8),
           Text(
             description,
-            style: const TextStyle(
-              color: Color(0xFF4C617F),
+            style: TextStyle(
+              color: const Color(0xFF4C617F),
               fontSize: 12,
               fontWeight: FontWeight.w400,
             ),
@@ -877,6 +797,54 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildDataRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Text(
+            "$label: ",
+            style: const TextStyle(
+              color: Color(0xFF1E293B),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF1E293B),
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPredictionBadge(String label, bool isPositive) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: isPositive ? const Color(0xFFFCCCE2) : const Color(0xFFAEE2FF).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isPositive ? const Color(0xFFFC5C9C) : const Color(0xFF4DBAFF),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isPositive ? const Color(0xFFFC5C9C) : const Color(0xFF4DBAFF),
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
   Widget _buildBottomNavigation() {
     return BottomNavigationBar(
       currentIndex: _currentIndex,
@@ -945,7 +913,7 @@ class _HomePageState extends State<HomePage> {
           icon: Icon(Icons.person),
           label: 'Profil',
         ),
-      ],
-    );
-  }
-}
+        home: const CommunityPage(),
+      );
+    }
+  }Z
