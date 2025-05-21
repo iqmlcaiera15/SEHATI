@@ -7,6 +7,11 @@ import 'package:Sehati/view/komunitas/index_komunitas.dart'; // Import disease i
 import 'package:Sehati/view/prediksidepresi/index_depresi.dart';
 import 'package:Sehati/view/kickcounter/index_kickcounter.dart';
 import 'package:Sehati/view/postpartum/postpartum.dart';
+import 'package:Sehati/view/polusiudara/index_polusi.dart'; 
+import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart';
+import 'package:Sehati/providers/auth_provider.dart';
+import 'package:Sehati/services/api/dio_client.dart';
+import 'package:Sehati/view/registerlogin/login_screen.dart';
 
 void main() {
   runApp(const SehatiApp());
@@ -28,13 +33,6 @@ class SehatiApp extends StatelessWidget {
     );
   }
 }
-import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; 
-import 'package:Sehati/view/komunitas/index_komunitas.dart'; 
-import 'package:Sehati/view/polusiudara/index_polusi.dart'; 
-import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart';
-import 'package:Sehati/providers/auth_provider.dart';
-import 'package:Sehati/services/api/dio_client.dart';
-import 'package:Sehati/view/registerlogin/login_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -523,68 +521,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     
-                    // Health Tips Section
+                    // Health Tips Section - Fixed version
                     Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Fitur Kesehatan Kehamilan lainnya',
-                          style: TextStyle(
-                            color: Color(0xFF1E293B),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          height: 180,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              // InkWell(
-                              //   onTap: () {
-                              //     Navigator.push(context, MaterialPageRoute(builder: (context) => RekomendasiMakananPage()));
-                              //   },
-                              //   child: _buildTipCard(
-                              //     'Makanan Dengan Nutrisi Penting Untuk Ibu Hamil',
-                              //     'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
-                              //     Icons.restaurant,
-                              //   ),
-                              // ),
-                              // InkWell(
-                              //   onTap: () {
-                              //     Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPolusi()));
-                              //   },
-                              //   child: _buildTipCard(
-                              //     'Olahraga Ringan',
-                              //     'Jalan santai dan yoga untuk ibu hamil',
-                              //     Icons.directions_walk,
-                              //   ),
-                              // ),
-                              InkWell(
-                                onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexKickCounter()));
-                                },
-                                child: _buildTipCard(
-                                  'Hitung Tendangan Bayi',
-                                  'Hitung tendangan untuk memantau kesehatan bayi',
-                                  Icons.monitor_heart,
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPostpartum()));
-                                },
-                                child: _buildTipCard(
-                                  'Perawatan PostPartum',
-                                  'Artikel perawatan setelah melahirkan',
-                                  Icons.healing,
-                                ),
-                              ),
-                            ],
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
                       child: Column(
@@ -635,11 +573,31 @@ class _HomePageState extends State<HomePage> {
                                     Icons.hotel,
                                   ),
                                 ),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => IndexKickCounter()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Hitung Tendangan Bayi',
+                                    'Hitung tendangan untuk memantau kesehatan bayi',
+                                    Icons.monitor_heart,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPostpartum()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Perawatan PostPartum',
+                                    'Artikel perawatan setelah melahirkan',
+                                    Icons.healing,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
                     // Protected Data Section (only shown if authenticated)
@@ -915,54 +873,6 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDataRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Text(
-            "$label: ",
-            style: const TextStyle(
-              color: Color(0xFF1E293B),
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Color(0xFF1E293B),
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPredictionBadge(String label, bool isPositive) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: isPositive ? const Color(0xFFFCCCE2) : const Color(0xFFAEE2FF).withOpacity(0.5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isPositive ? const Color(0xFFFC5C9C) : const Color(0xFF4DBAFF),
-          width: 1,
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isPositive ? const Color(0xFFFC5C9C) : const Color(0xFF4DBAFF),
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
       ),
     );
   }
