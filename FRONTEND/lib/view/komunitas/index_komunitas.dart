@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Sehati/services/api/api_service_komunitas.dart'; 
 import 'package:Sehati/view/homeprofile/home.dart';
+import 'package:Sehati/view/komunitas/comment_komunitas.dart';
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({Key? key}) : super(key: key);
@@ -440,7 +441,20 @@ class _CommunityPageState extends State<CommunityPage> {
     }
 
     Widget _buildPostCard(PostModel post) {
-      return Container(
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the comment page when post is tapped
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CommentPage(post: post),
+          ),
+        ).then((_) {
+          // Refresh the posts when returning from comment page
+          _loadPosts();
+        });
+      },
+      child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -465,7 +479,7 @@ class _CommunityPageState extends State<CommunityPage> {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: AssetImage(post.userImage ?? 'assets/images/default_user.png'),
+                        backgroundImage: AssetImage(post.userImage ?? 'assets/images/default_user.jpeg'),
                         radius: 20,
                       ),
                       const SizedBox(width: 12),
@@ -536,13 +550,24 @@ class _CommunityPageState extends State<CommunityPage> {
                 children: [
                   _buildActionButton(
                     Icons.thumb_up_outlined, 
-                    "Apresiasi (${post.likes})",
+                    "apresiasi (${post.apresiasi})",
                     () => _handleLikePost(post),
                   ),
                   _buildActionButton(
                     Icons.comment_outlined, 
                     "Komentar (${post.komentar})",
-                    () => _showCommentSheet(post),
+                    () {
+                      // Navigate to the comment page when comment button is tapped
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CommentPage(post: post),
+                        ),
+                      ).then((_) {
+                        // Refresh the posts when returning from comment page
+                        _loadPosts();
+                      });
+                    },
                   ),
                   _buildActionButton(
                     Icons.share_outlined, 
@@ -554,8 +579,9 @@ class _CommunityPageState extends State<CommunityPage> {
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
     
     Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
       return InkWell(
@@ -584,10 +610,10 @@ class _CommunityPageState extends State<CommunityPage> {
         });
         
         try {
-          await ApiServicePosts.updateLikes(post.id!, post.likes + 1);
+          await ApiServicePosts.updateLikes(post.id!, post.apresiasi + 1);
           _loadPosts(); // Reload posts to get updated data
         } catch (e) {
-          _showSnackBar('Error updating likes: $e');
+          _showSnackBar('Error updating apresiasi: $e');
         } finally {
           setState(() {
             isLoading = false;
