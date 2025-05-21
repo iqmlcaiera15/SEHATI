@@ -14,7 +14,7 @@ class PrediksiDepresiController extends Controller
         return response()->json(PrediksiDepresi::all());
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'umur' => 'required|integer|min:0|max:120',
@@ -35,11 +35,12 @@ class PrediksiDepresiController extends Controller
         }
 
         try {
-            $user = $request->user(); // pastikan middleware auth:api aktif di route
+            $user = $request->user(); // user dari token
             if (!$user) {
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
-            // Konversi jawaban ke angka
+
+            // Data yang dikirim ke Flask (tanpa user_id)
             $dataKuisioner = [
                 'umur' => $this->categorizeUmur($request->umur),
                 'merasa_sedih' => $this->convertToNumber('merasa_sedih', $request->merasa_sedih),
@@ -51,16 +52,15 @@ class PrediksiDepresiController extends Controller
                 'suicide_attempt' => $this->convertToNumber('suicide_attempt', $request->suicide_attempt),
             ];
 
-            // Panggil model SVM Flask
-            $dataKuisioner['hasil_prediksi'] = $this->predictDepresi($dataKuisioner);
+            // Prediksi dari Flask
+            $hasilPrediksi = $this->predictDepresi($dataKuisioner);
 
-            // Simpan ke database
-            $prediksi = PrediksiDepresi::create($dataKuisioner);
-            
-            $prediksi = PrediksiDepresi::create([
-                'user_id' => $user->id, // Simpan user ID dari JWT
-            ]);
-    
+            // Simpan ke database dengan user_id
+            $prediksi = PrediksiDepresi::create(array_merge(
+                $dataKuisioner,
+                ['hasil_prediksi' => $hasilPrediksi, 'user_id' => $user->id]
+            ));
+
             return response()->json([
                 "status" => "success",
                 "message" => "Prediksi berhasil disimpan",
@@ -75,6 +75,7 @@ class PrediksiDepresiController extends Controller
             ], 500);
         }
     }
+
 
     public function show($id)
     {
