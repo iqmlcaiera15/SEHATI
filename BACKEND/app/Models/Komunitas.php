@@ -10,7 +10,7 @@ class Komunitas extends Model
     use HasFactory;
 
     protected $table = 'komunitas';
-  
+    protected $primaryKey = 'post_id';
 
     protected $fillable = [
         // 'user_id', 
