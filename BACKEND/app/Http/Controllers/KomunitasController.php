@@ -61,8 +61,8 @@ class KomunitasController extends Controller
             'judul' => $request->judul,
             'deskripsi' => $request->deskripsi,
             'gambar' => $request->gambar,
-            'apresiasi' => 0, // Inisialisasi dengan 0 likes
-            'komen' => 0, // Inisialisasi dengan 0 likes
+            'apresiasi' => 0, 
+            'komen' => 0, 
             
         ]);
         

@@ -17,7 +17,7 @@ class Komunitas extends Model
         'judul', 
         'deskripsi', 
         'gambar', 
-        'likes',
+        'apresiasi',
         'komen'
     ];
 
