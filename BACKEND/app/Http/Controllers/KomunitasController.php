@@ -70,7 +70,11 @@ class KomunitasController extends Controller
 
 public function addComment(Request $request, $postId)
 {
-    $user = Auth::user(); // Ambil user dari JWT
+    $user = $request->user(); // pastikan middleware auth:api aktif di route
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
     $request->validate([
         'komentar' => 'required|string|max:1000',
     ]);
@@ -93,7 +97,7 @@ public function addComment(Request $request, $postId)
     try {
         $komentarKomunitas = KomentarKomunitas::create([
             'post_id' => $postId, // Use the URL parameter
-            'user_id' => $user, // Use authenticated user ID
+            'user_id' => $user->id, // Simpan user ID dari JWT
             'komentar' => $request->komentar,
         ]);
 
