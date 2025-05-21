@@ -8,7 +8,6 @@ use App\Models\KomentarKomunitas;
 
 class KomunitasController extends Controller
 {
-    
     public function index()
     {
         $Komunitas = Komunitas::all();
@@ -93,8 +92,8 @@ public function addComment(Request $request, $postId)
     // Create the comment
     try {
         $komentarKomunitas = KomentarKomunitas::create([
-            'post_id' => $user,
-            'user_id' => $userId, // Use authenticated user ID
+            'post_id' => $postId, // Use the URL parameter
+            'user_id' => $user, // Use authenticated user ID
             'komentar' => $request->komentar,
         ]);
 
