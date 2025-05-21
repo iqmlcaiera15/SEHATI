@@ -150,7 +150,7 @@ class PrediksiDepresiController extends Controller
                 1 => '31-35',
                 2 => '36-40',
                 3 => '41-45',
-                4 => '46-50',
+                4 => '46-50'
             ],
             'merasa_sedih' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
             'mudah_tersinggung' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
