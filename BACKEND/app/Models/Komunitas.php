@@ -10,20 +10,25 @@ class Komunitas extends Model
     use HasFactory;
 
     protected $table = 'komunitas';
-  
+    protected $primaryKey = 'post_id';
 
     protected $fillable = [
-        // 'user_id', 
+        'user_id', 
         'judul', 
         'deskripsi', 
         'gambar', 
-        'likes',
+        'apresiasi',
         'komen'
     ];
 
     public function komentar()
     {
         return $this->hasMany(KomentarKomunitas::class, 'id');
+    }
+
+        public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
 }

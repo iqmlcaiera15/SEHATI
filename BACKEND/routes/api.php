@@ -44,7 +44,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('/komunitas/history/{id}', [KomunitasController::class, 'deleteById']);
     Route::post('/komunitas/komen/add/{id}', [KomunitasController::class, 'addComment']);
     Route::post('/komunitas/like/add/{id}', [KomunitasController::class, 'addLike']);
-    Route::post('/komunitas/komen/{id}', [KomunitasController::class, 'getComments']);
+    Route::get('/komunitas/komen/{id}', [KomunitasController::class, 'getComments']);
 
     // Catatan Kunjungan
     Route::get('/catatan/history', [CatatanController::class, 'index']);

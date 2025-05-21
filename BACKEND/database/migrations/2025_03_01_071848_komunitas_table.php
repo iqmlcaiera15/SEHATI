@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('komunitas', function (Blueprint $table) {
-            $table->id( );
-            // $table->string('user_id');
+            $table->id('post_id' );
+            $table->string('user_id');
             $table->string('judul');
             $table->string('deskripsi');
             $table->string('gambar')->nullable();
             $table->integer('komen')->nullable();
-            $table->integer('Apresiasi')->nullable();
+            $table->integer('apresiasi')->nullable();
             $table->timestamps();
         });
     }

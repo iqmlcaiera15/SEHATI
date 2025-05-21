@@ -5,19 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class KomentarKomunitas extends Model
+class Like extends Model
 {
     use HasFactory;
 
-    protected $table = 'komentarkomunitas';
+    protected $table = 'like';
 
     protected $fillable = [
         'post_id',
         'user_id',
-        'komentar',
     ];
 
-    public function komunitas()
+    public function Like()
     {
         return $this->belongsTo(Komunitas::class, 'post_id');
     }
