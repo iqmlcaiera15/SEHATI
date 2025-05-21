@@ -141,7 +141,7 @@ public function addComment(Request $request, $postId)
         // Make sure the column name matches (post_id not komunitas_id)
         $comments = KomentarKomunitas::where('post_id', $postId)
                             ->orderBy('created_at', 'desc')
-                            ->with('user') // Include user relation if it exists
+                            // ->with('user') // Include user relation if it exists
                             ->get();
         
         return response()->json([
