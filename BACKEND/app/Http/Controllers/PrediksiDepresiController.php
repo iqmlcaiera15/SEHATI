@@ -119,12 +119,11 @@ class PrediksiDepresiController extends Controller
 
     private function categorizeUmur($umur)
     {
-        if ($umur < 25) return 0;
-        elseif ($umur >= 25 && $umur <= 30) return 1;
-        elseif ($umur >= 31 && $umur <= 35) return 2;
-        elseif ($umur >= 36 && $umur <= 40) return 3;
-        elseif ($umur >= 41 && $umur <= 45) return 4;
-        elseif ($umur >= 46 && $umur <= 50) return 5;
+        if ($umur <= 30) return 0;
+        elseif ($umur >= 31 && $umur <= 35) return 1;
+        elseif ($umur >= 36 && $umur <= 40) return 2;
+        elseif ($umur >= 41 && $umur <= 45) return 3;
+        elseif ($umur >= 46 && $umur <= 50) return 4;
         else return null; // umur di luar jangkauan
     }
 
@@ -135,7 +134,7 @@ class PrediksiDepresiController extends Controller
             'mudah_tersinggung' => ['Tidak' => 0, 'Ya' => 1, 'Kadang-kadang' => 2],
             'masalah_tidur' => ['Tidak' => 0, 'Ya' => 1, 'Dua hari dalam seminggu/lebih' => 2],
             'masalah_fokus' => ['Tidak' => 0, 'Ya' => 1, 'Sering' => 2],
-            'pola_makan' => ['Tidak sama sekali' => 0, 'Ya' => 1, 'Kadang-kadang' => 2],
+            'pola_makan' => ['Tidak sama sekali' => 2, 'Ya' => 1, 'Kadang-kadang' => 0],
             'merasa_bersalah' => ['Tidak' => 0, 'Ya' => 1, 'Mungkin' => 2],
             'suicide_attempt' => ['Tidak' => 0, 'Ya' => 1, 'Tidak ingin menjawab' => 2],
         ];
@@ -147,18 +146,17 @@ class PrediksiDepresiController extends Controller
     {
         $reverseMapping = [
             'umur' => [
-                0 => '< 25',
-                1 => '25-30',
-                2 => '31-35',
-                3 => '36-40',
-                4 => '41-45',
-                5 => '46-50'
+                0 => '0-30',
+                1 => '31-35',
+                2 => '36-40',
+                3 => '41-45',
+                4 => '46-50',
             ],
             'merasa_sedih' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
             'mudah_tersinggung' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
             'masalah_tidur' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Dua hari dalam seminggu/lebih'],
             'masalah_fokus' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Sering'],
-            'pola_makan' => [0 => 'Tidak sama sekali', 1 => 'Ya', 2 => 'Kadang-kadang'],
+            'pola_makan' => [2=> 'Tidak sama sekali', 1 => 'Ya', 1 => 'Kadang-kadang'],
             'merasa_bersalah' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Mungkin'],
             'suicide_attempt' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Tidak ingin menjawab'],
         ];

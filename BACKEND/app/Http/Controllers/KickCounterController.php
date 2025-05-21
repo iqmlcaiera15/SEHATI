@@ -13,11 +13,13 @@ class KickCounterController extends Controller
         try {
             $request->validate([
                 'kick_count' => 'required|integer|min:1',
+                'duration' => 'required|integer|min:0',
             ]);
     
             $kickCounter = KickCounter::create([
                 'kick_count' => $request->kick_count,
                 'recorded_at' => now(),
+                'duration' => $request->duration,
             ]);
     
             return response()->json([

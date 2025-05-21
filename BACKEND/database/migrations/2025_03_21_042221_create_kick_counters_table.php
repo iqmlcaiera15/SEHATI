@@ -13,6 +13,7 @@ class CreateKickCountersTable extends Migration
             $table->integer('kick_count');
             $table->timestamp('recorded_at')->useCurrent();
             $table->timestamps();
+            $table->integer('duration')->default(0);
         });
     }
 

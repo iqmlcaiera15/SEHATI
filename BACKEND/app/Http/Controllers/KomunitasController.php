@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Komunitas;
-use App\Models\Komentar;
-use App\Models\Like;
+use App\Models\KomentarKomunitas;
 
 class KomunitasController extends Controller
 {
@@ -15,6 +14,23 @@ class KomunitasController extends Controller
 
         return response()->json([
             'Komunitas' => $Komunitas
+        ]);
+    }
+
+    public function indexid($id)
+    {
+        
+        $result = komunitas::findOrFail($id);
+        return response()->json($result);
+    
+        if (!$komunitas) {
+            return response()->json([
+                'message' => 'Data tidak ditemukan untuk post_id: ' . $request->post_id
+            ], 404);
+        }
+    
+        return response()->json([
+            'Komunitas' => $komunitas
         ]);
     }
     
@@ -30,17 +46,19 @@ class KomunitasController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required',
+            // 'user_id' => 'required',
             'judul' => 'required',
             'deskripsi' => 'required',
         ]);
 
         $komunitas = Komunitas::create([
-            'user_id' => $request->user_id,
+            // 'user_id' => $request->user_id,
             'judul' => $request->judul,
             'deskripsi' => $request->deskripsi,
-            'komen' => 0, // Inisialisasi dengan 0 komentar
-            'likes' => 0, // Inisialisasi dengan 0 likes
+            'gambar' => $request->gambar,
+            'Apresiasi' => 0, // Inisialisasi dengan 0 likes
+            'komen' => 0, // Inisialisasi dengan 0 likes
+            
         ]);
         
         return response()->json([
@@ -53,8 +71,9 @@ class KomunitasController extends Controller
     public function addComment(Request $request, $postId)
     {
         $request->validate([
-            'user_id' => 'required',
-            'isi_komentar' => 'required',
+            'post_id' => 'required|exists:komunitas,id',
+            // 'user_id' => 'required',
+            'komentar' => 'required',
         ]);
 
         // Cek apakah post dengan id tersebut ada
@@ -68,10 +87,10 @@ class KomunitasController extends Controller
         }
 
         // Buat komentar
-        $komentar = Komentar::create([
-            'komunitas_id' => $postId,
-            'user_id' => $request->user_id,
-            'isi_komentar' => $request->isi_komentar,
+        $komentarkomunitas = KomentarKomunitas::create([
+            'post_id' => $request->input('post_id'),
+            // 'user_id' => $request->user_id,
+            'komentar' => $request->komentar,
         ]);
 
         // Update jumlah komentar di tabel Komunitas
@@ -80,7 +99,7 @@ class KomunitasController extends Controller
         return response()->json([
             'status' => 'berhasil',
             'message' => 'Comment added successfully',
-            'data' => $komentar
+            // 'data' => $komentar
         ], 201);
     }
 
@@ -98,7 +117,7 @@ class KomunitasController extends Controller
 
         // Ambil semua komentar untuk post ini
         $comments = Komentar::where('komunitas_id', $postId)
-                            ->orderBy('created_at', 'desc')
+                            ->orderBy('created_at', 'komentar')
                             ->with('user') // Tambahkan relasi user jika ada
                             ->get();
         
@@ -115,7 +134,7 @@ class KomunitasController extends Controller
         ]);
 
         // Cek apakah post dengan id tersebut ada
-        $post = Komunitas::find($postId);
+        $post = Komunitas::find($Id);
         
         if (!$post) {
             return response()->json([
@@ -134,7 +153,7 @@ class KomunitasController extends Controller
             $existingLike->delete();
             
             // Kurangi jumlah likes di tabel Komunitas
-            $post->decrement('likes');
+            $post->decrement('Apresiasi');
             
             return response()->json([
                 'status' => 'berhasil',
@@ -149,7 +168,7 @@ class KomunitasController extends Controller
             ]);
             
             // Tambah jumlah likes di tabel Komunitas
-            $post->increment('likes');
+            $post->increment('Apresiasi');
             
             return response()->json([
                 'status' => 'berhasil',

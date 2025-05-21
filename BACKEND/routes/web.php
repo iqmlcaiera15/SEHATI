@@ -1,83 +1,104 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InsentifController;
+use App\Http\Controllers\DeteksiDesktopController;
+use App\Http\Controllers\PrediksiDepresiDesktopController;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
 
-use App\Http\Controllers\DeteksiController;
-use App\Http\Controllers\AirQualityController;
-use App\Http\Controllers\CatatanController;
-use App\Http\Controllers\PostpartumController;
-use App\Http\Controllers\KomunitasController;
-use App\Http\Controllers\PrediksiDepresiController;
-use App\Http\Controllers\RekomendasiMakananController;
-use App\Http\Controllers\KickCounterController;
-use App\Http\Controllers\SkorEpdsController;
-
-
-#Air Quality
-Route::get('/kualitasudara', [AirQualityController::class, 'index']);
-
-
-#Komunitas
-Route::get('/komunitas', [KomunitasController::class, 'index']);
-Route::post('/komunitas/add', [KomunitasController::class, 'store']);
-Route::get('/komunitas/history', [KomunitasController::class, 'history']);
-Route::get('/komunitas/latest', [KomunitasController::class, 'indexlatest']);
-Route::delete('/komunitas/history/deleteAll', [KomunitasController::class, 'deleteAll']);
-Route::delete('/komunitas/history/{id}', [KomunitasController::class, 'deleteById']);
-
-#Catatan Kunjungan
-Route::get('/catatan/history', [CatatanController::class, 'index']);
-Route::post('/catatan', [CatatanController::class, 'store']);
-Route::delete('/catatan/history/deleteAll', [CatatanController::class, 'deleteAll']);
-Route::delete('/catatan/history/{id}', [CatatanController::class, 'deleteById']);
-
-#Deteksi Penyakit
-Route::get('/deteksi/history', [DeteksiController::class, 'index']);
-Route::get('/deteksi/latest', [DeteksiController::class, 'indexlatest']);
-Route::post('/deteksi/store', [DeteksiController::class, 'store']);
-Route::delete('/deteksi/history/deleteAll', [DeteksiController::class, 'deleteAll']);
-Route::delete('/deteksi/history/{id}', [DeteksiController::class, 'deleteById']);
-
-#Postpartum Recovery Tracker 
-Route::get('/Recovery', [DeteksiController::class, 'index']);
-Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
-
-#Saran Makanan
-Route::get('/Recovery', [DeteksiController::class, 'index']);
-Route::get('/Recovery/history', [DeteksiController::class, 'histindex']);
-
-Route::get('/home', [HomeProfileController::class, 'home']);
-
-#Prediksi Depresi
-Route::get('/prediksidepresi', [PrediksiDepresiController::class, 'index']);
-Route::post('/prediksidepresi/store', [PrediksiDepresiController::class, 'store']);
-Route::get('/prediksidepresi/{id}', [PrediksiDepresiController::class, 'show']);
-Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class, 'deletebyID']);
-
-
-#EPDS
-Route::post('/epds', [SkorEpdsController::class, 'store']);
-Route::get('/epds', [SkorEpdsController::class, 'index']);
-Route::get('/epds/{id}', [SkorEpdsController::class, 'show']);
-
-#Rekomendasi Makanan
-Route::get('/rekomendasimakanan', [RekomendasiMakananController::class, 'index']);
-Route::get('/rekomendasimakanan/{id}', [RekomendasiMakananController::class, 'show']);
-
-#Kick Counter
-Route::get('/kick-counter', [KickCounterController::class, 'index']);
-Route::post('/kick-counter', [KickCounterController::class, 'store']);
-
-
-#Login Register 
-Route::post('login', [AuthController::class, 'login']);
-
-
-#TOKEN 
-Route::get('token', function () {
-    return csrf_token();
-});
-
-#Home
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Authentication Routes (if you're using Laravel's default auth)
+Auth::routes();
+
+// Custom Registration Routes
+Route::get('/register/bidan', [RegisterController::class, 'showBidanRegistrationForm'])->name('register.bidan.form');
+Route::post('/register/bidan', [RegisterController::class, 'registerBidan'])->name('register.bidan');
+
+Route::get('/register/dinkes', [RegisterController::class, 'showDinkesRegistrationForm'])->name('register.dinkes.form');
+Route::post('/register/dinkes', [RegisterController::class, 'registerDinkes'])->name('register.dinkes');
+
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('auth.login');
+Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+// Protected Routes for Bidan - Using the check.role middleware
+Route::middleware(['auth'])->prefix('bidan')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('bidan.dashboard');
+    })->name('bidan.dashboard');
+    Route::get('/deteksi', [DeteksiDesktopController::class, 'index'])->name('deteksi.index');
+    Route::get('/deteksi/create', [DeteksiDesktopController::class, 'create'])->name('deteksi.create');
+    Route::post('/deteksi', [DeteksiDesktopController::class, 'store'])->name('deteksi.store');
+    Route::get('/deteksi/{id}', [DeteksiDesktopController::class, 'show'])->name('deteksi.show');
+    Route::get('/deteksi/latest', [DeteksiDesktopController::class, 'indexlatest'])->name('deteksi.latest');
+    Route::get('/deteksi/delete-all', [DeteksiDesktopController::class, 'deleteAll'])->name('deteksi.deleteAll');
+    Route::delete('/deteksi/{id}', [DeteksiDesktopController::class, 'destroy'])->name('deteksi.destroy');
+
+    Route::get('/depresi', [PrediksiDepresiDesktopController::class, 'index'])->name('depresi.index');
+    Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.delete');
+
+    // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
+    // Add more bidan routes here
+});
+
+Route::get('bidan/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
+
+
+// Protected Routes for Dinkes - Using the check.role middleware
+Route::middleware(['auth'])->prefix('dinkes')->group(function () {
+    // Route::get('/dashboard', function () {
+    //     return view('dinkes.dashboard');
+    // })->name('dinkes.dashboard');
+    Route::get('dashboard', [HomeController::class, 'index_dinkes'])->name('dinkes.dashboardd');
+
+    //Insentif
+    Route::get('saldo/{userId}', [InsentifController::class, 'Saldo'])->name('dinkes.dinkessaldo');
+    Route::get('saldo/{userId}/riwayat', [InsentifController::class, 'getRiwayatSaldo'])->name('dinkes.riwayat.saldo');
+    Route::get('saldo/{userId}/laporan', [InsentifController::class, 'getLaporanSaldo'])->name('dinkes.laporan.saldo');
+    Route::get('/dinkes/saldo/{id}/tambah', [InsentifController::class, 'showTambahSaldoForm'])->name('dinkes.form.tambah.saldo');
+    Route::post('saldo/{userId}', [InsentifController::class, 'tambahSaldo'])->name('dinkes.tambah.saldo');
+    // Add more dinkes routes here
+    
+});
+
+    Route::get('saldo/{userId}', [InsentifController::class, 'Saldo'])->name('dinkes.dinkessaldo');
+
+    // INSETIF
+    // Route::get('saldo/{userId}', [InsentifController::class, 'Saldo']);
+    // Route::post('/tambah', [SaldoController::class, 'tambahSaldo'])->middleware('role:dinkes');
+    Route::post('saldo/tambah', [SaldoController::class, 'tambahSaldo']);
+        // Ambil riwayat saldo ibu hamil tertentu
+    Route::get('/riwayat/{userId}', [SaldoController::class, 'getRiwayatSaldo']);
+        // Ambil daftar ibu hamil beserta saldo mereka (hanya admin)
+    Route::get('/daftar-ibu-hamil', [SaldoController::class, 'getDaftarIbuHamil'])->middleware('role:admin');
+        // Batalkan transaksi (hanya admin level 2 ke atas)
+    Route::post('/batalkan/{transaksiId}', [SaldoController::class, 'batalkanTransaksi'])->middleware('role:admin');
+        // Laporan transaksi saldo (hanya admin)
+    Route::get('/laporan', [SaldoController::class, 'getLaporanTransaksi'])->middleware('role:admin');
+
+// Home route (redirect based on role)
+Route::get('/home', function() {
+    if (auth()->check()) {
+        if (auth()->user()->role === 'bidan') {
+            return redirect()->route('bidan.dashboard');
+        } elseif (auth()->user()->role === 'dinkes') {
+            return redirect()->route('dinkes.dashboard');
+        }
+    }
+    
+    return redirect()->route('login');
+})->name('home');

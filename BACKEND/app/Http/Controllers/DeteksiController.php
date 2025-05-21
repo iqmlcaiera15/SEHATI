@@ -4,18 +4,22 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\DeteksiPenyakit;
+use Illuminate\Support\Facades\Auth;
 
 class DeteksiController extends Controller
 {
     public function index()
     {
-        $DeteksiPenyakit = DeteksiPenyakit::all();
-
+        $user = Auth::user(); // Ambil user dari JWT
+    
+        // Ambil data DeteksiPenyakit hanya milik user tersebut
+        $deteksiPenyakit = DeteksiPenyakit::where('user_id', $user->id)->get();
+    
         return response()->json([
-            'DeteksiPenyakit' => $DeteksiPenyakit
+            'DeteksiPenyakit' => $deteksiPenyakit
         ]);
     }
-
+    
     public function indexlatest()
     {
         $DeteksiPenyakit = DeteksiPenyakit::latest()->first();
@@ -27,7 +31,8 @@ class DeteksiController extends Controller
     
 
     public function store(Request $request)
-    {   try {
+    {
+        try {
             $request->validate([
                 'nama' => 'required',
                 'pregnancies' => 'required|integer',
@@ -45,9 +50,16 @@ class DeteksiController extends Controller
                 'heart_rate' => 'nullable|numeric',
                 'body_temp' => 'nullable|numeric',
             ]);
-        
+    
+            // Dapatkan user_id dari JWT
+            $user = $request->user(); // pastikan middleware auth:api aktif di route
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+    
             // Simpan ke database
             $deteksi = DeteksiPenyakit::create([
+                'user_id' => $user->id, // Simpan user ID dari JWT
                 'nama' => $request->nama,
                 'pregnancies' => $request->pregnancies,
                 'age' => $request->age,
@@ -64,20 +76,20 @@ class DeteksiController extends Controller
                 'heart_rate' => $request->heart_rate,
                 'body_temp' => $request->body_temp,
             ]);
-            
-            // Kirim data ke API ML Railway
-            $response = Http::post('https://sehatiml-production.up.railway.app//predictdeteksi', [
+    
+            // Kirim ke model ML
+            $response = Http::post('https://sehatiml-production.up.railway.app/predictdeteksi', [
                 'diabetes' => [
                     'Pregnancies' => $request->pregnancies ?? 0,
                     'BS' => $request->bs,
                     'BloodPressure' => $request->blood_pressure,
                     'SkinThickness' => $request->skin_thickness ?? 0,
                     'BMI' => $request->bmi,
-                    'Age' => $request->umur
+                    'Age' => $request->age,
                 ],
                 'hypertension' => [
                     'sex' => $request->sex,
-                    'Age' => $request->umur,
+                    'Age' => $request->age,
                     'currentSmoker' => $request->current_smoker,
                     'cigsPerDay' => $request->cigs_per_day,
                     'BPMeds' => $request->bp_meds,
@@ -86,44 +98,42 @@ class DeteksiController extends Controller
                     'DiastolicBP' => $request->diastolic_bp,
                     'BMI' => $request->bmi,
                     'Heartrate' => $request->heart_rate,
-                    'BS' => $request->bs
+                    'BS' => $request->bs,
                 ],
                 'maternal_health' => [
-                    'Age' => $request->umur,
+                    'Age' => $request->age,
                     'SystolicBP' => $request->systolic_bp,
                     'DiastolicBP' => $request->diastolic_bp,
                     'BS' => $request->bs,
                     'BodyTemp' => $request->body_temp,
-                    'HeartRate' => $request->heart_rate
-                ]
-        
+                    'HeartRate' => $request->heart_rate,
+                ],
             ]);
     
-        // Ambil hasil prediksi dari API ML
-        $prediction = $response->json();
+            $prediction = $response->json();
     
-        // Update database dengan hasil prediksi
-        $deteksi->update([
-            'diabetes_prediction' => $prediction['diabetes_prediction'],
-            'hypertension_prediction' => $prediction['hypertension_prediction'],
-            'maternal_health_prediction' => $prediction['maternal_health_prediction']
-        ]);
+            // Update hasil prediksi
+            $deteksi->update([
+                'diabetes_prediction' => $prediction['diabetes_prediction'],
+                'hypertension_prediction' => $prediction['hypertension_prediction'],
+                'maternal_health_prediction' => $prediction['maternal_health_prediction'],
+            ]);
     
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data successfully stored and ML prediction retrieved',
-            'prediction' => $prediction
-        ], 201);
-
-    } catch (\Exception $e) {
-        \Log::error('Error in DeteksiPenyakit store function: ' . $e->getMessage());
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Internal Server Error',
-            'error' => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data successfully stored and prediction retrieved',
+                'prediction' => $prediction,
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Error in DeteksiPenyakit store: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-}
+    
 
 
     public function deleteAll()

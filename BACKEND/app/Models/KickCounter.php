@@ -11,6 +11,7 @@ class KickCounter extends Model
 
     protected $fillable = [
         'kick_count', 
-        'recorded_at'
+        'recorded_at',
+        'duration',
     ];
 }

@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('skorepds', function (Blueprint $table) {
+        Schema::create('skor_epds', function (Blueprint $table) {
             $table->id();
-            $table->json('answers'); // simpan jawaban dalam bentuk array
-            $table->integer('score');
+            $table->foreignId('prediksi_depresi_id')
+                  ->constrained('prediksi_depresi')
+                  ->onDelete('cascade');
+            $table->json('answers'); // Store all 10 answers as JSON array
+            $table->integer('score'); // total skor EPDS
+            $table->string('hasil_epds')->nullable(); // status depresi (optional)
             $table->timestamps();
         });
     }
@@ -24,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('skorepds');
+        Schema::dropIfExists('skor_epds');
     }
 };
