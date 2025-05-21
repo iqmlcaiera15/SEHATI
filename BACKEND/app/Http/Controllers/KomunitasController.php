@@ -68,44 +68,56 @@ class KomunitasController extends Controller
         ], 201);
     }
 
-    public function addComment(Request $request, $postId)
-    {
-        $request->validate([
-            'post_id' => 'required|exists:komunitas,id',
-            // 'user_id' => 'required',
-            'komentar' => 'required',
-        ]);
+public function addComment(Request $request, $postId)
+{
+    $request->validate([
+        'komentar' => 'required|string|max:1000',
+    ]);
 
-        // Cek apakah post dengan id tersebut ada
-        $post = Komunitas::find($postId);
-        
-        if (!$post) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Post not found'
-            ], 404);
-        }
+    // Check if the post exists
+    $post = Komunitas::find($postId);
+    
+    if (!$post) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Post not found'
+        ], 404);
+    }
 
-        // Buat komentar
-        $komentarkomunitas = KomentarKomunitas::create([
-            'post_id' => $request->input('post_id'),
-            // 'user_id' => $request->user_id,
+    // Get current user from token (assume this is handled by auth middleware)
+    $user = auth()->user();
+    $userId = $user ? $user->id : null;
+
+    // Create the comment
+    try {
+        $komentarKomunitas = KomentarKomunitas::create([
+            'post_id' => $postId, // Use the URL parameter
+            'user_id' => $userId, // Use authenticated user ID
             'komentar' => $request->komentar,
         ]);
 
-        // Update jumlah komentar di tabel Komunitas
+        // Increment comment count on post
         $post->increment('komen');
         
         return response()->json([
             'status' => 'berhasil',
             'message' => 'Comment added successfully',
-            // 'data' => $komentar
+            'data' => $komentarKomunitas
         ], 201);
+    } catch (\Exception $e) {
+        \Log::error('Error adding comment: ' . $e->getMessage());
+        
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to add comment',
+            'debug_info' => config('app.debug') ? $e->getMessage() : null
+        ], 500);
     }
+}
 
     public function getComments($postId)
     {
-        // Cek apakah post dengan id tersebut ada
+        // Check if post with this ID exists
         $post = Komunitas::find($postId);
         
         if (!$post) {
@@ -115,10 +127,11 @@ class KomunitasController extends Controller
             ], 404);
         }
 
-        // Ambil semua komentar untuk post ini
-        $comments = Komentar::where('komunitas_id', $postId)
-                            ->orderBy('created_at', 'komentar')
-                            ->with('user') // Tambahkan relasi user jika ada
+        // Get all comments for this post
+        // Make sure the column name matches (post_id not komunitas_id)
+        $comments = KomentarKomunitas::where('post_id', $postId)
+                            ->orderBy('created_at', 'desc')
+                            ->with('user') // Include user relation if it exists
                             ->get();
         
         return response()->json([
@@ -129,12 +142,9 @@ class KomunitasController extends Controller
 
     public function addLike(Request $request, $postId)
     {
-        $request->validate([
-            'user_id' => 'required',
-        ]);
-
-        // Cek apakah post dengan id tersebut ada
-        $post = Komunitas::find($Id);
+        // Fixed the variable name from $Id to $postId
+        // Check if post exists
+        $post = Komunitas::find($postId);
         
         if (!$post) {
             return response()->json([
@@ -143,37 +153,49 @@ class KomunitasController extends Controller
             ], 404);
         }
 
-        // Cek apakah user sudah memberikan like pada post ini
-        $existingLike = Like::where('komunitas_id', $postId)
-                            ->where('user_id', $request->user_id)
+        // Get current user from token (assume this is handled by auth middleware)
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // Check if user already liked this post
+        $existingLike = Like::where('post_id', $postId)
+                            ->where('user_id', $user->id)
                             ->first();
         
         if ($existingLike) {
-            // User sudah like, jadi kita hapus like-nya (unlike)
+            // User already liked, so remove the like (unlike)
             $existingLike->delete();
             
-            // Kurangi jumlah likes di tabel Komunitas
+            // Decrease like count
             $post->decrement('Apresiasi');
             
             return response()->json([
                 'status' => 'berhasil',
                 'message' => 'Post unliked successfully',
-                'is_liked' => false
+                'is_liked' => false,
+                'Apresiasi' => $post->Apresiasi // Return the updated count
             ], 200);
         } else {
-            // User belum like, tambahkan like
+            // User hasn't liked, add like
             Like::create([
-                'komunitas_id' => $postId,
-                'user_id' => $request->user_id,
+                'post_id' => $postId, // Changed from komunitas_id to post_id to match frontend
+                'user_id' => $user->id,
             ]);
             
-            // Tambah jumlah likes di tabel Komunitas
+            // Increase like count
             $post->increment('Apresiasi');
             
             return response()->json([
                 'status' => 'berhasil',
                 'message' => 'Post liked successfully',
-                'is_liked' => true
+                'is_liked' => true,
+                'Apresiasi' => $post->Apresiasi // Return the updated count
             ], 201);
         }
     }
