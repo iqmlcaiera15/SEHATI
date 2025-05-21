@@ -35,8 +35,13 @@ class PrediksiDepresiController extends Controller
         }
 
         try {
+            $user = $request->user(); // pastikan middleware auth:api aktif di route
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
             // Konversi jawaban ke angka
             $dataKuisioner = [
+                'user_id' => $user->id,
                 'umur' => $this->categorizeUmur($request->umur),
                 'merasa_sedih' => $this->convertToNumber('merasa_sedih', $request->merasa_sedih),
                 'mudah_tersinggung' => $this->convertToNumber('mudah_tersinggung', $request->mudah_tersinggung),
