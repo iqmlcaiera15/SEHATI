@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:Sehati/services/api/api_service_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; // Import disease index page
@@ -27,6 +28,13 @@ class SehatiApp extends StatelessWidget {
     );
   }
 }
+import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; 
+import 'package:Sehati/view/komunitas/index_komunitas.dart'; 
+import 'package:Sehati/view/polusiudara/index_polusi.dart'; 
+import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart';
+import 'package:Sehati/providers/auth_provider.dart';
+import 'package:Sehati/services/api/dio_client.dart';
+import 'package:Sehati/view/registerlogin/login_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -38,11 +46,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<dynamic>> _recentData;
   int _currentIndex = 0;
+  final DioClient _dioClient = DioClient();
+  String _protectedData = '';
+  bool _isLoading = false;
   
   @override
   void initState() {
     super.initState();
     _loadRecentData();
+    _fetchProtectedData();
   }
 
   void _loadRecentData() {
@@ -52,6 +64,25 @@ class _HomePageState extends State<HomePage> {
         return data.take(3).toList();
       });
     });
+  }
+
+  Future<void> _fetchProtectedData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _dioClient.get('/protected-data');
+      setState(() {
+        _protectedData = response.data['message'];
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _protectedData = '';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -148,16 +179,36 @@ class _HomePageState extends State<HomePage> {
                     letterSpacing: 0.12,
                   ),
                 ),
-                Container(
-                  width: 24,
-                  height: 24,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: const BoxDecoration(),
-                  child: const Stack(
-                    children: [
-                      // Notification icon could be placed here
-                    ],
-                  ),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, _) {
+                    return GestureDetector(
+                      onTap: () async {
+                        if (authProvider.isAuthenticated) {
+                          final success = await authProvider.logout();
+                          if (success && mounted) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: const BoxDecoration(),
+                        child: Stack(
+                          children: [
+                            authProvider.isAuthenticated
+                                ? const Icon(Icons.logout, size: 24, color: Color(0xFF4C617F))
+                                : const SizedBox(),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -185,27 +236,34 @@ class _HomePageState extends State<HomePage> {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Selamat Datang, Bunda!',
-                            style: TextStyle(
-                              color: Color(0xFF1E293B),
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Pantau kesehatan kehamilan Anda bersama Sehati',
-                            style: TextStyle(
-                              color: const Color(0xFF4C617F),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
+                      child: Consumer<AuthProvider>(
+                        builder: (context, authProvider, _) {
+                          final user = authProvider.user;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user != null 
+                                    ? 'Selamat Datang, ${user.name}!' 
+                                    : 'Selamat Datang, Bunda!',
+                                style: const TextStyle(
+                                  color: Color(0xFF1E293B),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Pantau kesehatan kehamilan Anda bersama Sehati',
+                                style: const TextStyle(
+                                  color: Color(0xFF4C617F),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                     
@@ -232,9 +290,9 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.calendar_today, color: Colors.white, size: 18),
+                              const Icon(Icons.calendar_today, color: Colors.white, size: 18),
                               const SizedBox(width: 8),
-                              Text(
+                              const Text(
                                 'Minggu ke-28',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -340,10 +398,10 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 },
-                                child: Text(
+                                child: const Text(
                                   'Lihat Semua',
                                   style: TextStyle(
-                                    color: const Color(0xFF4DBAFF),
+                                    color: Color(0xFF4DBAFF),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -378,12 +436,12 @@ class _HomePageState extends State<HomePage> {
                                         child: Center(
                                           child: Column(
                                             children: [
-                                              Icon(Icons.folder_open, color: const Color(0xFF4DBAFF), size: 48),
+                                              const Icon(Icons.folder_open, color: Color(0xFF4DBAFF), size: 48),
                                               const SizedBox(height: 8),
-                                              Text(
+                                              const Text(
                                                 'Belum ada data kesehatan',
                                                 style: TextStyle(
-                                                  color: const Color(0xFF4C617F),
+                                                  color: Color(0xFF4C617F),
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -409,7 +467,7 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                                 ),
-                                                child: Text(
+                                                child: const Text(
                                                   'Tambah Data Baru',
                                                   style: TextStyle(
                                                     color: Colors.white,
@@ -427,8 +485,8 @@ class _HomePageState extends State<HomePage> {
                                       shrinkWrap: true,
                                       physics: const NeverScrollableScrollPhysics(),
                                       itemCount: data.length,
-                                      separatorBuilder: (context, index) => Divider(
-                                        color: const Color(0xFFD9D9D9),
+                                      separatorBuilder: (context, index) => const Divider(
+                                        color: Color(0xFFD9D9D9),
                                         thickness: 1,
                                       ),
                                       itemBuilder: (context, index) {
@@ -527,12 +585,133 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             ],
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Fitur Kesehatan Kehamilan lainnya',
+                            style: TextStyle(
+                              color: Color(0xFF1E293B),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 180,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const RekomendasiMakananPage()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Makanan Dengan Nutrisi Penting Untuk Ibu Hamil',
+                                    'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
+                                    Icons.restaurant,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const IndexPolusi()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Cek Kualitas Udara',
+                                    'Cek Kualitas Udara Untuk Bandung dan Sekitarnya',
+                                    Icons.wind_power_sharp,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    // TODO: Navigasi ke halaman TidurPage
+                                    // Navigator.push(context, MaterialPageRoute(builder: (context) => TidurPage()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Pola Tidur Sehat',
+                                    'Istirahat cukup untuk kesehatan ibu dan janin',
+                                    Icons.hotel,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  
+
+                    // Protected Data Section (only shown if authenticated)
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, _) {
+                        if (!authProvider.isAuthenticated || _protectedData.isEmpty) {
+                          return const SizedBox();
+                        }
+                        
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Data Pribadi',
+                                style: TextStyle(
+                                  color: Color(0xFF1E293B),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: _isLoading
+                                    ? const Center(child: CircularProgressIndicator(color: Color(0xFF4DBAFF)))
+                                    : Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _protectedData,
+                                            style: const TextStyle(
+                                              color: Color(0xFF1E293B),
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          ElevatedButton(
+                                            onPressed: _fetchProtectedData,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: const Color(0xFF4DBAFF),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              'Refresh Data',
+                                              style: TextStyle(color: Colors.white),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                     
                     // Spacer at the bottom
                     const SizedBox(height: 75),
@@ -550,7 +729,7 @@ class _HomePageState extends State<HomePage> {
           // Action menu button
         },
         backgroundColor: const Color(0xFFAEE2FF),
-        child: Icon(Icons.grid_view, color: const Color(0xFF414549)),
+        child: const Icon(Icons.grid_view, color: Color(0xFF414549)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
@@ -570,7 +749,7 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -601,8 +780,8 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(
-              color: const Color(0xFF1E293B),
+            style: const TextStyle(
+              color: Color(0xFF1E293B),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -647,8 +826,8 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 12),
           Text(
             title,
-            style: TextStyle(
-              color: const Color(0xFF1E293B),
+            style: const TextStyle(
+              color: Color(0xFF1E293B),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -656,8 +835,8 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 8),
           Text(
             description,
-            style: TextStyle(
-              color: const Color(0xFF4C617F),
+            style: const TextStyle(
+              color: Color(0xFF4C617F),
               fontSize: 12,
               fontWeight: FontWeight.w400,
             ),
