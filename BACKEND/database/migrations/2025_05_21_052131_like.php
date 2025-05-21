@@ -11,27 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('komentarkomunitas', function (Blueprint $table) {
+        Schema::create('like', function (Blueprint $table) {
             $table->id();
             $table->foreignId('post_id')
                 ->constrained('komunitas', 'post_id')
                 ->onDelete('cascade');
             $table->string('user_id'); 
-            $table->string('komentar');
             $table->timestamps();
 
     
         });
     }
 
-     
-    
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('komenkomunitas');
+        Schema::dropIfExists('like');
     }
 };

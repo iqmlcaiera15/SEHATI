@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Komunitas;
 use App\Models\KomentarKomunitas;
+use App\Models\Like;
 
 class KomunitasController extends Controller
 {
@@ -45,14 +46,18 @@ class KomunitasController extends Controller
 
     public function store(Request $request)
     {
+        $user = $request->user(); // pastikan middleware auth:api aktif di route
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+            }
+            
         $request->validate([
-            // 'user_id' => 'required',
             'judul' => 'required',
             'deskripsi' => 'required',
         ]);
 
         $komunitas = Komunitas::create([
-            // 'user_id' => $request->user_id,
+            'user_id' => $user->id,
             'judul' => $request->judul,
             'deskripsi' => $request->deskripsi,
             'gambar' => $request->gambar,
@@ -159,17 +164,13 @@ public function addComment(Request $request, $postId)
         }
 
         // Get current user from token (assume this is handled by auth middleware)
-        $user = auth()->user();
-        
+        $user = $request->user(); // pastikan middleware auth:api aktif di route
         if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
-        }
+            return response()->json(['message' => 'Unauthorized'], 401);
+            }
 
         // Check if user already liked this post
-        $existingLike = Komunitas::where('post_id', $postId)
+        $existingLike = Like::where('post_id', $postId)
                             ->where('user_id', $user->id)
                             ->first();
         
@@ -188,7 +189,7 @@ public function addComment(Request $request, $postId)
             ], 200);
         } else {
             // User hasn't liked, add like
-            Komunitas::create([
+            Like::create([
                 'post_id' => $postId, // Changed from komunitas_id to post_id to match frontend
                 'user_id' => $user->id,
             ]);
