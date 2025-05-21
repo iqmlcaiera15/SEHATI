@@ -41,7 +41,6 @@ class PrediksiDepresiController extends Controller
             }
             // Konversi jawaban ke angka
             $dataKuisioner = [
-                'user_id' => $user->id,
                 'umur' => $this->categorizeUmur($request->umur),
                 'merasa_sedih' => $this->convertToNumber('merasa_sedih', $request->merasa_sedih),
                 'mudah_tersinggung' => $this->convertToNumber('mudah_tersinggung', $request->mudah_tersinggung),
@@ -57,7 +56,11 @@ class PrediksiDepresiController extends Controller
 
             // Simpan ke database
             $prediksi = PrediksiDepresi::create($dataKuisioner);
-
+            
+            $prediksi = PrediksiDepresi::create([
+                'user_id' => $user->id, // Simpan user ID dari JWT
+            ]);
+    
             return response()->json([
                 "status" => "success",
                 "message" => "Prediksi berhasil disimpan",
