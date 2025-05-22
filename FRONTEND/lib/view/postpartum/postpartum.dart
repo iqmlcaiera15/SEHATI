@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Model class
 class PostpartumArticle {
@@ -31,10 +32,24 @@ class PostpartumArticle {
 
 // API Service
 class PostpartumApiService {
-  static const String baseUrl = 'https://sehatiapp-production.up.railway.app'; // Replace with your actual API URL
+  static const String baseUrl = 'https://sehatiapp-production.up.railway.app/api';
+
+  static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   static Future<List<PostpartumArticle>> fetchArticles() async {
-    final response = await http.get(Uri.parse('$baseUrl/postpartum'));
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/postpartum'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
     
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -45,7 +60,19 @@ class PostpartumApiService {
   }
 
   static Future<PostpartumArticle> fetchArticle(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/postpartum/$id'));
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+    
+    final response = await http.get(
+      Uri.parse('$baseUrl/postpartum/$id'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
     
     if (response.statusCode == 200) {
       return PostpartumArticle.fromJson(json.decode(response.body));
