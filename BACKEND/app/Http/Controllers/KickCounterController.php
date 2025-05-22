@@ -5,10 +5,6 @@ use App\Models\KickCounter;
 
 class KickCounterController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-    }
     
     public function store(Request $request)
     {
@@ -17,9 +13,14 @@ class KickCounterController extends Controller
                 'kick_count' => 'required|integer|min:1',
                 'duration' => 'required|integer|min:0',
             ]);
-    
+
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+            
             $kickCounter = KickCounter::create([
-                'user_id' => auth()->id(),
+                'user_id' => $user->id,
                 'kick_count' => $request->kick_count,
                 'recorded_at' => now(),
                 'duration' => $request->duration,
@@ -44,7 +45,8 @@ class KickCounterController extends Controller
     
     public function index()
     {
-        $kickCounter = KickCounter::where('user_id', auth()->id())->get();
+        $user = Auth::user();
+        $kickCounter = KickCounter::where('user_id', $user->id)->get();
         
         return response()->json([
             'data' => $kickCounter
