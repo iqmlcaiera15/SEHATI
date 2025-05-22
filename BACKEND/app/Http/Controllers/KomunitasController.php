@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Komunitas;
 use App\Models\KomentarKomunitas;
 use App\Models\Like;
+use App\Models\Saldo;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class KomunitasController extends Controller
 {
@@ -150,59 +153,134 @@ public function addComment(Request $request, $postId)
         ], 200);
     }
 
+
+
     public function addLike(Request $request, $postId)
     {
-        // Fixed the variable name from $Id to $postId
-        // Check if post exists
-        $post = Komunitas::find($postId);
-        
-        if (!$post) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Post not found'
-            ], 404);
-        }
-
-        // Get current user from token (assume this is handled by auth middleware)
-        $user = $request->user(); // pastikan middleware auth:api aktif di route
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        DB::beginTransaction();
+        try {
+            // Check if post exists
+            $post = Komunitas::find($postId);
+            
+            if (!$post) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Post not found'
+                ], 404);
             }
 
-        // Check if user already liked this post
-        $existingLike = Like::where('post_id', $postId)
-                            ->where('user_id', $user->id)
-                            ->first();
-        
-        if ($existingLike) {
-            // User already liked, so remove the like (unlike)
-            $existingLike->delete();
+            // Get current user from token (assume this is handled by auth middleware)
+            $user = $request->user(); // pastikan middleware auth:api aktif di route
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            // Check if user already liked this post
+            $existingLike = Like::where('post_id', $postId)
+                                ->where('user_id', $user->id)
+                                ->first();
             
-            // Decrease like count
-            $post->decrement('apresiasi');
-            
+            if ($existingLike) {
+                // User already liked, so remove the like (unlike)
+                $existingLike->delete();
+                
+                // Decrease like count
+                $post->decrement('apresiasi');
+                
+                DB::commit();
+                
+                return response()->json([
+                    'status' => 'berhasil',
+                    'message' => 'Post unliked successfully',
+                    'is_liked' => false,
+                    'apresiasi' => $post->apresiasi // Return the updated count
+                ], 200);
+            } else {
+                // User hasn't liked, add like
+                Like::create([
+                    'post_id' => $postId,
+                    'user_id' => $user->id,
+                ]);
+                
+                // Increase like count
+                $post->increment('apresiasi');
+                
+                // Refresh post data to get updated apresiasi count
+                $post->refresh();
+                
+                // Check for incentive (99+ likes)
+                $incentiveMessage = '';
+                if ($post->apresiasi >= 99) {
+                    $incentiveResult = $this->checkAndGiveIncentive($post);
+                    if ($incentiveResult['given']) {
+                        $incentiveMessage = $incentiveResult['message'];
+                    }
+                }
+                
+                DB::commit();
+                
+                $response = [
+                    'status' => 'berhasil',
+                    'message' => 'Post liked successfully',
+                    'is_liked' => true,
+                    'apresiasi' => $post->apresiasi
+                ];
+                
+                // Add incentive message if applicable
+                if (!empty($incentiveMessage)) {
+                    $response['incentive_message'] = $incentiveMessage;
+                }
+                
+                return response()->json($response, 201);
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
             return response()->json([
-                'status' => 'berhasil',
-                'message' => 'Post unliked successfully',
-                'is_liked' => false,
-                'apresiasi' => $post->apresiasi // Return the updated count
-            ], 200);
-        } else {
-            // User hasn't liked, add like
-            Like::create([
-                'post_id' => $postId, // Changed from komunitas_id to post_id to match frontend
-                'user_id' => $user->id,
-            ]);
+                'status' => 'error',
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function checkAndGiveIncentive($post)
+    {
+        try {
+            // Get post owner
+            $postOwner = User::find($post->user_id);
+            if (!$postOwner) {
+                return ['given' => false, 'message' => 'Post owner not found'];
+            }
             
-            // Increase like count
-            $post->increment('apresiasi');
+            // Check if this post has already received incentive
+            // Assuming you have a table to track incentives or use a flag in posts table
+            // Option 1: Check if there's already an incentive record for this post
+            $existingIncentive = Saldo::where('user_id', $postOwner->id)
+                                    ->where('keterangan', 'LIKE', 'Insentif 99+ likes untuk post ID: ' . $post->id)
+                                    ->first();
             
-            return response()->json([
-                'status' => 'berhasil',
-                'message' => 'Post liked successfully',
-                'is_liked' => true,
-                'apresiasi' => $post->apresiasi // Return the updated count
-            ], 201);
+            if ($existingIncentive) {
+                return ['given' => false, 'message' => 'Incentive already given for this post'];
+            }
+            
+            // Give incentive
+            $saldo = new Saldo();
+            $saldo->user_id = $postOwner->id;
+            $saldo->amount = 5000;
+            $saldo->type = 'credit'; // kredit (penambahan)
+            $saldo->keterangan = 'Insentif 99+ likes untuk post ID: ' . $post->id;
+            $saldo->save();
+
+            // Update total saldo pada user
+            $postOwner->saldo_total = $postOwner->saldo_total + 5000;
+            $postOwner->save();
+            
+            return [
+                'given' => true, 
+                'message' => 'Selamat! Pemilik post mendapat insentif Rp 5.000 karena mencapai 99+ likes!'
+            ];
+            
+        } catch (\Exception $e) {
+            return ['given' => false, 'message' => 'Error giving incentive: ' . $e->getMessage()];
         }
     }
 
