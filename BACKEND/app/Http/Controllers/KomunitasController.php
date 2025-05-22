@@ -210,7 +210,7 @@ public function addComment(Request $request, $postId)
                 
                 // Check for incentive (99+ likes)
                 $incentiveMessage = '';
-                if ($post->apresiasi > 1) {
+                if ($post->apresiasi => 1) {
                     $incentiveResult = $this->checkAndGiveIncentive($post);
                     if ($incentiveResult['given']) {
                         $incentiveMessage = $incentiveResult['message'];
