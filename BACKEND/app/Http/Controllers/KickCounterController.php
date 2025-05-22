@@ -1,12 +1,14 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\KickCounter;
 
 class KickCounterController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+    }
     
     public function store(Request $request)
     {
@@ -17,6 +19,7 @@ class KickCounterController extends Controller
             ]);
     
             $kickCounter = KickCounter::create([
+                'user_id' => auth()->id(),
                 'kick_count' => $request->kick_count,
                 'recorded_at' => now(),
                 'duration' => $request->duration,
@@ -38,12 +41,11 @@ class KickCounterController extends Controller
             ], 500);
         }
     }
-
-
+    
     public function index()
     {
-        $kickCounter = KickCounter::all();
-
+        $kickCounter = KickCounter::where('user_id', auth()->id())->get();
+        
         return response()->json([
             'data' => $kickCounter
         ]);
