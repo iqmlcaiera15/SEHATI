@@ -17,7 +17,8 @@ class KickCounterController extends Controller
             $user = $request->user();
             if (!$user) {
                 return response()->json(['message' => 'Unauthorized'], 401);
-            }
+
+            }
             
             $kickCounter = KickCounter::create([
                 'user_id' => $user->id,
