@@ -4,13 +4,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:Sehati/view/prediksidepresi/detail_result.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Provider untuk mengelola state
 class DepressionHistoryProvider with ChangeNotifier {
   bool isLoading = true;
   List<dynamic> historyItems = [];
   String errorMessage = '';
-
+  static final FlutterSecureStorage _storage = FlutterSecureStorage();
   DepressionHistoryProvider() {
     fetchHistory();
   }
@@ -20,21 +21,29 @@ class DepressionHistoryProvider with ChangeNotifier {
     errorMessage = '';
     notifyListeners();
 
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
     try {
       // Fetch both prediction and EPDS data
       final prediksiResponse = await http.get(
-        Uri.parse('https://sehatiapp-production.up.railway.app/prediksidepresi'),
+        Uri.parse('https://sehatiapp-production.up.railway.app/api/prediksidepresi'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
         },
       );
 
       final epdsResponse = await http.get(
-        Uri.parse('https://sehatiapp-production.up.railway.app/epds'),
+        Uri.parse('https://sehatiapp-production.up.railway.app/api/epds'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
         },
       );
 

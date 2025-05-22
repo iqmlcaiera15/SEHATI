@@ -1,19 +1,28 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DepressionService {
   // Base URL for API
-  final String baseUrl = 'https://sehatiapp-production.up.railway.app';
+  final String baseUrl = 'https://sehatiapp-production.up.railway.app/api';
 
+  static final FlutterSecureStorage _storage = FlutterSecureStorage();
   // Method to submit depression questionnaire data
   Future<Map<String, dynamic>> submitDepressionQuestionnaire(Map<String, dynamic> data) async {
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/prediksidepresi/store'),
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
         body: jsonEncode(data),
       );
 
@@ -28,6 +37,12 @@ class DepressionService {
   }
 
   Future<Map<String, dynamic>> submitEpdsQuestionnaire(Map<String, dynamic> data) async {
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
     try {
       // Convert individual q1, q2, etc. into an array
       final List<int> answersArray = [];
@@ -46,6 +61,7 @@ class DepressionService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode(payload),
       );
@@ -80,11 +96,18 @@ class DepressionService {
 
   // Method to get all prediction history
   Future<List<dynamic>> getDepressionHistory() async {
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/prediksidepresi'),
         headers: {
           'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
         },
       );
 
@@ -100,11 +123,18 @@ class DepressionService {
 
   // Method to get EPDS history
   Future<List<dynamic>> getEpdsHistory() async {
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/epds'),
         headers: {
           'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
         },
       );
 
@@ -120,11 +150,18 @@ class DepressionService {
 
   // Method to get specific depression record
   Future<Map<String, dynamic>> getDepressionRecord(String id) async {
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/prediksidepresi/$id'),
         headers: {
           'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
         },
       );
 
@@ -140,11 +177,18 @@ class DepressionService {
   
   // Method to get specific EPDS record
   Future<Map<String, dynamic>> getEpdsRecord(String id) async {
+    final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/epds/$id'),
         headers: {
           'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
         },
       );
 
