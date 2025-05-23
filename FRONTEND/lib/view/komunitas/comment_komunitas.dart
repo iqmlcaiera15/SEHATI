@@ -31,25 +31,70 @@ class _CommentPageState extends State<CommentPage> {
     super.dispose();
   }
 
+  // Di dalam class _CommentPageState di file CommentPage.dart
+
   Future<void> _loadComments() async {
     setState(() {
       _isLoading = true;
     });
+    // Mencetak ID post yang akan digunakan untuk mengambil komentar
+    print('[CommentPage] _loadComments: Memulai untuk post ID: ${_currentPost.id}');
+
+    // Pengecekan penting jika _currentPost.id adalah null
+    if (_currentPost.id == null) {
+      print('[CommentPage] _loadComments: ERROR - _currentPost.id adalah null! Tidak dapat memuat komentar.');
+      _showSnackBar('Error: Post ID tidak ditemukan untuk memuat komentar.');
+      setState(() {
+        _isLoading = false;
+        _comments = []; // Pastikan list komentar kosong jika ID post null
+      });
+      return;
+    }
 
     try {
-      final comments = await ApiServicePosts.fetchComments(_currentPost.id!);
+      // PENTING: Konversi _currentPost.id ke String di sini!
+      // Method getIdAsString() dari PostModel Anda bisa digunakan jika sudah diimplementasikan dengan benar,
+      // atau langsung .toString().
+      // String postIdString = _currentPost.getIdAsString() ?? ''; // Jika Anda menggunakan helper
+      String postIdString = _currentPost.id!.toString(); // Cara langsung jika id tidak null
+
+      if (postIdString.isEmpty) { // Pengecekan tambahan jika hasil toString() adalah string kosong (seharusnya tidak jika id ada)
+          print('[CommentPage] _loadComments: ERROR - postIdString kosong setelah konversi dari _currentPost.id!');
+          _showSnackBar('Error: Gagal mendapatkan ID post yang valid.');
+          setState(() {
+              _isLoading = false;
+              _comments = [];
+          });
+          return;
+      }
+      
+      print('[CommentPage] _loadComments: Memanggil ApiServicePosts.fetchComments dengan postIdString: "$postIdString"');
+      final List<CommentModel> fetchedComments = await ApiServicePosts.fetchComments(postIdString); 
+      
+      print('[CommentPage] _loadComments: Komentar yang diterima dari service: ${fetchedComments.length} komentar.');
+      if (fetchedComments.isNotEmpty) {
+        // Pastikan CommentModel Anda memiliki field yang sesuai (misalnya 'content' atau 'komentar')
+        print('[CommentPage] _loadComments: Konten komentar pertama: ${fetchedComments.first.content}'); 
+        print('[CommentPage] _loadComments: Username komentar pertama: ${fetchedComments.first.username}');
+      } else {
+        print('[CommentPage] _loadComments: Tidak ada komentar yang diterima dari service.');
+      }
+      
       setState(() {
-        _comments = comments;
+        _comments = fetchedComments;
         _isLoading = false;
       });
-    } catch (e) {
+      print('[CommentPage] _loadComments: State _comments diperbarui. Jumlah: ${_comments.length}');
+    } catch (e, s) { // Menangkap error (e) dan stack trace (s)
+      print('[CommentPage] _loadComments: Error saat memuat komentar: ${e.toString()}');
+      print('[CommentPage] _loadComments: Stack trace: $s'); // Mencetak stack trace untuk debug lebih detail
       _showSnackBar('Error loading comments: ${e.toString()}');
       setState(() {
         _isLoading = false;
+        _comments = []; // Pastikan list komentar di-reset menjadi kosong jika terjadi error
       });
     }
   }
-
   void _showSnackBar(String message, {Color backgroundColor = Colors.red}) {
     if (!mounted) return;
     

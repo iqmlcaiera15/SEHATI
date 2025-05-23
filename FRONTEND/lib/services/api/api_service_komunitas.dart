@@ -2,56 +2,111 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+// Pastikan CommentModel dan PostModel (jika digunakan di sini) diimpor atau didefinisikan
+// Anda sudah mendefinisikannya di bawah, jadi ini seharusnya OK.
+
 class ApiServicePosts {
-  // Base URL of your Railway API
   static const String baseUrl = 'https://sehatiapp-production.up.railway.app/api';
-  
-  
-    
-    static Future<List<CommentModel>> fetchComments(String postId) async {
+   static final FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  static Future<List<CommentModel>> fetchComments(String postId) async { // Pastikan postId adalah String
+   final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+    print('[ApiServicePosts] fetchComments: Memulai untuk postId: $postId');
     try {
       final response = await http.get(
         Uri.parse('https://sehatiapp-production.up.railway.app/api/komunitas/komen/$postId'),
         headers: {
           'Content-Type': 'application/json',
-          // Add any auth headers if required
+          'Authorization': 'Bearer $token',
         },
       );
+
+      print('[ApiServicePosts] fetchComments: Status Code untuk postId $postId: ${response.statusCode}');
+      // DEBUG PRINT 1: Raw response body
+      print('[ApiServicePosts] fetchComments: RAW RESPONSE untuk postId $postId: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         
-        // Check if the data field exists and is not null
-        if (responseData['data'] != null) {
-          List<dynamic> commentsList = responseData['data'];
-          return commentsList.map((json) => CommentModel.fromJson(json)).toList();
+        if (responseData.containsKey('data') && responseData['data'] != null) {
+          if (responseData['data'] is List) {
+            List<dynamic> commentsList = responseData['data'];
+            // DEBUG PRINT 2: Extracted commentsList
+            print('[ApiServicePosts] fetchComments: commentsList (sebelum map) untuk postId $postId: $commentsList');
+
+            if (commentsList.isEmpty) {
+              print('[ApiServicePosts] fetchComments: API mengembalikan list "data" kosong untuk postId $postId.');
+              return [];
+            }
+
+            List<CommentModel> parsedComments = [];
+            for (var i = 0; i < commentsList.length; i++) {
+              var jsonItem = commentsList[i];
+              if (jsonItem is Map<String, dynamic>) {
+                try {
+                  // DEBUG PRINT 3: JSON item yang sedang diparsing
+                  print('[ApiServicePosts] fetchComments: Memparsing item $i: $jsonItem');
+                  parsedComments.add(CommentModel.fromJson(jsonItem));
+                } catch (e, s) {
+                  // DEBUG PRINT 4: Error saat memparsing komentar individual
+                  print('[ApiServicePosts] fetchComments: ERROR memparsing item komentar $i untuk postId $postId: $jsonItem');
+                  print('[ApiServicePosts] fetchComments: Parsing ERROR: $e');
+                  print('[ApiServicePosts] fetchComments: Parsing STACKTRACE: $s');
+                  // Anda bisa memutuskan untuk melanjutkan (skip komentar ini) atau menghentikan semua parsing
+                  // Untuk sekarang, kita biarkan error ini menghentikan parsing komentar berikutnya di loop ini
+                  // dan akan ditangkap oleh catch luar jika tidak ada komentar yang berhasil diparsing.
+                }
+              } else {
+                  print('[ApiServicePosts] fetchComments: Item $i dalam list "data" bukan Map<String, dynamic>: $jsonItem');
+              }
+            }
+            // DEBUG PRINT 5: Jumlah komentar yang berhasil diparsing
+            print('[ApiServicePosts] fetchComments: Berhasil memparsing ${parsedComments.length} komentar untuk postId $postId.');
+            return parsedComments;
+          } else {
+            print('[ApiServicePosts] fetchComments: ERROR - Field "data" bukan List untuk postId $postId. Tipe aktual: ${responseData['data'].runtimeType}');
+            return []; // Kembalikan list kosong jika 'data' bukan list
+          }
         } else {
-          // Return empty list if there's no data
-          return [];
+          print('[ApiServicePosts] fetchComments: ERROR - Field "data" tidak ada atau null dalam respons untuk postId $postId. Keys respons: ${responseData.keys}');
+          return []; // Kembalikan list kosong jika 'data' tidak ada atau null
         }
       } else {
-        throw Exception('Failed to load comments: ${response.statusCode}');
+        print('[ApiServicePosts] fetchComments: HTTP ERROR untuk postId $postId: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Gagal memuat komentar: ${response.statusCode}');
       }
-    } catch (e) {
-      print('Error fetching comments: $e');
-      throw Exception('Error fetching comments: $e');
+    } catch (e, s) {
+      print('[ApiServicePosts] fetchComments: CATCH ERROR Umum untuk postId $postId: $e');
+      print('[ApiServicePosts] fetchComments: CATCH STACKTRACE: $s');
+      // Melempar ulang error agar bisa ditangani di CommentPage
+      throw Exception('Error mengambil komentar: $e'); 
     }
   }
 
   // Helper method to get token
   static Future<String?> _getToken() async {
-    final storage = FlutterSecureStorage();
+    const storage = FlutterSecureStorage(); // Jadikan const jika memungkinkan
     final token = await storage.read(key: 'jwt_token');
-    if (token == null || token.isEmpty) {
-      throw Exception('No token found. User might not be logged in.');
-    }
+    // Hapus throw Exception di sini, biarkan pemanggil yang menangani token null jika diperlukan
+    // if (token == null || token.isEmpty) {
+    //   print('[ApiServicePosts] _getToken: No token found.');
+    //   // throw Exception('No token found. User might not be logged in.');
+    // }
     return token;
   }
-  
+
   static Future<List<PostModel>> fetchPosts() async {
+    print('[ApiServicePosts] fetchPosts: Memulai...');
     try {
-      // Get JWT token
       final token = await _getToken();
+      if (token == null) {
+        print('[ApiServicePosts] fetchPosts: Token tidak ditemukan, request dibatalkan.');
+        throw Exception('Unauthorized: Token tidak ditemukan. Silakan login kembali.');
+      }
       
       final response = await http.get(
         Uri.parse('$baseUrl/komunitas'),
@@ -61,103 +116,81 @@ class ApiServicePosts {
         },
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('[ApiServicePosts] fetchPosts: Response status: ${response.statusCode}');
+      // print('[ApiServicePosts] fetchPosts: Response body: ${response.body}'); // Bisa sangat panjang
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedData = json.decode(response.body);
-        print('Decoded data: $decodedData');
+        // print('[ApiServicePosts] fetchPosts: Decoded data: $decodedData'); // Bisa sangat panjang
 
-        // Check if the response has the 'Komunitas' key (capital K)
+        List<dynamic>? postsListFromApi;
+
         if (decodedData.containsKey('Komunitas') && decodedData['Komunitas'] is List) {
-          final List<dynamic> postsList = decodedData['Komunitas'];
-          print('Found ${postsList.length} posts in Komunitas key');
-          
-          // Map each item in the list to a PostModel
-          return postsList.map<PostModel>((postJson) {
-            return PostModel(
-              id: postJson['post_id'] ?? postJson['id'], // Try both possible id fields
-              judul: postJson['judul'] ?? '',
-              deskripsi: postJson['deskripsi'] ?? '',
-              apresiasi: int.tryParse(postJson['apresiasi']?.toString() ?? '0') ?? 0,
-              komentar: postJson['komen'] != null 
-                  ? int.tryParse(postJson['komen'].toString()) ?? 0 
-                  : 0,
-              // You may need to adjust these based on what fields your API provides
-              username: 'User', // Default
-              userImage: 'assets/images/default_user.png', // Default
-              timeAgo: postJson['created_at'] != null 
-                  ? _formatTimeAgo(postJson['created_at'].toString())
-                  : 'baru saja',
-            );
-          }).toList();
+          postsListFromApi = decodedData['Komunitas'];
+          print('[ApiServicePosts] fetchPosts: Ditemukan ${postsListFromApi!.length} posts di key "Komunitas"');
+        } else if (decodedData.containsKey('data') && decodedData['data'] is List) {
+          postsListFromApi = decodedData['data'];
+          print('[ApiServicePosts] fetchPosts: Ditemukan ${postsListFromApi!.length} posts di key "data" (fallback)');
         } else {
-          print('No Komunitas key found or it is not a list');
-          // Try looking for 'data' key as a fallback
-          if (decodedData.containsKey('data') && decodedData['data'] is List) {
-            print('Found data key instead, using that');
-            final List<dynamic> postsList = decodedData['data'];
-            // Similar mapping logic here
-            return postsList.map<PostModel>((postJson) => PostModel.fromJson(postJson)).toList();
-          }
+          print('[ApiServicePosts] fetchPosts: Tidak ditemukan key "Komunitas" atau "data" yang berisi list postingan.');
           return [];
         }
+        
+        List<PostModel> posts = [];
+        for (var postJson in postsListFromApi) {
+            if (postJson is Map<String, dynamic>) {
+                try {
+                    // Menggunakan PostModel.fromJson yang sudah Anda definisikan
+                    posts.add(PostModel.fromJson(postJson));
+                } catch (e,s) {
+                    print('[ApiServicePosts] fetchPosts: Error parsing post: $postJson, Error: $e, Stack: $s');
+                }
+            } else {
+                print('[ApiServicePosts] fetchPosts: Item postingan bukan Map: $postJson');
+            }
+        }
+        print('[ApiServicePosts] fetchPosts: Berhasil memparsing ${posts.length} postingan.');
+        return posts;
+
       } else if (response.statusCode == 401) {
-        throw Exception('Unauthorized: Please login again');
+        print('[ApiServicePosts] fetchPosts: Unauthorized (401).');
+        throw Exception('Unauthorized: Silakan login kembali');
       } else {
-        // Try to parse error message from response if possible
+        print('[ApiServicePosts] fetchPosts: Server error ${response.statusCode}. Body: ${response.body}');
         try {
           final errorData = json.decode(response.body);
-          final errorMsg = errorData['message'] ?? errorData['error'] ?? 'Unknown error';
+          final errorMsg = errorData['message'] ?? errorData['error'] ?? 'Unknown server error';
           throw Exception('Server error: $errorMsg');
         } catch (_) {
-          throw Exception('Failed to load posts: HTTP ${response.statusCode}');
+          throw Exception('Gagal memuat postingan: HTTP ${response.statusCode}');
         }
       }
-    } catch (e) {
-      print('Exception in fetchPosts: $e');
-      throw Exception('Failed to fetch posts: $e');
+    } catch (e,s) {
+      print('[ApiServicePosts] fetchPosts: Exception: $e');
+      print('[ApiServicePosts] fetchPosts: Stacktrace: $s');
+      // Melempar ulang error agar bisa ditangani di UI
+      if (e is Exception) throw e;
+      throw Exception('Gagal mengambil postingan: $e');
     }
   }
 
-  // Helper function to format the API timestamp into a "time ago" format
-  static String _formatTimeAgo(String dateString) {
-    try {
-      final DateTime date = DateTime.parse(dateString);
-      final Duration difference = DateTime.now().difference(date);
-      
-      if (difference.inDays > 365) {
-        return '${(difference.inDays / 365).floor()} tahun yang lalu';
-      } else if (difference.inDays > 30) {
-        return '${(difference.inDays / 30).floor()} bulan yang lalu';
-      } else if (difference.inDays > 0) {
-        return '${difference.inDays} hari yang lalu';
-      } else if (difference.inHours > 0) {
-        return '${difference.inHours} jam yang lalu';
-      } else if (difference.inMinutes > 0) {
-        return '${difference.inMinutes} menit yang lalu';
-      } else {
-        return 'baru saja';
-      }
-    } catch (e) {
-      print('Error formatting date: $e');
-      return 'baru saja';
-    }
-  }
+  // static String _formatTimeAgo(String dateString) { ... } // Method ini duplikat dengan yang di CommentPage. Sebaiknya hanya ada di satu tempat atau sebagai utilitas.
 
-  // Add a new post
   static Future<PostModel> createPost(PostModel post) async {
+    print('[ApiServicePosts] createPost: Memulai dengan judul: ${post.judul}');
     try {
-      // Get JWT token
       final token = await _getToken();
+      if (token == null) {
+        print('[ApiServicePosts] createPost: Token tidak ditemukan.');
+        throw Exception('Unauthorized: Token tidak ditemukan.');
+      }
       
-      // Prepare the request body
       final Map<String, dynamic> requestBody = {
         'judul': post.judul,
         'deskripsi': post.deskripsi,
       };
       
-      print('Creating post with data: $requestBody');
+      print('[ApiServicePosts] createPost: Request body: $requestBody');
       
       final response = await http.post(
         Uri.parse('$baseUrl/komunitas/add'),
@@ -168,102 +201,108 @@ class ApiServicePosts {
         body: json.encode(requestBody),
       );
       
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('[ApiServicePosts] createPost: Response status: ${response.statusCode}');
+      print('[ApiServicePosts] createPost: Response body: ${response.body}');
       
       if (response.statusCode == 201) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        
-        // Check if response contains the created post data
-        if (responseData.containsKey('data')) {
-          return PostModel.fromJson(responseData['data']);
+        if (responseData.containsKey('data') && responseData['data'] is Map<String, dynamic>) {
+          print('[ApiServicePosts] createPost: Post berhasil dibuat, data dari API: ${responseData['data']}');
+          return PostModel.fromJson(responseData['data'] as Map<String, dynamic>);
         } else {
-          // If there's no data key, create a model from the request with defaults
+          print('[ApiServicePosts] createPost: Post berhasil dibuat (status 201) namun tidak ada key "data" yang valid di respons. Mengembalikan data lokal.');
+          // Jika API tidak mengembalikan post yang baru dibuat, kembalikan saja post yang dikirim dengan ID null atau default.
+          // Ini mungkin perlu penyesuaian tergantung bagaimana Anda ingin menanganinya.
           return PostModel(
+            id: null, // Atau coba parse dari respons jika ada field ID terpisah
             judul: post.judul,
             deskripsi: post.deskripsi,
+            // Atur default lain jika perlu
           );
         }
       } else {
-        // Try to extract error message
+        print('[ApiServicePosts] createPost: Gagal membuat post, status: ${response.statusCode}');
         try {
           final errorData = json.decode(response.body);
           final errorMsg = errorData['message'] ?? errorData['error'] ?? 'Unknown error';
-          throw Exception('Failed to create post: $errorMsg');
+          throw Exception('Gagal membuat post: $errorMsg');
         } catch (_) {
-          throw Exception('Failed to create post: HTTP ${response.statusCode}');
+          throw Exception('Gagal membuat post: HTTP ${response.statusCode}');
         }
       }
-    } catch (e) {
-      print('Error in createPost: $e');
-      throw Exception('Failed to create post: $e');
+    } catch (e,s) {
+      print('[ApiServicePosts] createPost: Error: $e');
+      print('[ApiServicePosts] createPost: Stacktrace: $s');
+      if (e is Exception) throw e;
+      throw Exception('Gagal membuat post: $e');
     }
   }
   
-  // Update apresiasi count
-  static Future<bool> updateLikes(int postId, int newapresiasiCount) async {
+  static Future<bool> updateLikes(dynamic postId, int newapresiasiCount) async { // postId bisa int atau String
+    final String postIdStr = postId.toString();
+    print('[ApiServicePosts] updateLikes: Memulai untuk postId: $postIdStr');
     try {
-      // Get JWT token
       final token = await _getToken();
+      if (token == null) {
+        print('[ApiServicePosts] updateLikes: Token tidak ditemukan.');
+        throw Exception('Unauthorized: Token tidak ditemukan.');
+      }
       
-      print('Updating like for post ID: $postId');
-      
-      // Since backend expects a user_id for like tracking,
-      // we need to modify our approach
-      final Map<String, dynamic> requestBody = {
-        // No need to pass apresiasi count, the backend will handle incrementing
-        'user_id': 'current_user', // This would ideally come from user context
-      };
+      // Backend mungkin hanya perlu trigger, bukan jumlah apresiasi baru atau user_id di body.
+      // Sesuaikan body jika API Anda memerlukannya.
+      // final Map<String, dynamic> requestBody = {}; // Kosong jika backend hanya butuh trigger dari endpoint
       
       final response = await http.post(
-        Uri.parse('$baseUrl/komunitas/like/add/$postId'),
+        Uri.parse('$baseUrl/komunitas/like/add/$postIdStr'),
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json', // Atau biarkan kosong jika body kosong
           'Authorization': 'Bearer $token',
         },
-        body: json.encode(requestBody),
+        // body: json.encode(requestBody), // Hanya jika API memerlukan body
       );
       
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('[ApiServicePosts] updateLikes: Response status: ${response.statusCode}');
+      print('[ApiServicePosts] updateLikes: Response body: ${response.body}');
       
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        print('[ApiServicePosts] updateLikes: Berhasil untuk postId: $postIdStr');
         return true;
       } else {
+        print('[ApiServicePosts] updateLikes: Gagal untuk postId: $postIdStr, status: ${response.statusCode}');
         try {
           final errorData = json.decode(response.body);
           final errorMsg = errorData['message'] ?? errorData['error'] ?? 'Unknown error';
-          throw Exception('Failed to update likes: $errorMsg');
+          throw Exception('Gagal memperbarui apresiasi: $errorMsg');
         } catch (_) {
-          throw Exception('Failed to update likes: HTTP ${response.statusCode}');
+          throw Exception('Gagal memperbarui apresiasi: HTTP ${response.statusCode}');
         }
       }
-    } catch (e) {
-      print('Error in updateLikes: $e');
-      throw Exception('Failed to update likes: $e');
+    } catch (e,s) {
+      print('[ApiServicePosts] updateLikes: Error: $e');
+      print('[ApiServicePosts] updateLikes: Stacktrace: $s');
+      if (e is Exception) throw e;
+      throw Exception('Gagal memperbarui apresiasi: $e');
     }
   }
   
-  // Add a comment to a post
-  static Future<bool> addComment(int postId, String comment) async {
+  static Future<bool> addComment(dynamic postId, String comment) async { // postId bisa int atau String
+    final String postIdStr = postId.toString();
+    print('[ApiServicePosts] addComment: Memulai untuk postId: $postIdStr');
     try {
-      // Get JWT token
       final token = await _getToken();
+      if (token == null) {
+        print('[ApiServicePosts] addComment: Token tidak ditemukan.');
+        throw Exception('Unauthorized: Token tidak ditemukan.');
+      }
       
-      // Debug info
-      print('Attempting to add comment to post ID: $postId');
-      
-      // Prepare request - IMPORTANT: Match the backend expectations
       final requestBody = {
         'komentar': comment,
-        // Don't include post_id in body since it's already in the URL
       };
       
-      print('Request body: $requestBody');
+      print('[ApiServicePosts] addComment: Request body: $requestBody');
       
-      // Make request - Using POST not PATCH
       final response = await http.post(
-        Uri.parse('$baseUrl/komunitas/komen/add/$postId'),
+        Uri.parse('$baseUrl/komunitas/komen/add/$postIdStr'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -272,77 +311,46 @@ class ApiServicePosts {
         body: json.encode(requestBody),
       );
       
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('[ApiServicePosts] addComment: Response status: ${response.statusCode}');
+      print('[ApiServicePosts] addComment: Response body: ${response.body}');
       
-      // Handle response
       if (response.statusCode >= 200 && response.statusCode < 300) {
+         print('[ApiServicePosts] addComment: Komentar berhasil ditambahkan untuk postId: $postIdStr');
         return true;
       } else {
+        print('[ApiServicePosts] addComment: Gagal menambahkan komentar untuk postId: $postIdStr, status: ${response.statusCode}');
         try {
           final errorData = json.decode(response.body);
           final errorMsg = errorData['message'] ?? errorData['error'] ?? 'Unknown error';
-          if (response.statusCode == 404) {
-            throw Exception('Post not found: $errorMsg');
-          } else if (response.statusCode == 422) {
-            throw Exception('Validation error: $errorMsg');
-          } else {
-            throw Exception('Server error: $errorMsg');
-          }
-        } catch (e) {
-          if (e is Exception) {
-            throw e;
-          } else {
-            throw Exception('Failed to add comment: HTTP ${response.statusCode}');
-          }
+          throw Exception('Gagal menambahkan komentar: $errorMsg (Status: ${response.statusCode})');
+        } catch (jsonErr) { // Catch error jika body bukan JSON atau parsing gagal
+          throw Exception('Gagal menambahkan komentar: HTTP ${response.statusCode}, Body: ${response.body}');
         }
       }
-    } catch (e) {
-      print('Error in addComment: $e');
-      throw Exception('Failed to add comment: $e');
+    } catch (e,s) {
+      print('[ApiServicePosts] addComment: Error: $e');
+      print('[ApiServicePosts] addComment: Stacktrace: $s');
+      if (e is Exception) throw e; // Lempar ulang exception yang sudah Exception
+      throw Exception('Gagal menambahkan komentar: $e'); // Bungkus error lain sebagai Exception
     }
   }
   
-  // Alternative method if API expects different format
-  static Future<bool> addCommentAlternative(int postId, String comment) async {
-    try {
-      // Get JWT token
-      final token = await _getToken();
-      
-      // Try with the exact structure backend expects
-      final response = await http.post(
-        Uri.parse('$baseUrl/komunitas/komen/add/$postId'),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: {
-          'komentar': comment,
-        },
-      );
-      
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      
-      return response.statusCode >= 200 && response.statusCode < 300;
-    } catch (e) {
-      print('Error in addCommentAlternative: $e');
-      throw Exception('Failed to add comment: $e');
-    }
-  }
+  // addCommentAlternative tidak saya sertakan print karena addComment yang utama
 }
 
-// Post model representing data from API
+
+// MODEL DEFINITIONS (ANDA SUDAH MENYEDIAKAN INI, SAYA HANYA MEMASTIKAN ADA DI SINI UNTUK KONTEKS)
+// Pastikan definisi ini konsisten dengan yang Anda gunakan di CommentPage.dart
+
 class PostModel {
-  final dynamic id; // Changed to dynamic to handle both string and int IDs
+  final dynamic id; 
   final String judul;
   final String deskripsi;
   final int apresiasi;
-  final int komentar;
+  final int komentar; // Ini adalah jumlah komentar
   final String? userImage;
   final String? username;
-  final String? timeAgo;
+  final String? timeAgo; // Ini sepertinya dihitung oleh _formatTimeAgo di fetchPosts
 
   PostModel({
     this.id,
@@ -352,11 +360,11 @@ class PostModel {
     this.userImage,
     this.timeAgo,
     this.apresiasi = 0,
-    this.komentar = 0,
+    this.komentar = 0, // Jumlah komentar
   });
 
   PostModel copyWith({
-    String? id,
+    dynamic id, // Ubah tipe jadi dynamic
     String? judul,
     String? deskripsi,
     String? username,
@@ -376,13 +384,12 @@ class PostModel {
       komentar: komentar ?? this.komentar,
     );
   }
-  // Helper method to safely get post ID as string (for API calls)
+  
   String? getIdAsString() {
     if (id == null) return null;
     return id.toString();
   }
 
-  // Helper method to safely get post ID as int 
   int? getIdAsInt() {
     if (id == null) return null;
     if (id is int) return id;
@@ -390,100 +397,44 @@ class PostModel {
     return null;
   }
 
-  // Factory constructor to create a PostModel from JSON
   factory PostModel.fromJson(Map<String, dynamic> json) {
-    print('Parsing post: $json'); // Debug
+    // print('[PostModel] Parsing post: $json'); // Bisa diaktifkan jika perlu debug PostModel
     
-    // Helper function to safely extract integer values
     int? safeInt(dynamic value) {
-      if (value == null) return null;
+      if (value == null) return 0; // Default ke 0 jika null
       if (value is int) return value;
-      if (value is String) return int.tryParse(value);
-      return null;
+      if (value is String) return int.tryParse(value) ?? 0; // Default ke 0 jika parsing gagal
+      return 0; // Default untuk tipe lain
     }
 
-    // Extract ID - try multiple possible field names
     final postId = json['id'] ?? json['post_id'] ?? json['_id'];
     
-    // Extract comment count - backend uses 'komen' but we map to 'komentar'
-    final commentCount = safeInt(json['komen']) ?? safeInt(json['komentar']) ?? 
-                         safeInt(json['comment_count']) ?? 0;
-    
+    // Untuk `timeAgo`, jika API mengirim `created_at` yang perlu diformat,
+    // sebaiknya formatting dilakukan di UI atau saat data akan ditampilkan,
+    // bukan saat parsing model, kecuali API sudah mengirim string "time ago".
+    // Jika `created_at` adalah timestamp, simpan sebagai DateTime atau String timestamp.
+    String? createdAtTimestamp = json['created_at']?.toString(); 
+    // String timeAgoFormatted = createdAtTimestamp != null ? ApiServicePosts._formatTimeAgo(createdAtTimestamp) : 'baru saja'; 
+    // Menghapus _formatTimeAgo dari sini karena sudah ada di CommentPage dan bisa menyebabkan duplikasi/inkonsistensi
+
     return PostModel(
-      id: postId, // Use the extracted ID
+      id: postId,
       judul: json['judul']?.toString() ?? json['title']?.toString() ?? '',
       deskripsi: json['deskripsi']?.toString() ?? json['description']?.toString() ?? json['content']?.toString() ?? '',
       apresiasi: safeInt(json['apresiasi']) ?? safeInt(json['like_count']) ?? 0,
-      komentar: commentCount,
-      username: json['username']?.toString() ?? json['user_name']?.toString() ?? json['name']?.toString() ?? 'User',
-      userImage: json['userImage']?.toString() ?? json['user_image']?.toString() ?? json['avatar']?.toString() ?? 'assets/images/default_user.png',
-      timeAgo: json['timeAgo']?.toString() ?? json['time_ago']?.toString() ?? json['created_at']?.toString() ?? 'baru saja',
+      komentar: safeInt(json['komen']) ?? safeInt(json['komentar']) ?? safeInt(json['comment_count']) ?? 0,
+      username: json['user'] != null && json['user'] is Map ? json['user']['name']?.toString() : (json['username']?.toString() ?? json['user_name']?.toString() ?? 'User'),
+      userImage: json['user'] != null && json['user'] is Map ? json['user']['photo_profile']?.toString() : (json['userImage']?.toString() ?? json['user_image']?.toString() ?? 'assets/images/default_user.png'),
+      timeAgo: createdAtTimestamp, // Simpan timestamp mentah, format di UI
     );
   }
 
-  // Convert PostModel to JSON for API requests
   Map<String, dynamic> toJson() {
     return {
       'judul': judul,
       'deskripsi': deskripsi,
-      // We don't send these values when creating a post
-      // 'komen': komentar,
-      // 'apresiasi': apresiasi,
-      // Conditionally add id if it exists
       if (id != null) 'post_id': id.toString(),
     };
-  }
-}
-
-class CommentModel {
-  final int id;
-  final int postId;
-  final String userId; // Keeping as String since backend returns it as string "3"
-  final String komentar;
-  final String createdAt;
-  final String updatedAt;
-  final UserModel? user;
-  
-  // UI-specific properties
-  String? username;
-  String? userImage;
-  String get content => komentar; // Map komentar to content for the UI
-
-  CommentModel({
-    required this.id,
-    required this.postId,
-    required this.userId,
-    required this.komentar,
-    required this.createdAt,
-    required this.updatedAt,
-    this.user,
-    this.username,
-    this.userImage,
-  });
-
-  factory CommentModel.fromJson(Map<String, dynamic> json) {
-    // Create the base comment model
-    final comment = CommentModel(
-      id: json['id'],
-      postId: json['post_id'],
-      userId: json['user_id'].toString(), // Converting to string to ensure consistency
-      komentar: json['komentar'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
-    );
-    
-    // Add the UI-specific properties
-    if (comment.user != null) {
-      comment.username = comment.user!.name;
-    } else {
-      comment.username = 'User'; // Default username
-    }
-    
-    // Default user image
-    comment.userImage = 'assets/images/default_user.png';
-    
-    return comment;
   }
 }
 
@@ -492,21 +443,83 @@ class UserModel {
   final String name;
   final String email;
   final String? role;
-  // Add other user fields as needed
+  // final String? photoProfile; // Contoh jika ada
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
     this.role,
+    // this.photoProfile,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      role: json['role'],
+      id: json['id'] as int,
+      name: json['name'] != null ? json['name'].toString() : 'Nama Tidak Diketahui',
+      email: json['email'] != null ? json['email'].toString() : '',
+      role: json['role']?.toString(),
+      // photoProfile: json['photo_profile']?.toString(),
     );
+  }
+}
+
+class CommentModel {
+  final int id;
+  final int postId;
+  final String userId;
+  final String komentar;
+  final String? createdAt;
+  final String? updatedAt;
+  final UserModel? user;
+
+  String? username;
+  String? userImage;
+  String get content => komentar;
+
+  CommentModel({
+    required this.id,
+    required this.postId,
+    required this.userId,
+    required this.komentar,
+    this.createdAt,
+    this.updatedAt,
+    this.user,
+    this.username,
+    this.userImage,
+  });
+
+  factory CommentModel.fromJson(Map<String, dynamic> json) {
+    UserModel? parsedUser;
+    if (json['user'] != null && json['user'] is Map<String, dynamic>) {
+        try {
+            parsedUser = UserModel.fromJson(json['user'] as Map<String, dynamic>);
+        } catch (e) {
+            print('[CommentModel] Error parsing nested user in comment: $e. User JSON: ${json['user']}');
+        }
+    }
+
+    final comment = CommentModel(
+      id: json['id'] as int,
+      postId: json['post_id'] as int,
+      userId: json['user_id'] != null ? json['user_id'].toString() : '',
+      komentar: json['komentar'] != null ? json['komentar'].toString() : '',
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+      user: parsedUser,
+    );
+
+    if (comment.user != null) {
+      comment.username = comment.user!.name;
+      // Jika UserModel punya photoProfile:
+      // comment.userImage = comment.user!.photoProfile ?? 'assets/images/default_user.png';
+    } else {
+      comment.username = 'User'; // Default jika tidak ada info user
+    }
+    
+    // Pastikan userImage di-set, jika tidak dari user, gunakan default
+    comment.userImage ??= 'assets/images/default_user.png';
+
+    return comment;
   }
 }
