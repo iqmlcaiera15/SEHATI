@@ -13,7 +13,7 @@ class SaranMakananSeeder extends Seeder
             [
                 'nama' => 'Sayur Bayam',
                 'deskripsi' => 'Sayur bayam kaya akan zat besi dan sangat baik untuk ibu hamil dan menyusui.',
-                'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/sayur_bayam.jpg',
+                'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/sayur_bening.jpg',
                 'target_makanan' => json_encode(['Hamil', 'Menyusui']),
             ],
             [
@@ -37,7 +37,7 @@ class SaranMakananSeeder extends Seeder
             [
                 'nama' => 'Buah Alpukat',
                 'deskripsi' => 'Alpukat kaya akan folat dan lemak sehat, penting untuk ibu hamil.',
-                'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/buah_alpukat.jpg',
+                'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/alpukat.jpg',
                 'target_makanan' => json_encode(['Hamil']),
             ],
             [
