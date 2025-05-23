@@ -15,22 +15,6 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
   String _selectedFilter = 'Semua';
   final List<String> _filters = ['Semua', 'Hamil', 'Menyusui'];
   TextEditingController _searchController = TextEditingController();
-  
-  // Helper method to ensure image URLs are properly formatted
-  String _getCompleteImageUrl(String imageUrl) {
-    // Check if the URL already has the http or https protocol
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      return imageUrl;
-    }
-    
-    // Check if the URL is a relative path
-    if (imageUrl.startsWith('/')) {
-      return '${ApiServiceRekomen.baseUrl}$imageUrl';
-    }
-    
-    // If it's just a filename or partial path, construct the full URL
-    return '${ApiServiceRekomen.baseUrl}/$imageUrl';
-  }
 
   @override
   void initState() {
@@ -48,7 +32,18 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
     // Filter data based on selected category
     if (_selectedFilter != 'Semua') {
       data = data.where((item) {
-        List<dynamic> targetMakanan = json.decode(item['target_makanan']);
+        // Handle both string and array formats
+        List<dynamic> targetMakanan = [];
+        if (item['target_makanan'] is String) {
+          try {
+            targetMakanan = json.decode(item['target_makanan']);
+          } catch (e) {
+            debugPrint('Error parsing target_makanan: $e');
+            return false;
+          }
+        } else if (item['target_makanan'] is List) {
+          targetMakanan = item['target_makanan'];
+        }
         return targetMakanan.contains(_selectedFilter);
       }).toList();
     }
@@ -252,15 +247,22 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
   }
 
   Widget _buildFoodItem(dynamic item) {
-    // Parse target_makanan from JSON string to List
+    // Debug: Print item data
+    debugPrint('Item data: $item');
+    debugPrint('Image URL: ${item['gambar']}');
+    debugPrint('Target makanan: ${item['target_makanan']}');
+    debugPrint('Target makanan type: ${item['target_makanan'].runtimeType}');
+
+    // Handle target_makanan - it's already an array from API
     List<dynamic> targetList = [];
     try {
-      targetList = json.decode(item['target_makanan']);
-    } catch (e) {
-      // If parsing fails, try to use it as is (in case it's already a List)
-      if (item['target_makanan'] is List) {
+      if (item['target_makanan'] is String) {
+        targetList = json.decode(item['target_makanan']);
+      } else if (item['target_makanan'] is List) {
         targetList = item['target_makanan'];
       }
+    } catch (e) {
+      debugPrint('Error parsing target_makanan: $e');
     }
 
     return Card(
@@ -272,77 +274,16 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Food Image
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-            child: item['gambar'] != null && item['gambar'].toString().isNotEmpty
-                ? Image.network(
-                    _getCompleteImageUrl(item['gambar']),
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    headers: {
-                      'Cache-Control': 'no-cache',  // Prevents caching issues
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        height: 180,
-                        width: double.infinity,
-                        color: Color(0xFFAEE2FF).withOpacity(0.3),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF4DBAFF),
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / 
-                                  loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      print('Error loading image: $error');
-                      return Container(
-                        height: 180,
-                        width: double.infinity,
-                        color: Color(0xFFAEE2FF),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.image_not_supported,
-                              size: 48,
-                              color: Colors.white,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Gambar tidak tersedia',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  )
-                : Container(
-                    height: 180,
-                    width: double.infinity,
-                    color: Color(0xFFAEE2FF),
-                    child: Center(
-                      child: Icon(
-                        Icons.restaurant,
-                        size: 48,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+          // Food Image - Fixed version
+          Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              color: Colors.grey[200],
+            ),
+            child: _buildImageWidget(item['gambar']),
           ),
-
           // Food Content
           Padding(
             padding: const EdgeInsets.all(16),
@@ -361,28 +302,29 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
                 SizedBox(height: 8),
 
                 // Target Groups
-                Wrap(
-                  spacing: 8,
-                  children: targetList.map<Widget>((target) {
-                    return Chip(
-                      label: Text(
-                        target,
-                        style: TextStyle(
-                          color: Color(0xFF4DBAFF),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                if (targetList.isNotEmpty)
+                  Wrap(
+                    spacing: 8,
+                    children: targetList.map<Widget>((target) {
+                      return Chip(
+                        label: Text(
+                          target.toString(),
+                          style: TextStyle(
+                            color: Color(0xFF4DBAFF),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      backgroundColor: Color(0xFFAEE2FF).withOpacity(0.3),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(color: Color(0xFF4DBAFF), width: 1),
-                      ),
-                      padding: EdgeInsets.zero,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    );
-                  }).toList(),
-                ),
+                        backgroundColor: Color(0xFFAEE2FF).withOpacity(0.3),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(color: Color(0xFF4DBAFF), width: 1),
+                        ),
+                        padding: EdgeInsets.zero,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      );
+                    }).toList(),
+                  ),
                 SizedBox(height: 12),
 
                 // Food Description
@@ -395,6 +337,119 @@ class _RekomendasiMakananPageState extends State<RekomendasiMakananPage> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageWidget(String? imageUrl) {
+    // Debug image URL
+    debugPrint('Building image widget for URL: $imageUrl');
+
+    // Check if image URL is valid
+    if (imageUrl == null || imageUrl.isEmpty) {
+      debugPrint('Image URL is null or empty');
+      return _buildPlaceholder();
+    }
+
+    // Validate URL format
+    Uri? uri;
+    try {
+      uri = Uri.parse(imageUrl);
+      if (!uri.hasScheme || (!uri.scheme.startsWith('http'))) {
+        debugPrint('Invalid URL scheme: $imageUrl');
+        return _buildPlaceholder();
+      }
+    } catch (e) {
+      debugPrint('Error parsing URL: $e');
+      return _buildPlaceholder();
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        // Remove problematic headers
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            debugPrint('Image loaded successfully: $imageUrl');
+            return child;
+          }
+          
+          final progress = loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+              : null;
+              
+          debugPrint('Loading image: ${(progress ?? 0) * 100}%');
+          
+          return Center(
+            child: CircularProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.grey[300],
+              color: Color(0xFF4DBAFF),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('Error loading image: $error');
+          debugPrint('Image URL that failed: $imageUrl');
+          debugPrint('Stack trace: $stackTrace');
+          return _buildErrorPlaceholder();
+        },
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.grey[200],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.fastfood,
+            size: 50,
+            color: Colors.grey[400],
+          ),
+          SizedBox(height: 8),
+          Text(
+            'No Image',
+            style: TextStyle(
+              color: Colors.grey[500],
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.red[50],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 50,
+            color: Colors.red[300],
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Failed to load image',
+            style: TextStyle(
+              color: Colors.red[400],
+              fontSize: 12,
             ),
           ),
         ],

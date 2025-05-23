@@ -9,35 +9,30 @@ class ApiServiceRekomen {
   // 1. Get semua data rekomendasi makanan
   static Future<List<dynamic>> fetchMakananData() async {
     final token = await _storage.read(key: 'jwt_token');
-
+    
     if (token == null || token.isEmpty) {
-      throw Exception('No token found. User might not be logged in.');
+      throw Exception('No token found');
     }
 
     final response = await http.get(
       Uri.parse('$baseUrl/rekomendasimakanan'),
       headers: {
-        'Accept': 'application/json',
+        // 'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-
-      // Jika respons adalah list langsung
-      if (data is List) {
-        return data;
-      }
-
-      // Jika respons adalah map yang punya key 'data'
+      
+      // Pastikan untuk mengambil array dari properti 'data'
       if (data is Map && data.containsKey('data')) {
-        return data['data'];
+        return data['data'] as List; // Explicit cast ke List
       }
-
-      return []; // fallback kosong
+      
+      throw Exception('Invalid API response structure');
     } else {
-      throw Exception('Failed to fetch makanan data');
+      throw Exception('Failed to load data: ${response.statusCode}');
     }
   }
 }
