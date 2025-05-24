@@ -30,8 +30,11 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
 // Semua route terproteksi
 Route::group(['middleware' => 'auth:api'], function () {
     
-    //ISI DATA IBU HAMIL
+    //Profil
     Route::post('/isidata', [UserController::class, 'isidata']);
+    Route::get('/icons', [IconController::class, 'index']); 
+    Route::put('/user/select-icon', [UserController::class, 'updateSelectedIcon']); 
+    
     // Air Quality
     Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
 

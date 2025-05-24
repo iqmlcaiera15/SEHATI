@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use App\Models\Icon; 
 
 class UserController extends Controller
 {
@@ -81,5 +82,60 @@ class UserController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function updateSelectedIcon(Request $request)
+    {
+        $request->validate([
+            'icon_id' => 'required|integer|exists:icons,id', // Pastikan icon_id ada di tabel icons
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
+        }
+
+        $user->selected_icon_id = $request->icon_id;
+        $user->save();
+
+        // Load relasi selectedIcon untuk disertakan dalam response
+        $user->load('selectedIcon');
+
+        // Jika menggunakan API Resource untuk User:
+        // return new UserResource($user);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Icon selected successfully.',
+            'data' => $user // Mengembalikan data user yang sudah terupdate beserta ikonnya
+        ]);
+    }
+
+    /**
+     * Get the authenticated user's profile including the selected icon.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function profile(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
+        }
+
+        // Load relasi selectedIcon untuk disertakan dalam response
+        $user->load('selectedIcon');
+
+        // Jika menggunakan API Resource untuk User:
+        // return new UserResource($user);
+
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ]);
     }
 }
