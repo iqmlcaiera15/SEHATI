@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\IconResource; // Opsional, jika Anda memutuskan untuk menggunakannya
 use Illuminate\Support\Facades\Log; // Untuk mencatat error ke log server
 
-class IconController extends Controller
+class IconsController extends Controller
 {
     /**
      * Display a listing of the resource.

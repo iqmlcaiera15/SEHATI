@@ -16,7 +16,7 @@ use App\Http\Controllers\FetalMonitoringController;
 use App\Http\Controllers\PostpartumArticleController;
 use App\Http\Controllers\HomeProfileController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\IconController;
+use App\Http\Controllers\IconsController;
 use Illuminate\Support\Facades\Route;
 
 // Auth routes - Pindahkan ke api.php jika menggunakan API
@@ -35,7 +35,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/isidata', [UserController::class, 'isidata']);
     Route::get('/icons', [IconController::class, 'index']); 
     Route::put('/user/select-icon', [UserController::class, 'updateSelectedIcon']); 
-    
+    Route::get('/icons', [IconsController::class, 'index']); 
     // Air Quality
     Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
 
