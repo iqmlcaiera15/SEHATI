@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:Sehati/view/homeprofile/home.dart';
+import 'package:Sehati/view/homeprofile/selecticon.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DataFormPage extends StatefulWidget {
@@ -83,7 +83,7 @@ class _DataFormPageState extends State<DataFormPage> {
           // Jika submit berhasil, navigasi ke HomePage
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => HomePage()),
+            MaterialPageRoute(builder: (context) => SelectProfilePage()),
           );
           
           // Tampilkan pesan sukses

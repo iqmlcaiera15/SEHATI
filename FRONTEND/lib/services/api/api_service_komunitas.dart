@@ -7,7 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiServicePosts {
   static const String baseUrl = 'https://sehatiapp-production.up.railway.app/api';
-   static final FlutterSecureStorage _storage = FlutterSecureStorage();
+   static final FlutterSecureStorage _storage =  const FlutterSecureStorage();
 
   static Future<List<CommentModel>> fetchComments(String postId) async { // Pastikan postId adalah String
    final token = await _storage.read(key: 'jwt_token');
