@@ -7,6 +7,9 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsentifController;
 use App\Http\Controllers\DeteksiDesktopController;
 use App\Http\Controllers\PrediksiDepresiDesktopController;
+use App\Http\Controllers\IconsController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,10 +24,10 @@ use App\Http\Controllers\PrediksiDepresiDesktopController;
 Route::get('/', function () {
     return view('welcome');
 });
-
+ 
 // Authentication Routes (if you're using Laravel's default auth)
 Auth::routes();
-
+ 
 // Custom Registration Routes
 Route::get('/register/bidan', [RegisterController::class, 'showBidanRegistrationForm'])->name('register.bidan.form');
 Route::post('/register/bidan', [RegisterController::class, 'registerBidan'])->name('register.bidan');

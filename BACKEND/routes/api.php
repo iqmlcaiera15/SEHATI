@@ -19,6 +19,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\IconsController;
 use Illuminate\Support\Facades\Route;
 
+  
 // Auth routes - Pindahkan ke api.php jika menggunakan API
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
     Route::post('register', [AuthController::class, 'register']);
