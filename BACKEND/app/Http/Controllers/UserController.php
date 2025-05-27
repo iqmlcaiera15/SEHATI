@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use App\Models\Icon; 
+use App\Models\Icons; 
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -88,7 +88,7 @@ class UserController extends Controller
     public function updateSelectedIcon(Request $request)
     {
         $request->validate([
-            'icon_id' => 'required|integer|exists:icons,id', // Pastikan icon_id ada di tabel icons
+            'id' => 'required|integer|exists:icons,id', // Pastikan icon_id ada di tabel icons
         ]);
 
         /** @var \App\Models\User $user */
@@ -98,7 +98,7 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
         }
 
-        $user->selected_icon_id = $request->icon_id;
+        $user->selected_icon_id = $request->id;
         $user->save();
 
         // Load relasi selectedIcon untuk disertakan dalam response
