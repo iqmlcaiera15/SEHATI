@@ -14,7 +14,7 @@ class KomunitasController extends Controller
 {
 public function index()
 {
-    $Komunitas = Komunitas::with('user:id,name,data')->get();
+    $Komunitas = Komunitas::with('user:id,name,selected_icon_data_cache')->get();
 
     // Transform data to include user information
     $KomunitasWithUser = $Komunitas->map(function ($komunitas) {
