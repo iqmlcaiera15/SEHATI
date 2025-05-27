@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Icon extends Model
+class Icons extends Model
 {
     use HasFactory;
 
@@ -20,6 +20,6 @@ class Icon extends Model
      */
     public function users()
     {
-        return $this->hasMany(User::class, 'profil');
+        return $this->hasMany(User::class, 'selected_icon_id');
     }
 }
