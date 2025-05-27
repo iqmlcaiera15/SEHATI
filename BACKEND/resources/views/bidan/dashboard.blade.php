@@ -40,7 +40,7 @@
                     Total Prediksi Depresi
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
+                    <a class="small text-white stretched-link" href="{{ route('depresi.index') }}">Lihat Detail</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
@@ -199,35 +199,63 @@
                     <div class="card border-left-success h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
-                                <h5 class="card-title">ID: {{ $depresi->id }}</h5>
-                                <span class="badge {{ $depresi->hasil_prediksi ? 'bg-danger' : 'bg-success' }}">
-                                    {{ $depresi->hasil_prediksi ? 'Depresi' : 'Tidak Depresi' }}
-                                </span>
+                                <h5 class="card-title">{{ $depresi->user->name ?? 'Tidak diketahui' }}</h5>
+                                
+                                @if($depresi->epds && $depresi->epds->score)
+                                    <!-- Badge untuk EPDS jika ada data -->
+                                    <span class="badge 
+                                        @if($depresi->epds->score >= 14) bg-danger
+                                        @elseif($depresi->epds->score >= 12) bg-warning
+                                        @else bg-success
+                                        @endif">
+                                        @if($depresi->epds->score >= 14)
+                                            Risiko Tinggi Depresi
+                                        @elseif($depresi->epds->score >= 12)
+                                            Kemungkinan Depresi
+                                        @else
+                                            Gejala Ringan
+                                        @endif
+                                        ({{ $depresi->epds->score }})
+                                    </span>
+                                @else
+                                    <!-- Badge untuk prediksi depresi jika tidak ada EPDS -->
+                                    <span class="badge {{ $depresi->hasil_prediksi ? 'bg-danger' : 'bg-success' }}">
+                                        {{ $depresi->hasil_prediksi ? 'Bergejala Depresi' : 'Tidak Bergejala Depresi' }}
+                                    </span>
+                                @endif
                             </div>
                             <hr>
                             <div class="row mb-2">
                                 <div class="col-md-6 fw-bold">Umur</div>
-                                <div class="col-md-6">{{ $depresi->umur }} tahun</div>
+                                <div class="col-md-6">{{ $depresi->user->usia ?? '-' }} tahun</div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Merasa Sedih</div>
-                                <div class="col-md-6">{{ $depresi->merasa_sedih }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Mudah Tersinggung</div>
-                                <div class="col-md-6">{{ $depresi->mudah_tersinggung }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Masalah Tidur</div>
-                                <div class="col-md-6">{{ $depresi->masalah_tidur }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Masalah Fokus</div>
-                                <div class="col-md-6">{{ $depresi->masalah_fokus }}</div>
-                            </div>
+
+                             <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Merasa Sedih</div>
+                                    <div class="col-md-6">{{ $depresi->merasa_sedih_text }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Mudah Tersinggung</div>
+                                    <div class="col-md-6">{{ $depresi->mudah_tersinggung_text}}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Masalah Tidur</div>
+                                    <div class="col-md-6">{{ $depresi->masalah_tidur_text}}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Masalah Fokus</div>
+                                    <div class="col-md-6">{{ $depresi->masalah_fokus_text}}</div>
+                                </div>
+                            @if($depresi->epds && $depresi->epds->score)
+                                <!-- Tampilkan info EPDS jika ada -->
+                                <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Skor EPDS</div>
+                                    <div class="col-md-6">{{ $depresi->epds->score }} / 30</div>
+                                </div>
+                            @endif
                         </div>
                         <div class="card-footer">
-                            <a href="#" class="btn btn-sm btn-success w-100">Detail Lengkap</a>
+                            <a href="{{ route('depresi.show', $depresi->id) }}" class="btn btn-sm btn-success w-100">Detail Lengkap</a>
                         </div>
                     </div>
                 </div>

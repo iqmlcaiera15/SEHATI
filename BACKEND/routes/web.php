@@ -52,7 +52,8 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::delete('/deteksi/{id}', [DeteksiDesktopController::class, 'destroy'])->name('deteksi.destroy');
 
     Route::get('/depresi', [PrediksiDepresiDesktopController::class, 'index'])->name('depresi.index');
-    Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.delete');
+    Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show'); 
+    Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.destroy');
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
     // Add more bidan routes here
