@@ -28,7 +28,7 @@ class User extends Authenticatable implements JWTSubject
         'usia_suami',
         'pekerjaan_suami',
         'saldo_total',
-        'profil',
+        'selected_icon_id',
         
         // BIDAN
         'nomor_str',
