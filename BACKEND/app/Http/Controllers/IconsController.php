@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Icons; // Pastikan path ke model Icon sudah benar
+use App\Models\icons; // Pastikan path ke model Icon sudah benar
 use Illuminate\Http\Request;
 use App\Http\Resources\IconResource; // Opsional, jika Anda memutuskan untuk menggunakannya
 use Illuminate\Support\Facades\Log; // Untuk mencatat error ke log server
@@ -17,21 +17,21 @@ class IconsController extends Controller
     {
         try {
             // Baris ini akan mencoba mengambil semua data dari model Icon
-            $icons = Icon::all();
+            $icons = Icons::all();
 
             // Jika Anda ingin menggunakan API Resource (disarankan untuk transformasi data yang konsisten):
-            // return IconResource::collection($icons);
+            // return iconsResource::collection($iconss);
 
             // Jika tidak menggunakan API Resource:
             return response()->json([
                 'success' => true,
                 'data' => $icons,
-                'message' => 'Icons retrieved successfully.'
+                'message' => 'iconss retrieved successfully.'
             ]);
 
         } catch (\Throwable $e) { // Menangkap semua jenis error atau exception (\Throwable lebih luas dari \Exception)
             // 1. Catat error lengkap ke log server (ini sangat penting untuk debugging sisi server)
-            Log::error('Error in IconController@index: ' . $e->getMessage(), [
+            Log::error('Error in iconsController@index: ' . $e->getMessage(), [
                 'exception' => get_class($e),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
