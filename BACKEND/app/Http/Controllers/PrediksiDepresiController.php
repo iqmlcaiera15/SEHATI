@@ -165,7 +165,7 @@ class PrediksiDepresiController extends Controller
             'mudah_tersinggung' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
             'masalah_tidur' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Dua hari dalam seminggu/lebih'],
             'masalah_fokus' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Sering'],
-            'pola_makan' => [2=> 'Tidak sama sekali', 1 => 'Ya', 1 => 'Kadang-kadang'],
+            'pola_makan' => [2=> 'Tidak sama sekali', 1 => 'Ya', 0 => 'Kadang-kadang'],
             'merasa_bersalah' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Mungkin'],
             'suicide_attempt' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Tidak ingin menjawab'],
         ];

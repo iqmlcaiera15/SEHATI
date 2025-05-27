@@ -69,7 +69,7 @@ class PrediksiDepresi extends Model
 
     public function getPolaMakanTextAttribute()
     {
-        return [0 => 'Tidak sama sekali', 1 => 'Kadang-kadang', 2 => 'Ya'][$this->pola_makan] ?? 'Tidak diketahui';
+        return [2 => 'Tidak sama sekali', 0 => 'Kadang-kadang', 1 => 'Ya'][$this->pola_makan] ?? 'Tidak diketahui';
     }
 
     public function getMerasaBersalahTextAttribute()

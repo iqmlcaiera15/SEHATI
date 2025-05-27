@@ -1,9 +1,7 @@
 @extends('layouts.app')
-
 @section('content')
 <div class="container">
     <h3 class="mb-4">Riwayat Prediksi Depresi</h3>
-
     <!-- Filter -->
     <form method="GET" class="row g-3 mb-4">
         <div class="col-md-4">
@@ -14,19 +12,17 @@
             <label>Filter Hasil</label>
             <select name="hasil" class="form-control">
                 <option value="">-- Semua --</option>
-                <option value="1" {{ request('hasil') == '1' ? 'selected' : '' }}>Bergejala Depresi</option>
-                <option value="0" {{ request('hasil') === '0' ? 'selected' : '' }}>Tidak Bergejala Depresi</option>
+                <option value="bergejala" {{ request('hasil_prediksi') == '1' ? 'selected' : '' }}>Bergejala Depresi</option>
+                <option value="tidak_bergejala" {{ request('hasil_prediksi') == '0' ? 'selected' : '' }}>Tidak Bergejala Depresi</option>
             </select>
         </div>
         <div class="col-md-4 align-self-end">
             <button type="submit" class="btn btn-primary w-100">Filter</button>
         </div>
     </form>
-
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
-
     @if($prediksiList->count() > 0)
     <div class="table-responsive">
         <table class="table table-striped align-middle">
@@ -48,8 +44,29 @@
                     <td>{{ $data->user->usia ?? '-' }}</td>
                     <td>{{ $data->created_at->format('d M Y H:i') }}</td>
                     <td>
-                        <span class="badge {{ $data->hasil_prediksi ? 'bg-danger' : 'bg-success' }}">
-                            {{ $data->hasil_prediksi ? 'Bergejala Depresi' : 'Tidak Bergejala Depresi' }}
+                        @php
+                            // Logika sesuai kondisi yang diminta
+                            $hasilText = '';
+                            $badgeClass = '';
+                            
+                            if ($data->hasil_prediksi == 1) {
+                                // Kondisi 4: Jika hasil prediksi = 1 maka akan muncul 'Bergejala Depresi'
+                                $hasilText = 'Bergejala Depresi';
+                                $badgeClass = 'bg-danger';
+                            } else if ($data->hasil_prediksi == 0) {
+                                if ($data->epds && $data->epds->score >= 12) {
+                                    // Kondisi 3: Jika hasil prediksi = 0 tapi ada skor epds dengan skor >= 12 maka hasil prediksi akan muncul 'Bergejala Depresi'
+                                    $hasilText = 'Bergejala Depresi';
+                                    $badgeClass = 'bg-danger';
+                                } else {
+                                    // Kondisi 1 & 2: Jika hasil prediksi = 0 tapi ada skor epds dengan skor <12 atau tidak ada skor epds = 'Tidak bergejala depresi'
+                                    $hasilText = 'Tidak bergejala depresi';
+                                    $badgeClass = 'bg-success';
+                                }
+                            }
+                        @endphp
+                        <span class="badge {{ $badgeClass }}">
+                            {{ $hasilText }}
                         </span>
                     </td>
                     <td>
@@ -62,8 +79,7 @@
                         </ul>
                     </td>
                     <td>
-                        {{ $data->epds?->score
-                             ?? '-' }}
+                        {{ $data->epds?->score ?? '-' }}
                     </td>
                     <td>
                         <a href="{{ route('depresi.show', $data->id) }}" class="btn btn-sm btn-info">Detail</a>
@@ -78,9 +94,7 @@
             </tbody>
         </table>
     </div>
-
     {{ $prediksiList->links() }}
-
     @else
         <div class="alert alert-info">Belum ada data prediksi depresi.</div>
     @endif
