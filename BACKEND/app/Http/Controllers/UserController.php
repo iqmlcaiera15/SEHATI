@@ -85,10 +85,14 @@ class UserController extends Controller
         }
     }
 
+
     public function updateSelectedIcon(Request $request)
     {
+        // 1. Ubah validasi untuk mengharapkan 'icon_id'
+        //    Aturan 'exists:icons,id' tetap benar, karena ini mengecek nilai dari 'icon_id'
+        //    terhadap kolom 'id' di tabel 'icons'.
         $request->validate([
-            'id' => 'required|integer|exists:icons,id', // Memastikan 'id' ikon yang dikirim valid
+            'icon_id' => 'required|integer|exists:icons,id',
         ]);
 
         /** @var \App\Models\User $user */
@@ -98,35 +102,35 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
         }
 
-        // Ambil ID ikon dari request
-        $iconId = $request->id;
+        // 2. Ambil ID ikon dari request menggunakan key 'icon_id'
+        $iconId = $request->icon_id; // atau $request->input('icon_id');
 
         // Set foreign key
         $user->selected_icon_id = $iconId;
 
         // Ambil data dari ikon yang dipilih
+        // Pastikan nama modelnya benar (Icon, bukan Icons jika filenya Icon.php)
         $selectedIconData = Icons::find($iconId);
 
+        // (Opsional: Bagian untuk menyimpan cache data ikon ke tabel user)
+        // Jika Anda sudah menambahkan kolom selected_icon_name_cache dan selected_icon_data_cache di tabel users
         if ($selectedIconData) {
-            // Simpan data ikon yang diinginkan ke kolom cache di tabel users
-            $user->selected_icon_name_cache = $selectedIconData->name; // Asumsi ada kolom 'name' di tabel icons
-            $user->selected_icon_data_cache = $selectedIconData->data; // Asumsi ada kolom 'data' di tabel icons
+            $user->selected_icon_name_cache = $selectedIconData->name; // Asumsi ada kolom 'name' di model Icon
+            $user->selected_icon_data_cache = $selectedIconData->data; // Asumsi ada kolom 'data' di model Icon
         } else {
-            // Handle jika ikon tidak ditemukan (meskipun validasi 'exists' seharusnya mencegah ini)
             $user->selected_icon_name_cache = null;
             $user->selected_icon_data_cache = null;
         }
+        // (Akhir bagian opsional)
 
-        $user->save(); // Sekarang menyimpan selected_icon_id, selected_icon_name_cache, dan selected_icon_data_cache
+        $user->save(); // Menyimpan selected_icon_id (dan kolom cache jika ada)
 
-        // Load relasi selectedIcon untuk disertakan dalam response (opsional jika data sudah di-cache)
-        // Namun, tetap baik untuk konsistensi jika klien mengharapkan objek relasi penuh
-        $user->load('selectedIcon'); 
+        $user->load('selectedIcon');
 
         return response()->json([
             'success' => true,
             'message' => 'Icon selected successfully.',
-            'data' => $user // User data sekarang akan termasuk kolom cache dan relasi selectedIcon
+            'data' => $user
         ]);
     }
     /**
