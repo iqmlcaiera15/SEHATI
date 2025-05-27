@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\icons; // Pastikan path ke model Icon sudah benar
+use App\Models\Icons; // Pastikan path ke model Icon sudah benar
 use Illuminate\Http\Request;
 use App\Http\Resources\IconResource; // Opsional, jika Anda memutuskan untuk menggunakannya
 use Illuminate\Support\Facades\Log; // Untuk mencatat error ke log server

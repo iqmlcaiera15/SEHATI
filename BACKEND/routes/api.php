@@ -34,9 +34,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     
     //Profil
     Route::post('/isidata', [UserController::class, 'isidata']);
-    Route::get('/icons', [IconController::class, 'index']); 
+    Route::get('/icons', [IconsController::class, 'index']);  
     Route::put('/user/select-icon', [UserController::class, 'updateSelectedIcon']); 
-    Route::get('/icons', [IconsController::class, 'index']); 
+  
     // Air Quality
     Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
 
