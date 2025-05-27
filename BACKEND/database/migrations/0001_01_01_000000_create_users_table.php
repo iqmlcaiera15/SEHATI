@@ -33,7 +33,7 @@ return new class extends Migration
             $table->integer('usia_suami')->nullable();
             $table->string('pekerjaan_suami')->nullable();
             $table->integer('saldo_total')->nullable()->default(0);
-            $table->string('profil')->nullable();
+            $table->integer('selected_icon_id')->nullable();
             // $table->integer('jumlah_kehamilan_sebelumnya')->nullable();
             // $table->integer('jumlah_anak_hidup')->nullable();
             // $table->date('hpht')->nullable();
