@@ -12,33 +12,33 @@ use Illuminate\Support\Facades\DB;
 
 class KomunitasController extends Controller
 {
-public function index()
-{
-    $Komunitas = Komunitas::with('user:id,name,selected_icon_data_cache')->get();
+    public function index()
+    {
+        $Komunitas = Komunitas::with('user:id,name,selected_icon_data_cache')->get();
 
-    // Transform data to include user information
-    $KomunitasWithUser = $Komunitas->map(function ($komunitas) {
-        return [
-            'id' => $komunitas->id,
-            'judul' => $komunitas->judul,
-            'deskripsi' => $komunitas->deskripsi,
-            'apresiasi' => $komunitas->apresiasi,
-            'komentar' => $komunitas->komentar,
-            'created_at' => $komunitas->created_at,
-            'updated_at' => $komunitas->updated_at,
-            'user_id' => $komunitas->user_id,
-            'user' => [
-                'id' => $komunitas->user->id,
-                'name' => $komunitas->user->name,
-                'profile_image' => $komunitas->user->data, // URL dari kolom data
-            ]
-        ];
-    });
+        // Transform data to include user information
+        $KomunitasWithUser = $Komunitas->map(function ($komunitas) {
+            return [
+                'id' => $komunitas->post_id,
+                'judul' => $komunitas->judul,
+                'deskripsi' => $komunitas->deskripsi,
+                'apresiasi' => $komunitas->apresiasi,
+                'komentar' => $komunitas->komentar,
+                'created_at' => $komunitas->created_at,
+                'updated_at' => $komunitas->updated_at,
+                'user_id' => $komunitas->user_id,
+                'user' => [
+                    'id' => $komunitas->user->id,
+                    'name' => $komunitas->user->name,
+                    'profile_image' => $komunitas->user->data, // URL dari kolom data
+                ]
+            ];
+        });
 
-    return response()->json([
-        'Komunitas' => $KomunitasWithUser
-    ]);
-}
+        return response()->json([
+            'Komunitas' => $KomunitasWithUser
+        ]);
+    }
 
     public function indexid($id)
     {
