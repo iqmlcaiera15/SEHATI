@@ -7,6 +7,8 @@ use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\icons;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -31,6 +33,8 @@ class User extends Authenticatable implements JWTSubject
         'pekerjaan_suami',
         'saldo_total',
         'selected_icon_id',
+        'selected_icon_name_cache',
+        'selected_icon_data_cache',
         
         // BIDAN
         'nomor_str',
