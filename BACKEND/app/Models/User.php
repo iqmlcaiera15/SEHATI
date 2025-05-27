@@ -72,7 +72,7 @@ class User extends Authenticatable implements JWTSubject
      public function selectedIcon(): BelongsTo 
     {
         
-        return $this->belongsTo(Icon::class, 'selected_icon_id', 'id');
+        return $this->belongsTo(Icons::class, 'selected_icon_id', 'id');
     }
     
     public function getJWTCustomClaims()

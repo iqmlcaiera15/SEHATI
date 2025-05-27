@@ -88,7 +88,7 @@ class UserController extends Controller
     public function updateSelectedIcon(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer|exists:icons,id', // Pastikan icon_id ada di tabel icons
+            'id' => 'required|integer|exists:icons,id', // Memastikan 'id' ikon yang dikirim valid
         ]);
 
         /** @var \App\Models\User $user */
@@ -98,22 +98,37 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
         }
 
-        $user->selected_icon_id = $request->id;
-        $user->save();
+        // Ambil ID ikon dari request
+        $iconId = $request->id;
 
-        // Load relasi selectedIcon untuk disertakan dalam response
-        $user->load('selectedIcon');
+        // Set foreign key
+        $user->selected_icon_id = $iconId;
 
-        // Jika menggunakan API Resource untuk User:
-        // return new UserResource($user);
+        // Ambil data dari ikon yang dipilih
+        $selectedIconData = Icons::find($iconId);
+
+        if ($selectedIconData) {
+            // Simpan data ikon yang diinginkan ke kolom cache di tabel users
+            $user->selected_icon_name_cache = $selectedIconData->name; // Asumsi ada kolom 'name' di tabel icons
+            $user->selected_icon_data_cache = $selectedIconData->data; // Asumsi ada kolom 'data' di tabel icons
+        } else {
+            // Handle jika ikon tidak ditemukan (meskipun validasi 'exists' seharusnya mencegah ini)
+            $user->selected_icon_name_cache = null;
+            $user->selected_icon_data_cache = null;
+        }
+
+        $user->save(); // Sekarang menyimpan selected_icon_id, selected_icon_name_cache, dan selected_icon_data_cache
+
+        // Load relasi selectedIcon untuk disertakan dalam response (opsional jika data sudah di-cache)
+        // Namun, tetap baik untuk konsistensi jika klien mengharapkan objek relasi penuh
+        $user->load('selectedIcon'); 
 
         return response()->json([
             'success' => true,
             'message' => 'Icon selected successfully.',
-            'data' => $user // Mengembalikan data user yang sudah terupdate beserta ikonnya
+            'data' => $user // User data sekarang akan termasuk kolom cache dan relasi selectedIcon
         ]);
     }
-
     /**
      * Get the authenticated user's profile including the selected icon.
      *
