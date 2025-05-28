@@ -17,12 +17,18 @@ class _CommentPageState extends State<CommentPage> {
   List<CommentModel> _comments = [];
   bool _isLoading = true;
   late PostModel _currentPost;
+  
+  // Add variables to track like state
+  bool _isLiked = false;
+  bool _isLikeLoading = false;
 
   @override
   void initState() {
     super.initState();
     _currentPost = widget.post;
     _loadComments();
+    // Initialize like state - you might want to get this from API if you track user likes
+    _isLiked = false; // Set this based on actual user like status from API
   }
 
   @override
@@ -31,34 +37,27 @@ class _CommentPageState extends State<CommentPage> {
     super.dispose();
   }
 
-  // Di dalam class _CommentPageState di file CommentPage.dart
-
   Future<void> _loadComments() async {
     setState(() {
       _isLoading = true;
     });
-    // Mencetak ID post yang akan digunakan untuk mengambil komentar
+    
     print('[CommentPage] _loadComments: Memulai untuk post ID: ${_currentPost.id}');
 
-    // Pengecekan penting jika _currentPost.id adalah null
     if (_currentPost.id == null) {
       print('[CommentPage] _loadComments: ERROR - _currentPost.id adalah null! Tidak dapat memuat komentar.');
       _showSnackBar('Error: Post ID tidak ditemukan untuk memuat komentar.');
       setState(() {
         _isLoading = false;
-        _comments = []; // Pastikan list komentar kosong jika ID post null
+        _comments = [];
       });
       return;
     }
 
     try {
-      // PENTING: Konversi _currentPost.id ke String di sini!
-      // Method getIdAsString() dari PostModel Anda bisa digunakan jika sudah diimplementasikan dengan benar,
-      // atau langsung .toString().
-      // String postIdString = _currentPost.getIdAsString() ?? ''; // Jika Anda menggunakan helper
-      String postIdString = _currentPost.id!.toString(); // Cara langsung jika id tidak null
+      String postIdString = _currentPost.id!.toString();
 
-      if (postIdString.isEmpty) { // Pengecekan tambahan jika hasil toString() adalah string kosong (seharusnya tidak jika id ada)
+      if (postIdString.isEmpty) {
           print('[CommentPage] _loadComments: ERROR - postIdString kosong setelah konversi dari _currentPost.id!');
           _showSnackBar('Error: Gagal mendapatkan ID post yang valid.');
           setState(() {
@@ -73,7 +72,6 @@ class _CommentPageState extends State<CommentPage> {
       
       print('[CommentPage] _loadComments: Komentar yang diterima dari service: ${fetchedComments.length} komentar.');
       if (fetchedComments.isNotEmpty) {
-        // Pastikan CommentModel Anda memiliki field yang sesuai (misalnya 'content' atau 'komentar')
         print('[CommentPage] _loadComments: Konten komentar pertama: ${fetchedComments.first.content}'); 
         print('[CommentPage] _loadComments: Username komentar pertama: ${fetchedComments.first.username}');
       } else {
@@ -85,16 +83,17 @@ class _CommentPageState extends State<CommentPage> {
         _isLoading = false;
       });
       print('[CommentPage] _loadComments: State _comments diperbarui. Jumlah: ${_comments.length}');
-    } catch (e, s) { // Menangkap error (e) dan stack trace (s)
+    } catch (e, s) {
       print('[CommentPage] _loadComments: Error saat memuat komentar: ${e.toString()}');
-      print('[CommentPage] _loadComments: Stack trace: $s'); // Mencetak stack trace untuk debug lebih detail
+      print('[CommentPage] _loadComments: Stack trace: $s');
       _showSnackBar('Error loading comments: ${e.toString()}');
       setState(() {
         _isLoading = false;
-        _comments = []; // Pastikan list komentar di-reset menjadi kosong jika terjadi error
+        _comments = [];
       });
     }
   }
+
   void _showSnackBar(String message, {Color backgroundColor = Colors.red}) {
     if (!mounted) return;
     
@@ -120,7 +119,6 @@ class _CommentPageState extends State<CommentPage> {
       await ApiServicePosts.addComment(_currentPost.id!, _commentController.text);
       _commentController.clear();
       
-      // Update the post with incremented comment count
       final updatedPost = _currentPost.copyWith(
         komentar: _currentPost.komentar + 1
       );
@@ -129,7 +127,7 @@ class _CommentPageState extends State<CommentPage> {
         _currentPost = updatedPost;
       });
       
-      await _loadComments(); // Reload comments after adding a new one
+      await _loadComments();
       _showSnackBar('Comment added successfully', backgroundColor: Colors.green);
     } catch (e) {
       _showSnackBar('Error adding comment: ${e.toString()}');
@@ -139,7 +137,60 @@ class _CommentPageState extends State<CommentPage> {
     }
   }
 
-  String _formatTimeAgo(String dateString) {
+  // Fixed like function with proper toggle logic
+  Future<void> _handleLikePost() async {
+    if (_currentPost.id == null || _isLikeLoading) return;
+    
+    setState(() {
+      _isLikeLoading = true;
+    });
+    
+    try {
+      int newLikeCount;
+      bool newLikeState;
+      
+      if (_isLiked) {
+        // Unlike: decrease like count
+        newLikeCount = _currentPost.apresiasi > 0 ? _currentPost.apresiasi - 1 : 0;
+        newLikeState = false;
+      } else {
+        // Like: increase like count
+        newLikeCount = _currentPost.apresiasi + 1;
+        newLikeState = true;
+      }
+      
+      // Call API to update likes
+      await ApiServicePosts.updateLikes(_currentPost.id!, newLikeCount);
+      
+      // Update local state
+      final updatedPost = _currentPost.copyWith(
+        apresiasi: newLikeCount
+      );
+      
+      setState(() {
+        _currentPost = updatedPost;
+        _isLiked = newLikeState;
+        _isLikeLoading = false;
+      });
+      
+      // Show feedback
+      _showSnackBar(
+        _isLiked ? 'Apresiasi ditambahkan' : 'Apresiasi dihapus', 
+        backgroundColor: Colors.green
+      );
+      
+    } catch (e) {
+      setState(() {
+        _isLikeLoading = false;
+      });
+      _showSnackBar('Error updating apresiasi: $e');
+    }
+  }
+
+  // KONSISTEN dengan halaman komunitas - gunakan fungsi yang sama
+  static String _formatTimeAgo(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return 'baru saja';
+    
     try {
       final DateTime date = DateTime.parse(dateString);
       final Duration difference = DateTime.now().difference(date);
@@ -160,6 +211,60 @@ class _CommentPageState extends State<CommentPage> {
     } catch (e) {
       print('Error formatting date: $e');
       return 'baru saja';
+    }
+  }
+
+  // KONSISTEN dengan halaman komunitas - gunakan fungsi yang sama untuk avatar
+  Widget _buildUserAvatar(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty || imageUrl == 'assets/images/default_user.png') {
+      return const Icon(
+        Icons.person,
+        color: Colors.white,
+        size: 20,
+      );
+    } else {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 20,
+            );
+          },
+        ),
+      );
+    }
+  }
+
+  // Helper untuk avatar kecil di comment
+  Widget _buildCommentAvatar(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty || imageUrl == 'assets/images/default_user.png') {
+      return const Icon(
+        Icons.person,
+        color: Colors.white,
+        size: 16,
+      );
+    } else {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 32,
+          height: 32,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 16,
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -189,7 +294,7 @@ class _CommentPageState extends State<CommentPage> {
         ),
         body: Column(
           children: [
-            // Post card
+            // Post card - DIPERBAIKI KONSISTENSI
             Container(
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -206,7 +311,7 @@ class _CommentPageState extends State<CommentPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // User info and timestamp
+                  // User info and timestamp - DIPERBAIKI
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
@@ -215,8 +320,9 @@ class _CommentPageState extends State<CommentPage> {
                         Row(
                           children: [
                             CircleAvatar(
-                              backgroundImage: AssetImage(_currentPost.userImage ?? 'assets/images/default_user.png'),
                               radius: 20,
+                              backgroundColor: const Color(0xFF4DBAFF),
+                              child: _buildUserAvatar(_currentPost.userImage),
                             ),
                             const SizedBox(width: 12),
                             Column(
@@ -231,7 +337,7 @@ class _CommentPageState extends State<CommentPage> {
                                   ),
                                 ),
                                 Text(
-                                  _currentPost.timeAgo ?? 'baru saja',
+                                  _formatTimeAgo(_currentPost.timeAgo),
                                   style: const TextStyle(
                                     color: Colors.grey,
                                     fontSize: 12,
@@ -278,44 +384,13 @@ class _CommentPageState extends State<CommentPage> {
                   
                   const Divider(height: 32),
                   
-                  // Like, comment, share buttons
+                  // Like, comment, share buttons - FIXED LIKE BUTTON
                   Padding(
                     padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildActionButton(
-                          Icons.thumb_up_outlined, 
-                          "apresiasi (${_currentPost.apresiasi})",
-                          () async {
-                            if (_currentPost.id != null) {
-                              setState(() {
-                                _isLoading = true;
-                              });
-                              
-                              try {
-                                // Call the API to update likes
-                                await ApiServicePosts.updateLikes(_currentPost.id!, _currentPost.apresiasi + 1);
-                                
-                                // Create a new PostModel with updated apresiasi count
-                                final updatedPost = _currentPost.copyWith(
-                                  apresiasi: _currentPost.apresiasi + 1
-                                );
-                                
-                                // Update the state with the new post
-                                setState(() {
-                                  _currentPost = updatedPost;
-                                  _isLoading = false;
-                                });
-                              } catch (e) {
-                                setState(() {
-                                  _isLoading = false;
-                                });
-                                _showSnackBar('Error updating apresiasi: $e');
-                              }
-                            }
-                          },
-                        ),
+                        _buildLikeButton(), // Use new like button with toggle logic
                         _buildActionButton(
                           Icons.comment_outlined, 
                           "Komentar (${_comments.length})",
@@ -353,7 +428,7 @@ class _CommentPageState extends State<CommentPage> {
               ),
             ),
             
-            // Comments list
+            // Comments list - DIPERBAIKI KONSISTENSI
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator(color: Color(0xFF4DBAFF)))
@@ -386,8 +461,9 @@ class _CommentPageState extends State<CommentPage> {
                                   Row(
                                     children: [
                                       CircleAvatar(
-                                        backgroundImage: AssetImage(comment.userImage ?? 'assets/images/default_user.png'),
                                         radius: 16,
+                                        backgroundColor: const Color(0xFF4DBAFF),
+                                        child: _buildCommentAvatar(comment.userImage),
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
@@ -400,7 +476,7 @@ class _CommentPageState extends State<CommentPage> {
                                       ),
                                       const Spacer(),
                                       Text(
-                                        _formatTimeAgo(comment.createdAt ?? DateTime.now().toString()),
+                                        _formatTimeAgo(comment.createdAt),
                                         style: const TextStyle(
                                           color: Colors.grey,
                                           fontSize: 12,
@@ -480,6 +556,42 @@ class _CommentPageState extends State<CommentPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // New like button with proper toggle logic
+  Widget _buildLikeButton() {
+    return InkWell(
+      onTap: _isLikeLoading ? null : _handleLikePost,
+      child: Row(
+        children: [
+          if (_isLikeLoading)
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4DBAFF)),
+              ),
+            )
+          else
+            Icon(
+              _isLiked ? Icons.thumb_up : Icons.thumb_up_outlined, 
+              color: _isLiked ? const Color(0xFF4DBAFF) : const Color(0xFF4DBAFF), 
+              size: 18
+            ),
+          const SizedBox(width: 4),
+          Text(
+            "apresiasi (${_currentPost.apresiasi})",
+            style: TextStyle(
+              color: _isLiked ? const Color(0xFF4DBAFF) : const Color(0xFF1E293B),
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              fontWeight: _isLiked ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+        ],
       ),
     );
   }

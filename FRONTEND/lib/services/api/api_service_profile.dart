@@ -70,6 +70,7 @@ class ApiServiceProfile {
       Uri.parse('$baseUrl/user/select-icon'),
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       },
       body: json.encode({

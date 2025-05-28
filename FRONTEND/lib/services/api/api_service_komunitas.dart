@@ -140,8 +140,19 @@ class ApiServicePosts {
         for (var postJson in postsListFromApi) {
             if (postJson is Map<String, dynamic>) {
                 try {
-                    // Menggunakan PostModel.fromJson yang sudah Anda definisikan
-                    posts.add(PostModel.fromJson(postJson));
+                    for (var postJson in postsListFromApi) {
+                        if (postJson is Map<String, dynamic>) {
+                          print('[ApiServicePosts] fetchPosts: Memproses postJson: $postJson'); // CETAK JSON MENTAH UNTUK POST
+                          print('[ApiServicePosts] fetchPosts: Ekstraksi id dari JSON -> id: ${postJson['id']}, post_id: ${postJson['post_id']}, _id: ${postJson['_id']}'); // PERIKSA FIELD ID POTENSIAL
+                          try {
+                            posts.add(PostModel.fromJson(postJson));
+                          } catch (e,s) {
+                            print('[ApiServicePosts] fetchPosts: Error parsing post: $postJson, Error: $e, Stack: $s');
+                          }
+                        } else {
+                          print('[ApiServicePosts] fetchPosts: Item postingan bukan Map: $postJson');
+                        }
+                      }
                 } catch (e,s) {
                     print('[ApiServicePosts] fetchPosts: Error parsing post: $postJson, Error: $e, Stack: $s');
                 }
@@ -341,50 +352,190 @@ class ApiServicePosts {
 
 // MODEL DEFINITIONS (ANDA SUDAH MENYEDIAKAN INI, SAYA HANYA MEMASTIKAN ADA DI SINI UNTUK KONTEKS)
 // Pastikan definisi ini konsisten dengan yang Anda gunakan di CommentPage.dart
+class UserModel {
+  final dynamic id; // Bisa int atau String
+  final String name;
+  final String? profileImage;
+  final String? email;
+  final String? phoneNumber;
 
+  UserModel({
+    required this.id,
+    required this.name,
+    this.profileImage,
+    this.email,
+    this.phoneNumber,
+  });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'] ?? json['user_id'],
+      name: json['name'] ?? json['username'] ?? 'Unknown User',
+      profileImage: json['profile_image'] ?? json['photo_profile'] ?? json['avatar'],
+      email: json['email'],
+      phoneNumber: json['phone'] ?? json['phone_number'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'profile_image': profileImage,
+      'email': email,
+      'phone_number': phoneNumber,
+    };
+  }
+
+  // Helper method untuk mendapatkan gambar profil dengan fallback
+  String getProfileImageUrl() {
+    if (profileImage == null || 
+        profileImage!.isEmpty || 
+        profileImage == 'assets/images/default_user.png') {
+      return 'assets/images/default_user.png';
+    }
+    return profileImage!;
+  }
+
+  // Helper method untuk cek apakah menggunakan default avatar
+  bool get hasCustomProfileImage {
+    return profileImage != null && 
+           profileImage!.isNotEmpty && 
+           profileImage != 'assets/images/default_user.png';
+  }
+}
+
+// ===== POST MODEL =====
 class PostModel {
-  final dynamic id; 
+  final dynamic id;
   final String judul;
   final String deskripsi;
-  final int apresiasi;
-  final int komentar; // Ini adalah jumlah komentar
-  final String? userImage;
-  final String? username;
-  final String? timeAgo; // Ini sepertinya dihitung oleh _formatTimeAgo di fetchPosts
+  final int apresiasi; // Jumlah likes/apresiasi
+  final int komentar; // Jumlah komentar
+  final UserModel? user; // Data user yang posting
+  final String? createdAt; // Timestamp untuk format "time ago"
+  final String? updatedAt;
+  final bool isLiked; // Apakah user sudah like post ini
+  final List<String>? tags; // Tags opsional untuk kategorisasi
+  final String? imageUrl; // URL gambar post jika ada
 
   PostModel({
     this.id,
     required this.judul,
     required this.deskripsi,
-    this.username,
-    this.userImage,
-    this.timeAgo,
+    this.user,
+    this.createdAt,
+    this.updatedAt,
     this.apresiasi = 0,
-    this.komentar = 0, // Jumlah komentar
+    this.komentar = 0,
+    this.isLiked = false,
+    this.tags,
+    this.imageUrl,
   });
 
+  // Helper getters untuk compatibility dengan view yang ada
+  String? get username => user?.name ?? 'User';
+  String? get userImage => user?.profileImage;
+  String? get timeAgo => createdAt; // Will be formatted in UI
+
+  factory PostModel.fromJson(Map<String, dynamic> json) {
+    // Helper function untuk parsing int yang aman
+    int safeParseInt(dynamic value, {int defaultValue = 0}) {
+      if (value == null) return defaultValue;
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value) ?? defaultValue;
+      return defaultValue;
+    }
+
+    // Parse user data
+    UserModel? userData;
+    if (json['user'] != null && json['user'] is Map<String, dynamic>) {
+      try {
+        userData = UserModel.fromJson(json['user'] as Map<String, dynamic>);
+      } catch (e) {
+        print('[PostModel] Error parsing user data: $e');
+      }
+    }
+
+    // Parse tags jika ada
+    List<String>? postTags;
+    if (json['tags'] != null) {
+      if (json['tags'] is List) {
+        postTags = (json['tags'] as List).map((tag) => tag.toString()).toList();
+      } else if (json['tags'] is String) {
+        // Jika tags berupa string yang dipisah koma
+        postTags = json['tags'].toString().split(',').map((tag) => tag.trim()).toList();
+      }
+    }
+
+    return PostModel(
+      id: json['id'] ?? json['post_id'] ?? json['_id'],
+      judul: json['judul']?.toString() ?? json['title']?.toString() ?? '',
+      deskripsi: json['deskripsi']?.toString() ?? 
+                json['description']?.toString() ?? 
+                json['content']?.toString() ?? '',
+      apresiasi: safeParseInt(json['apresiasi']) ?? 
+                safeParseInt(json['like_count']) ?? 
+                safeParseInt(json['likes']),
+      komentar: safeParseInt(json['komen']) ?? 
+               safeParseInt(json['komentar']) ?? 
+               safeParseInt(json['comment_count']) ?? 
+               safeParseInt(json['comments']),
+      user: userData,
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+      isLiked: json['is_liked'] == true || json['isLiked'] == true,
+      tags: postTags,
+      imageUrl: json['image_url']?.toString() ?? json['image']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (id != null) 'id': id,
+      'judul': judul,
+      'deskripsi': deskripsi,
+      'apresiasi': apresiasi,
+      'komentar': komentar,
+      if (user != null) 'user': user!.toJson(),
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      'is_liked': isLiked,
+      if (tags != null) 'tags': tags,
+      if (imageUrl != null) 'image_url': imageUrl,
+    };
+  }
+
+  // Method untuk update apresiasi
   PostModel copyWith({
-    dynamic id, // Ubah tipe jadi dynamic
+    dynamic id,
     String? judul,
     String? deskripsi,
-    String? username,
-    String? userImage,
-    String? timeAgo,
     int? apresiasi,
     int? komentar,
+    UserModel? user,
+    String? createdAt,
+    String? updatedAt,
+    bool? isLiked,
+    List<String>? tags,
+    String? imageUrl,
   }) {
     return PostModel(
       id: id ?? this.id,
       judul: judul ?? this.judul,
       deskripsi: deskripsi ?? this.deskripsi,
-      username: username ?? this.username,
-      userImage: userImage ?? this.userImage,
-      timeAgo: timeAgo ?? this.timeAgo,
       apresiasi: apresiasi ?? this.apresiasi,
       komentar: komentar ?? this.komentar,
+      user: user ?? this.user,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isLiked: isLiked ?? this.isLiked,
+      tags: tags ?? this.tags,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
-  
+
+  // Helper methods untuk ID handling
   String? getIdAsString() {
     if (id == null) return null;
     return id.toString();
@@ -397,129 +548,201 @@ class PostModel {
     return null;
   }
 
-  factory PostModel.fromJson(Map<String, dynamic> json) {
-    // print('[PostModel] Parsing post: $json'); // Bisa diaktifkan jika perlu debug PostModel
-    
-    int? safeInt(dynamic value) {
-      if (value == null) return 0; // Default ke 0 jika null
-      if (value is int) return value;
-      if (value is String) return int.tryParse(value) ?? 0; // Default ke 0 jika parsing gagal
-      return 0; // Default untuk tipe lain
+  // Helper method untuk validasi post
+  bool get isValid {
+    return judul.isNotEmpty && deskripsi.isNotEmpty;
+  }
+
+  // Helper method untuk preview deskripsi
+  String getPreviewDescription({int maxLength = 100}) {
+    if (deskripsi.length <= maxLength) return deskripsi;
+    return '${deskripsi.substring(0, maxLength)}...';
+  }
+}
+
+// ===== COMMENT MODEL =====
+class CommentModel {
+  final dynamic id;
+  final dynamic postId;
+  final String komentar; // Isi komentar
+  final UserModel? user; // Data user yang komen
+  final String? createdAt;
+  final String? updatedAt;
+  final int likes; // Jumlah likes pada komentar
+  final bool isLiked; // Apakah user sudah like komentar ini
+  final List<CommentModel>? replies; // Replies/balasan komentar
+
+  CommentModel({
+    required this.id,
+    required this.postId,
+    required this.komentar,
+    this.user,
+    this.createdAt,
+    this.updatedAt,
+    this.likes = 0,
+    this.isLiked = false,
+    this.replies,
+  });
+
+  // Helper getters untuk compatibility
+  String get content => komentar;
+  String? get username => user?.name ?? 'User';
+  String? get userImage => user?.profileImage;
+  String get userId => user?.id?.toString() ?? '';
+
+  factory CommentModel.fromJson(Map<String, dynamic> json) {
+    // Parse user data
+    UserModel? userData;
+    if (json['user'] != null && json['user'] is Map<String, dynamic>) {
+      try {
+        userData = UserModel.fromJson(json['user'] as Map<String, dynamic>);
+      } catch (e) {
+        print('[CommentModel] Error parsing user data: $e');
+      }
     }
 
-    final postId = json['id'] ?? json['post_id'] ?? json['_id'];
-    
-    // Untuk `timeAgo`, jika API mengirim `created_at` yang perlu diformat,
-    // sebaiknya formatting dilakukan di UI atau saat data akan ditampilkan,
-    // bukan saat parsing model, kecuali API sudah mengirim string "time ago".
-    // Jika `created_at` adalah timestamp, simpan sebagai DateTime atau String timestamp.
-    String? createdAtTimestamp = json['created_at']?.toString(); 
-    // String timeAgoFormatted = createdAtTimestamp != null ? ApiServicePosts._formatTimeAgo(createdAtTimestamp) : 'baru saja'; 
-    // Menghapus _formatTimeAgo dari sini karena sudah ada di CommentPage dan bisa menyebabkan duplikasi/inkonsistensi
+    // Parse replies jika ada
+    List<CommentModel>? commentReplies;
+    if (json['replies'] != null && json['replies'] is List) {
+      try {
+        commentReplies = (json['replies'] as List)
+            .map((reply) => CommentModel.fromJson(reply as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        print('[CommentModel] Error parsing replies: $e');
+      }
+    }
 
-    return PostModel(
-      id: postId,
-      judul: json['judul']?.toString() ?? json['title']?.toString() ?? '',
-      deskripsi: json['deskripsi']?.toString() ?? json['description']?.toString() ?? json['content']?.toString() ?? '',
-      apresiasi: safeInt(json['apresiasi']) ?? safeInt(json['like_count']) ?? 0,
-      komentar: safeInt(json['komen']) ?? safeInt(json['komentar']) ?? safeInt(json['comment_count']) ?? 0,
-      username: json['user'] != null && json['user'] is Map ? json['user']['name']?.toString() : (json['username']?.toString() ?? json['user_name']?.toString() ?? 'User'),
-      userImage: json['user'] != null && json['user'] is Map ? json['user']['photo_profile']?.toString() : (json['userImage']?.toString() ?? json['user_image']?.toString() ?? 'assets/images/default_user.png'),
-      timeAgo: createdAtTimestamp, // Simpan timestamp mentah, format di UI
+    return CommentModel(
+      id: json['id'] ?? json['comment_id'],
+      postId: json['post_id'] ?? json['postId'],
+      komentar: json['komentar']?.toString() ?? 
+               json['comment']?.toString() ?? 
+               json['content']?.toString() ?? '',
+      user: userData,
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+      likes: int.tryParse(json['likes']?.toString() ?? '0') ?? 0,
+      isLiked: json['is_liked'] == true || json['isLiked'] == true,
+      replies: commentReplies,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'judul': judul,
-      'deskripsi': deskripsi,
-      if (id != null) 'post_id': id.toString(),
+      'id': id,
+      'post_id': postId,
+      'komentar': komentar,
+      if (user != null) 'user': user!.toJson(),
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      'likes': likes,
+      'is_liked': isLiked,
+      if (replies != null) 'replies': replies!.map((reply) => reply.toJson()).toList(),
     };
   }
+
+  CommentModel copyWith({
+    dynamic id,
+    dynamic postId,
+    String? komentar,
+    UserModel? user,
+    String? createdAt,
+    String? updatedAt,
+    int? likes,
+    bool? isLiked,
+    List<CommentModel>? replies,
+  }) {
+    return CommentModel(
+      id: id ?? this.id,
+      postId: postId ?? this.postId,
+      komentar: komentar ?? this.komentar,
+      user: user ?? this.user,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      likes: likes ?? this.likes,
+      isLiked: isLiked ?? this.isLiked,
+      replies: replies ?? this.replies,
+    );
+  }
+
+  // Helper method untuk validasi komentar
+  bool get isValid {
+    return komentar.isNotEmpty;
+  }
+
+  // Helper method untuk cek apakah ada replies
+  bool get hasReplies {
+    return replies != null && replies!.isNotEmpty;
+  }
+
+  // Helper method untuk menghitung total replies
+  int get replyCount {
+    return replies?.length ?? 0;
+  }
 }
 
-class UserModel {
-  final int id;
-  final String name;
-  final String email;
-  final String? role;
-  // final String? photoProfile; // Contoh jika ada
+// ===== PAGINATION MODEL (untuk future use) =====
+class PaginationModel {
+  final int currentPage;
+  final int totalPages;
+  final int totalItems;
+  final int itemsPerPage;
+  final bool hasNextPage;
+  final bool hasPreviousPage;
 
-  UserModel({
-    required this.id,
-    required this.name,
-    required this.email,
-    this.role,
-    // this.photoProfile,
+  PaginationModel({
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalItems,
+    required this.itemsPerPage,
+    required this.hasNextPage,
+    required this.hasPreviousPage,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] as int,
-      name: json['name'] != null ? json['name'].toString() : 'Nama Tidak Diketahui',
-      email: json['email'] != null ? json['email'].toString() : '',
-      role: json['role']?.toString(),
-      // photoProfile: json['photo_profile']?.toString(),
+  factory PaginationModel.fromJson(Map<String, dynamic> json) {
+    return PaginationModel(
+      currentPage: json['current_page'] ?? json['page'] ?? 1,
+      totalPages: json['total_pages'] ?? json['last_page'] ?? 1,
+      totalItems: json['total'] ?? json['total_items'] ?? 0,
+      itemsPerPage: json['per_page'] ?? json['limit'] ?? 10,
+      hasNextPage: json['has_next_page'] ?? json['hasNextPage'] ?? false,
+      hasPreviousPage: json['has_previous_page'] ?? json['hasPreviousPage'] ?? false,
     );
   }
 }
 
-class CommentModel {
-  final int id;
-  final int postId;
-  final String userId;
-  final String komentar;
-  final String? createdAt;
-  final String? updatedAt;
-  final UserModel? user;
+// ===== API RESPONSE MODEL =====
+class ApiResponse<T> {
+  final bool success;
+  final String? message;
+  final T? data;
+  final Map<String, dynamic>? errors;
+  final PaginationModel? pagination;
 
-  String? username;
-  String? userImage;
-  String get content => komentar;
-
-  CommentModel({
-    required this.id,
-    required this.postId,
-    required this.userId,
-    required this.komentar,
-    this.createdAt,
-    this.updatedAt,
-    this.user,
-    this.username,
-    this.userImage,
+  ApiResponse({
+    required this.success,
+    this.message,
+    this.data,
+    this.errors,
+    this.pagination,
   });
 
-  factory CommentModel.fromJson(Map<String, dynamic> json) {
-    UserModel? parsedUser;
-    if (json['user'] != null && json['user'] is Map<String, dynamic>) {
-        try {
-            parsedUser = UserModel.fromJson(json['user'] as Map<String, dynamic>);
-        } catch (e) {
-            print('[CommentModel] Error parsing nested user in comment: $e. User JSON: ${json['user']}');
-        }
+  factory ApiResponse.fromJson(
+    Map<String, dynamic> json, 
+    T Function(dynamic)? fromJsonT
+  ) {
+    PaginationModel? paginationData;
+    if (json['pagination'] != null) {
+      paginationData = PaginationModel.fromJson(json['pagination']);
     }
 
-    final comment = CommentModel(
-      id: json['id'] as int,
-      postId: json['post_id'] as int,
-      userId: json['user_id'] != null ? json['user_id'].toString() : '',
-      komentar: json['komentar'] != null ? json['komentar'].toString() : '',
-      createdAt: json['created_at']?.toString(),
-      updatedAt: json['updated_at']?.toString(),
-      user: parsedUser,
+    return ApiResponse<T>(
+      success: json['success'] ?? json['status'] == 'success' ?? true,
+      message: json['message']?.toString(),
+      data: json['data'] != null && fromJsonT != null ? fromJsonT(json['data']) : json['data'],
+      errors: json['errors'] as Map<String, dynamic>?,
+      pagination: paginationData,
     );
-
-    if (comment.user != null) {
-      comment.username = comment.user!.name;
-      // Jika UserModel punya photoProfile:
-      // comment.userImage = comment.user!.photoProfile ?? 'assets/images/default_user.png';
-    } else {
-      comment.username = 'User'; // Default jika tidak ada info user
-    }
-    
-    // Pastikan userImage di-set, jika tidak dari user, gunakan default
-    comment.userImage ??= 'assets/images/default_user.png';
-
-    return comment;
   }
 }

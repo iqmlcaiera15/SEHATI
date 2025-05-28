@@ -63,7 +63,9 @@ class _CommunityPageState extends State<CommunityPage> {
   }
 
   // Helper function to format the API timestamp into a "time ago" format
-  static String _formatTimeAgo(String dateString) {
+  static String _formatTimeAgo(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return 'baru saja';
+    
     try {
       final DateTime date = DateTime.parse(dateString);
       final Duration difference = DateTime.now().difference(date);
@@ -84,6 +86,33 @@ class _CommunityPageState extends State<CommunityPage> {
     } catch (e) {
       print('Error formatting date: $e');
       return 'baru saja';
+    }
+  }
+
+  // Helper method to build user avatar
+  Widget _buildUserAvatar(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty || imageUrl == 'assets/images/default_user.png') {
+      return const Icon(
+        Icons.person,
+        color: Colors.white,
+        size: 20,
+      );
+    } else {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 20,
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -479,8 +508,9 @@ class _CommunityPageState extends State<CommunityPage> {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: AssetImage(post.userImage ?? 'assets/images/default_user.jpeg'),
                         radius: 20,
+                        backgroundColor: const Color(0xFF4DBAFF),
+                        child: _buildUserAvatar(post.userImage),
                       ),
                       const SizedBox(width: 12),
                       Column(
@@ -495,7 +525,7 @@ class _CommunityPageState extends State<CommunityPage> {
                             ),
                           ),
                           Text(
-                            post.timeAgo ?? 'baru saja',
+                            _formatTimeAgo(post.timeAgo),
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 12,
@@ -604,6 +634,7 @@ class _CommunityPageState extends State<CommunityPage> {
     }
     
     void _handleLikePost(PostModel post) async {
+      print('[CommunityPage] _handleLikePost DIPANGGIL untuk post ID: ${post.id}'); // <-- TAMBAHKAN INI
       if (post.id != null) {
         setState(() {
           isLoading = true;
