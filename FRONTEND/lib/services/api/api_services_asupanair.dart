@@ -47,7 +47,7 @@ class ApiServiceAsupanAir {
       throw Exception('Token tidak ditemukan. Silakan login kembali.');
     }
 
-    final url = Uri.parse('$_baseUrl/water-intake/add');
+    final url = Uri.parse('$_baseUrl/water-intake');
 
     try {
       final response = await http.post(
