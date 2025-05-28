@@ -91,8 +91,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     // Prediksi Metode Persalinan
     Route::get('/predictions', [PredictionController::class, 'index']);
-    Route::get('/predictions/{id}', [PredictionController::class, 'show']);
     Route::post('/predictions', [PredictionController::class, 'store']);
+    Route::get('/predictions/{id}', [PredictionController::class, 'show']);
     Route::put('/predictions/{id}', [PredictionController::class, 'update']);
     Route::delete('/predictions/{id}', [PredictionController::class, 'destroy']);
 
@@ -123,7 +123,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::get('/products/{product}', [ProductController::class, 'show']);
-    Route::put('/products/{product}', [ProductController::class, 'update']); 
+    Route::put('/products/{product}', [ProductController::class, 'update']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
 

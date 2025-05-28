@@ -65,7 +65,7 @@ class PredictionController extends Controller
             ];
 
             // Kirim ke Flask API
-            $flaskUrl = 'https://sehatimlpredict-production.up.railway.app/predict';
+            $flaskUrl = 'https://sehatimlprediksi-production.up.railway.app/predict';
             $response = Http::post($flaskUrl, $dataToSend);
 
             if ($response->failed()) {
