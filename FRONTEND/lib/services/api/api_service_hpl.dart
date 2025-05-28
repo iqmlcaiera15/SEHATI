@@ -14,7 +14,7 @@ class ApiServiceHPL {
     }
 
     final response = await http.post(
-      Uri.parse('$baseUrl/pregnancy-calculator'),
+      Uri.parse('$baseUrl/pregnancy-calculators'),
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -23,7 +23,7 @@ class ApiServiceHPL {
       body: jsonEncode({'hpht': hpht.toIso8601String().split('T')[0]}),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
       throw Exception('Gagal menghitung HPL (${response.statusCode})');
