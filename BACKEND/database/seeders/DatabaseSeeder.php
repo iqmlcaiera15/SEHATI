@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
             PostpartumArticlesSeeder::class,
             SaranMakananSeeder::class,
             WaterIntakeSeeder::class,
+            ProductSeeder::class
         ]);
     }
 }

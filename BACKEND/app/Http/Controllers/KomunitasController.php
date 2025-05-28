@@ -14,10 +14,29 @@ class KomunitasController extends Controller
 {
     public function index()
     {
-        $Komunitas = Komunitas::all();
+        $Komunitas = Komunitas::with('user:id,name,selected_icon_data_cache')->get();
+
+        // Transform data to include user information
+        $KomunitasWithUser = $Komunitas->map(function ($komunitas) {
+            return [
+                'id' => $komunitas->post_id,
+                'judul' => $komunitas->judul,
+                'deskripsi' => $komunitas->deskripsi,
+                'apresiasi' => $komunitas->apresiasi,
+                'komentar' => $komunitas->komentar,
+                'created_at' => $komunitas->created_at,
+                'updated_at' => $komunitas->updated_at,
+                'user_id' => $komunitas->user_id,
+                'user' => [
+                    'id' => $komunitas->user->id,
+                    'name' => $komunitas->user->name,
+                    'profile_image' => $komunitas->user->selected_icon_data_cache, // URL dari kolom data
+                ]
+            ];
+        });
 
         return response()->json([
-            'Komunitas' => $Komunitas
+            'Komunitas' => $KomunitasWithUser
         ]);
     }
 

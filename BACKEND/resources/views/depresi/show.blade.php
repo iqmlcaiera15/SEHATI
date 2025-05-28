@@ -255,69 +255,6 @@
     </div>
     @endif
 
-    <!-- Raw Data Card (for debugging/admin purposes) -->
-    <div class="card">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0"><i class="fas fa-database"></i> Data Mentah</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <table class="table table-sm">
-                        <tr>
-                            <td><strong>ID Prediksi:</strong></td>
-                            <td>{{ $prediksi->id }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>User ID:</strong></td>
-                            <td>{{ $prediksi->user_id }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Umur (raw):</strong></td>
-                            <td>{{ $prediksi->umur }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Merasa Sedih (raw):</strong></td>
-                            <td>{{ $prediksi->merasa_sedih }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Mudah Tersinggung (raw):</strong></td>
-                            <td>{{ $prediksi->mudah_tersinggung }}</td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <table class="table table-sm">
-                        <tr>
-                            <td><strong>Masalah Tidur (raw):</strong></td>
-                            <td>{{ $prediksi->masalah_tidur }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Masalah Fokus (raw):</strong></td>
-                            <td>{{ $prediksi->masalah_fokus }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Pola Makan (raw):</strong></td>
-                            <td>{{ $prediksi->pola_makan }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Merasa Bersalah (raw):</strong></td>
-                            <td>{{ $prediksi->merasa_bersalah }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Suicide Attempt (raw):</strong></td>
-                            <td>{{ $prediksi->suicide_attempt }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Hasil Prediksi (raw):</strong></td>
-                            <td>{{ $prediksi->hasil_prediksi ? '1' : '0' }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Action Buttons -->
     <div class="mt-4 text-center">
         <a href="{{ route('depresi.index') }}" class="btn btn-secondary me-2">

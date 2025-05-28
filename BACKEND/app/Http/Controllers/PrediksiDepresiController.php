@@ -115,7 +115,73 @@ class PredictionController extends Controller
 
         return response()->json([
             "status" => "success",
-            "message" => "Riwayat prediksi berhasil dihapus"
+            "message" => "History prediksi berhasil dihapus"
         ]);
     }
+
+    private function categorizeUmur($umur)
+    {
+        if ($umur <= 30) return 0;
+        elseif ($umur >= 31 && $umur <= 35) return 1;
+        elseif ($umur >= 36 && $umur <= 40) return 2;
+        elseif ($umur >= 41 && $umur <= 45) return 3;
+        elseif ($umur >= 46 && $umur <= 50) return 4;
+        else return null; // umur di luar jangkauan
+    }
+
+    private function convertToNumber($field, $value)
+    {
+        $mapping = [
+            'merasa_sedih' => ['Tidak' => 0, 'Ya' => 1, 'Kadang-kadang' => 2],
+            'mudah_tersinggung' => ['Tidak' => 0, 'Ya' => 1, 'Kadang-kadang' => 2],
+            'masalah_tidur' => ['Tidak' => 0, 'Ya' => 1, 'Dua hari dalam seminggu/lebih' => 2],
+            'masalah_fokus' => ['Tidak' => 0, 'Ya' => 1, 'Sering' => 2],
+            'pola_makan' => ['Tidak sama sekali' => 2, 'Ya' => 1, 'Kadang-kadang' => 0],
+            'merasa_bersalah' => ['Tidak' => 0, 'Ya' => 1, 'Mungkin' => 2],
+            'suicide_attempt' => ['Tidak' => 0, 'Ya' => 1, 'Tidak ingin menjawab' => 2],
+        ];
+
+        return $mapping[$field][$value] ?? null;
+    }
+
+    private function convertToText($field, $value)
+    {
+        $reverseMapping = [
+            'umur' => [
+                0 => '0-30',
+                1 => '31-35',
+                2 => '36-40',
+                3 => '41-45',
+                4 => '46-50'
+            ],
+            'merasa_sedih' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
+            'mudah_tersinggung' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
+            'masalah_tidur' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Dua hari dalam seminggu/lebih'],
+            'masalah_fokus' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Sering'],
+            'pola_makan' => [2=> 'Tidak sama sekali', 1 => 'Ya', 0 => 'Kadang-kadang'],
+            'merasa_bersalah' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Mungkin'],
+            'suicide_attempt' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Tidak ingin menjawab'],
+        ];
+
+        return $reverseMapping[$field][$value] ?? "Tidak diketahui";
+    }
+
+
+    private function predictDepresi($data)
+    {
+        $response = Http::post('https://sehatimldepresi-production.up.railway.app/predict', [
+            // $response = Http::post('http://127.0.0.1:5000/predict', [
+            'features' => array_values($data)
+        ]);
+
+        if ($response->failed()) {
+            $status = $response->status();
+            $body = $response->body();
+
+            throw new \Exception("Gagal memanggil Flask API. Status: $status. Respons: $body");
+        }
+
+        return $response->json()['prediction'] ?? null;
+    }
+
 }
