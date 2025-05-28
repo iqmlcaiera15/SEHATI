@@ -30,7 +30,7 @@ class KomunitasController extends Controller
                 'user' => [
                     'id' => $komunitas->user->id,
                     'name' => $komunitas->user->name,
-                    'profile_image' => $komunitas->user->data, // URL dari kolom data
+                    'profile_image' => $komunitas->user->selected_icon_data_cache, // URL dari kolom data
                 ]
             ];
         });
