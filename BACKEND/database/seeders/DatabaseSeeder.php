@@ -40,7 +40,6 @@ class DatabaseSeeder extends Seeder
             IconSeeder::class,
             KomunitasSeeder::class,
             PostpartumArticlesSeeder::class,
-            PregnancyStageSeeder::class,
             SaranMakananSeeder::class,
             WaterIntakeSeeder::class,
         ]);

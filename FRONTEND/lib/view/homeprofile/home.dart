@@ -9,6 +9,12 @@ import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart';
 import 'package:Sehati/providers/auth_provider.dart';
 import 'package:Sehati/services/api/dio_client.dart';
 import 'package:Sehati/view/registerlogin/login_screen.dart';
+import 'package:Sehati/view/prediksipersalinan/index_prediksi.dart';
+import 'package:Sehati/view/asupanair/index_asupanair.dart';
+import 'package:Sehati/view/kalkulatorhpl/index_hpl.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -23,12 +29,17 @@ class _HomePageState extends State<HomePage> {
   final DioClient _dioClient = DioClient();
   String _protectedData = '';
   bool _isLoading = false;
+  String? _hpl;
+  int? _mingguKe;
+
   
   @override
   void initState() {
     super.initState();
     _loadRecentData();
     _fetchProtectedData();
+    _fetchProtectedData();
+    _loadHPLData(); // ← tambahan ini
   }
 
   void _loadRecentData() {
@@ -266,9 +277,9 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               const Icon(Icons.calendar_today, color: Colors.white, size: 18),
                               const SizedBox(width: 8),
-                              const Text(
-                                'Minggu ke-28',
-                                style: TextStyle(
+                              Text(
+                                _mingguKe != null ? 'Minggu ke-$_mingguKe' : 'Minggu belum dihitung',
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -280,7 +291,7 @@ class _HomePageState extends State<HomePage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              _buildStatItem('HPL', '15 Jun 2025'),
+                              _buildStatItem('HPL', _formatHPL(_hpl)),
                               _buildStatItem('Usia', '30 tahun'),
                               _buildStatItem('BMI', '23.5'),
                             ],
@@ -321,19 +332,23 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
                               _buildServiceItem(
-                                'Kalkulator HPL', 
-                                Icons.calendar_month_outlined,
-                                () {
-                                  // Navigate to HPL calculator
-                                },
-                              ),
-                              _buildServiceItem(
-                                'Konsultasi', 
-                                Icons.chat_outlined,
-                                () {
-                                  // Navigate to consultation page
-                                },
-                              ),
+                              'Deteksi Depresi', 
+                              Icons.sentiment_dissatisfied_outlined,
+                              () {
+                                // TODO: Navigasi ke halaman deteksi depresi
+                                // Navigator.push(context, MaterialPageRoute(builder: (_) => const DeteksiDepresiPage()));
+                              },
+                            ),
+                                _buildServiceItem(
+                                  'Prediksi Persalinan', 
+                                  Icons.pregnant_woman_outlined,
+                                  () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => IndexPrediksi()),
+                                    );
+                                  },
+                                ),
                             ],
                           ),
                         ],
@@ -544,6 +559,28 @@ class _HomePageState extends State<HomePage> {
                                     Icons.hotel,
                                   ),
                                 ),
+                                InkWell(
+                                  onTap: () {
+                                    // TODO: Navigasi ke Kalkulator HPL
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AddDataHPL()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Kalkulator HPL',
+                                    'Hitung perkiraan hari lahir bayi Anda secara cepat',
+                                    Icons.date_range,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    // TODO: Navigasi ke Hidrasi Harian
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AsupanAirPage()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Hidrasi Harian',
+                                    'Pantau asupan cairan Anda setiap hari',
+                                    Icons.local_drink,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -667,7 +704,24 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
-  
+  Future<void> _loadHPLData() async {
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    _hpl = prefs.getString('last_hpl');
+    _mingguKe = prefs.getInt('last_week');
+  });
+}
+
+String _formatHPL(String? hpl) {
+  if (hpl == null) return 'Belum dihitung';
+  try {
+    final parsedDate = DateTime.parse(hpl);
+    return DateFormat('dd MMM yyyy').format(parsedDate);
+  } catch (_) {
+    return 'Format salah';
+  }
+}
+
   Widget _buildServiceItem(String label, IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,

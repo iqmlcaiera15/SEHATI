@@ -4,22 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Prediction;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Exception;
 
 class PredictionController extends Controller
 {
-    private $FLASK_API_URL = "http://127.0.0.1:5000/predict"; // URL Flask API
-
     public function index()
     {
-        $predictions = Prediction::all();
+        $predictions = Prediction::latest()->get();
 
         return response()->json([
             'status' => 'success',
             'data' => $predictions
-        ], 200);
+        ]);
     }
 
     public function show($id)
@@ -29,92 +26,103 @@ class PredictionController extends Controller
         if (!$prediction) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Prediksi tidak ditemukan'
+                'message' => 'Data tidak ditemukan'
             ], 404);
         }
 
         return response()->json([
             'status' => 'success',
             'data' => $prediction
-        ], 200);
+        ]);
     }
 
     public function store(Request $request)
     {
-        try {
-            // 🔹 Validasi input dari user
-            $validated = $request->validate([
-                'usia_ibu' => 'required|integer|min:15|max:50',
-                'tekanan_darah' => 'required|string|in:normal,rendah,tinggi',
-                'riwayat_persalinan' => 'required|string|in:tidak ada,normal,caesar',
-                'posisi_janin' => 'required|string|in:normal,lintang,sungsang',
-                'riwayat_kesehatan_ibu' => 'nullable|string',
-                'kondisi_kesehatan_janin' => 'nullable|string'
-            ]);
+        $validator = Validator::make($request->all(), [
+            'usia_ibu' => 'required|integer|min:15|max:50',
+            'tekanan_darah' => 'required|in:normal,rendah,tinggi',
+            'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
+            'posisi_janin' => 'required|in:normal,lintang,sungsang',
+            'riwayat_kesehatan_ibu' => 'nullable|string',
+            'kondisi_kesehatan_janin' => 'nullable|string',
+        ]);
 
-            // 🔹 Siapkan data untuk dikirim ke Flask
-            $requestData = [
-                'usia_ibu' => (int) $validated['usia_ibu'],
-                'tekanan_darah' => strtolower($validated['tekanan_darah']),
-                'riwayat_persalinan' => strtolower($validated['riwayat_persalinan']),
-                'posisi_janin' => strtolower($validated['posisi_janin']),
-                'riwayat_kesehatan_ibu' => $validated['riwayat_kesehatan_ibu'] ?? 'normal', // Tidak lowercase
-                'kondisi_kesehatan_janin' => $validated['kondisi_kesehatan_janin'] ?? 'Normal' // Tidak lowercase
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $dataToSend = [
+                'usia_ibu' => (int) $request->usia_ibu,
+                'tekanan_darah' => strtolower($request->tekanan_darah),
+                'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
+                'posisi_janin' => strtolower($request->posisi_janin),
+                'riwayat_kesehatan_ibu' => $request->riwayat_kesehatan_ibu ?? 'normal',
+                'kondisi_kesehatan_janin' => $request->kondisi_kesehatan_janin ?? 'normal',
             ];
 
-            Log::info('📩 Data yang dikirim ke Flask:', $requestData);
-
-            // 🔹 Kirim POST ke Flask API
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ])->post($this->FLASK_API_URL, $requestData);
+            // Kirim ke Flask API
+            $flaskUrl = 'https://sehatimlpredict-production.up.railway.app/predict';
+            $response = Http::post($flaskUrl, $dataToSend);
 
             if ($response->failed()) {
-                Log::error('❌ Flask API gagal merespons.', ['response' => $response->body()]);
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Gagal mendapatkan prediksi dari Flask API',
-                    'details' => $response->json()
-                ], 500);
+                $status = $response->status();
+                $body = $response->body();
+                throw new \Exception("Gagal memanggil Flask API. Status: $status. Respons: $body");
             }
 
-            $flaskResponse = $response->json();
-            Log::info('✅ Respons dari Flask API:', $flaskResponse);
+            $result = $response->json();
+            $hasil = $result['hasil_prediksi'] ?? null;
+            $faktor = $result['faktor'] ?? '-';
 
-            // 🔹 Ambil data dari respons Flask
-            $status = $flaskResponse['status'] ?? null;
-            $message = $flaskResponse['message'] ?? null;
-            $hasilPrediksi = $flaskResponse['hasil_prediksi'] ?? null;
-
-            if (empty($status) || empty($message) || empty($hasilPrediksi)) {
-                Log::error('❌ Respons Flask API tidak lengkap.', $flaskResponse);
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Respons Flask API tidak valid',
-                    'details' => $flaskResponse
-                ], 500);
+            if (!$hasil) {
+                throw new \Exception("Respons Flask tidak lengkap: " . json_encode($result));
             }
 
-            // 🔹 Simpan hasil ke database
-            $prediction = Prediction::create(array_merge($validated, [
-                'metode_persalinan' => $hasilPrediksi
-            ]));
+            $prediction = Prediction::create(array_merge(
+                $dataToSend,
+                [
+                    'metode_persalinan' => $hasil,
+                    'faktor' => $faktor
+                ]
+            ));
 
             return response()->json([
                 'status' => 'success',
-                'message' => $message,
-                'hasil_prediksi' => $hasilPrediksi,
+                'message' => $result['message'] ?? 'Prediksi berhasil',
+                'hasil_prediksi' => $hasil,
+                'faktor' => $faktor,
                 'data' => $prediction
             ], 201);
 
-        } catch (Exception $e) {
-            Log::error('❌ Terjadi Exception:', ['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan saat memproses prediksi',
-                'details' => $e->getMessage()
+                'message' => 'Terjadi kesalahan saat prediksi',
+                'error_detail' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function deletebyID($id)
+    {
+        $prediction = Prediction::find($id);
+
+        if (!$prediction) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        $prediction->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Riwayat prediksi berhasil dihapus'
+        ]);
     }
 }

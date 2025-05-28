@@ -24,10 +24,10 @@ use App\Http\Controllers\IconsController;
 Route::get('/', function () {
     return view('welcome');
 });
- 
+
 // Authentication Routes (if you're using Laravel's default auth)
 Auth::routes();
- 
+
 // Custom Registration Routes
 Route::get('/register/bidan', [RegisterController::class, 'showBidanRegistrationForm'])->name('register.bidan.form');
 Route::post('/register/bidan', [RegisterController::class, 'registerBidan'])->name('register.bidan');
@@ -52,7 +52,7 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::delete('/deteksi/{id}', [DeteksiDesktopController::class, 'destroy'])->name('deteksi.destroy');
 
     Route::get('/depresi', [PrediksiDepresiDesktopController::class, 'index'])->name('depresi.index');
-    Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show'); 
+    Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show');
     Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.destroy');
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
@@ -76,7 +76,7 @@ Route::middleware(['auth'])->prefix('dinkes')->group(function () {
     Route::get('/dinkes/saldo/{id}/tambah', [InsentifController::class, 'showTambahSaldoForm'])->name('dinkes.form.tambah.saldo');
     Route::post('saldo/{userId}', [InsentifController::class, 'tambahSaldo'])->name('dinkes.tambah.saldo');
     // Add more dinkes routes here
-    
+
 });
 
     Route::get('saldo/{userId}', [InsentifController::class, 'Saldo'])->name('dinkes.dinkessaldo');
@@ -103,6 +103,6 @@ Route::get('/home', function() {
             return redirect()->route('dinkes.dashboard');
         }
     }
-    
+
     return redirect()->route('login');
 })->name('home');

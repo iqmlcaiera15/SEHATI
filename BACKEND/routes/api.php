@@ -12,14 +12,13 @@ use App\Http\Controllers\SkorEpdsController;
 use App\Http\Controllers\PredictionController;
 use App\Http\Controllers\WaterIntakeController;
 use App\Http\Controllers\PregnancyCalculatorController;
-use App\Http\Controllers\FetalMonitoringController;
 use App\Http\Controllers\PostpartumArticleController;
 use App\Http\Controllers\HomeProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\IconsController;
 use Illuminate\Support\Facades\Route;
 
-  
+
 // Auth routes - Pindahkan ke api.php jika menggunakan API
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
     Route::post('register', [AuthController::class, 'register']);
@@ -31,12 +30,12 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
 
 // Semua route terproteksi
 Route::group(['middleware' => 'auth:api'], function () {
-    
+
     //Profil
     Route::post('/isidata', [UserController::class, 'isidata']);
-    Route::get('/icons', [IconsController::class, 'index']);  
-    Route::put('/user/select-icon', [UserController::class, 'updateSelectedIcon']); 
-  
+    Route::get('/icons', [IconsController::class, 'index']);
+    Route::put('/user/select-icon', [UserController::class, 'updateSelectedIcon']);
+
     // Air Quality
     Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
 
@@ -109,13 +108,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'show']);
     Route::put('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'update']);
     Route::delete('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'destroy']);
-
-    // Fetal Monitoring
-    Route::get('fetal-monitorings', [FetalMonitoringController::class, 'index']);
-    Route::post('fetal-monitorings', [FetalMonitoringController::class, 'store']);
-    Route::get('fetal-monitorings/{id}', [FetalMonitoringController::class, 'show']);
-    Route::put('fetal-monitorings/{id}', [FetalMonitoringController::class, 'update']);
-    Route::delete('fetal-monitorings/{id}', [FetalMonitoringController::class, 'destroy']);
 
     // PostPartum Article
     Route::get('/postpartum', [PostpartumArticleController::class, 'index']);
