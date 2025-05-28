@@ -34,8 +34,9 @@ class _AddDataHPLState extends State<AddDataHPL> {
 
     try {
       final response = await ApiServiceHPL.calculateHPL(selectedDate!);
-      final hpht = DateTime.parse(response['hpht']);
-      final hpl = response['hpl'];
+      final data = response['data'];
+      final hpht = DateTime.parse(data['hpht']);
+      final hpl = data['hpl'];
       final mingguKe = DateTime.now().difference(hpht).inDays ~/ 7;
 
       final prefs = await SharedPreferences.getInstance();
