@@ -35,12 +35,17 @@ class _AddDataHPLState extends State<AddDataHPL> {
     try {
       final response = await ApiServiceHPL.calculateHPL(selectedDate!);
       final data = response['data'];
+
+      if (data == null || data['hpht'] == null || data['hpl'] == null || data['minggu_ke'] == null) {
+        throw Exception('Data dari server tidak lengkap atau salah format.');
+      }
+
       final hpht = DateTime.parse(data['hpht']);
-      final hpl = data['hpl'];
-      final mingguKe = DateTime.now().difference(hpht).inDays ~/ 7;
+      final hpl = data['hpl'] as String;
+      final mingguKe = (data['minggu_ke'] as num).round();
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('last_hpht', response['hpht']);
+      await prefs.setString('last_hpht', data['hpht']);
       await prefs.setString('last_hpl', hpl);
       await prefs.setInt('last_week', mingguKe);
 
@@ -76,7 +81,6 @@ class _AddDataHPLState extends State<AddDataHPL> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -121,8 +125,6 @@ class _AddDataHPLState extends State<AddDataHPL> {
               ],
             ),
           ),
-
-          // Body
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -152,8 +154,6 @@ class _AddDataHPLState extends State<AddDataHPL> {
                     ),
                   ),
                   const SizedBox(height: 28),
-
-                  // Pilih Tanggal
                   const Text('Tanggal', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
                   const SizedBox(height: 6),
                   GestureDetector(
@@ -183,8 +183,6 @@ class _AddDataHPLState extends State<AddDataHPL> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Tombol Hitung atau Kembali
                   SizedBox(
                     width: double.infinity,
                     child: estimatedDate == null
@@ -233,8 +231,6 @@ class _AddDataHPLState extends State<AddDataHPL> {
                           ),
                   ),
                   const SizedBox(height: 24),
-
-                  // Hasil
                   if (estimatedDate != null && week != null)
                     Container(
                       width: double.infinity,
@@ -288,7 +284,6 @@ class _AddDataHPLState extends State<AddDataHPL> {
                         ],
                       ),
                     ),
-
                   const SizedBox(height: 28),
                   const Text(
                     'Catatan',
