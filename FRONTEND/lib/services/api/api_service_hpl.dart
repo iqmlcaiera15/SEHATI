@@ -14,7 +14,7 @@ class ApiServiceHPL {
     }
 
     final response = await http.post(
-      Uri.parse('$baseUrl/pregnancy-calculator'),
+      Uri.parse('$baseUrl/pregnancy-calculators'),
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
