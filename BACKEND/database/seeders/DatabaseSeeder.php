@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
             PregnancyStageSeeder::class,
             SaranMakananSeeder::class,
             WaterIntakeSeeder::class,
+            ProductSeeder::class
         ]);
     }
 }
