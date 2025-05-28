@@ -2,38 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Prediction;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 
 class PredictionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $predictions = Prediction::latest()->get();
+        $query = Prediction::latest();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $predictions
-        ]);
-    }
-
-    public function show($id)
-    {
-        $prediction = Prediction::find($id);
-
-        if (!$prediction) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data tidak ditemukan'
-            ], 404);
+        // Filter berdasarkan metode persalinan
+        if ($request->filled('method')) {
+            $query->where('metode_persalinan', $request->method);
         }
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $prediction
-        ]);
+        // Filter berdasarkan tanggal prediksi
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        // Ambil hasil akhir
+        $predictions = $query->get();
+
+        return view('prediksi.index', compact('predictions'));
     }
 
     public function store(Request $request)
@@ -43,15 +37,12 @@ class PredictionController extends Controller
             'tekanan_darah' => 'required|in:normal,rendah,tinggi',
             'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
             'posisi_janin' => 'required|in:normal,lintang,sungsang',
-            'riwayat_kesehatan_ibu' => 'nullable|string',
-            'kondisi_kesehatan_janin' => 'nullable|string',
+            'riwayat_kesehatan_ibu' => 'required|string',
+            'kondisi_kesehatan_janin' => 'required|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()
-            ], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         try {
@@ -60,18 +51,15 @@ class PredictionController extends Controller
                 'tekanan_darah' => strtolower($request->tekanan_darah),
                 'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
                 'posisi_janin' => strtolower($request->posisi_janin),
-                'riwayat_kesehatan_ibu' => $request->riwayat_kesehatan_ibu ?? 'normal',
-                'kondisi_kesehatan_janin' => $request->kondisi_kesehatan_janin ?? 'normal',
+                'riwayat_kesehatan_ibu' => strtolower($request->riwayat_kesehatan_ibu),
+                'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
             ];
 
-            // Kirim ke Flask API
             $flaskUrl = 'https://sehatimlprediksi-production.up.railway.app/predict';
             $response = Http::post($flaskUrl, $dataToSend);
 
             if ($response->failed()) {
-                $status = $response->status();
-                $body = $response->body();
-                throw new \Exception("Gagal memanggil Flask API. Status: $status. Respons: $body");
+                throw new \Exception("Gagal memanggil Flask API. Status: {$response->status()}. Respons: {$response->body()}");
             }
 
             $result = $response->json();
@@ -82,28 +70,22 @@ class PredictionController extends Controller
                 throw new \Exception("Respons Flask tidak lengkap: " . json_encode($result));
             }
 
-            $prediction = Prediction::create(array_merge(
-                $dataToSend,
-                [
-                    'metode_persalinan' => $hasil,
-                    'faktor' => $faktor
-                ]
-            ));
-
-            return response()->json([
-                'status' => 'success',
-                'message' => $result['message'] ?? 'Prediksi berhasil',
-                'hasil_prediksi' => $hasil,
+            $prediction = Prediction::create([
+                'usia_ibu' => $dataToSend['usia_ibu'],
+                'tekanan_darah' => $dataToSend['tekanan_darah'],
+                'riwayat_persalinan' => $dataToSend['riwayat_persalinan'],
+                'posisi_janin' => $dataToSend['posisi_janin'],
+                'riwayat_kesehatan_ibu' => $dataToSend['riwayat_kesehatan_ibu'],
+                'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
+                'metode_persalinan' => $hasil,
                 'faktor' => $faktor,
-                'data' => $prediction
-            ], 201);
+                'user_id' => Auth::id(),
+            ]);
+
+            return redirect()->route('bidan.prediksi.result', $prediction->id);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat prediksi',
-                'error_detail' => $e->getMessage()
-            ], 500);
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat prediksi: ' . $e->getMessage());
         }
     }
 
@@ -112,17 +94,25 @@ class PredictionController extends Controller
         $prediction = Prediction::find($id);
 
         if (!$prediction) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data tidak ditemukan'
-            ], 404);
+            return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
 
         $prediction->delete();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Riwayat prediksi berhasil dihapus'
-        ]);
+        return redirect()->route('bidan.prediksi.index')->with('success', 'Riwayat prediksi berhasil dihapus');
+    }
+
+    public function result($id)
+    {
+        $prediction = Prediction::findOrFail($id);
+
+        return view('prediksi.result', compact('prediction'));
+    }
+
+    public function print($id)
+    {
+        $prediction = Prediction::findOrFail($id);
+
+        return view('prediksi.print', compact('prediction'));
     }
 }

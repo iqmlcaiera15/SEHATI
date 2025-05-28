@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Sehati/services/api/api_service_hpl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AddDataHPL extends StatefulWidget {
   const AddDataHPL({super.key});
@@ -10,11 +11,26 @@ class AddDataHPL extends StatefulWidget {
   State<AddDataHPL> createState() => _AddDataHPLState();
 }
 
-class _AddDataHPLState extends State<AddDataHPL> {
+class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateMixin {
   DateTime? selectedDate;
   String? estimatedDate;
   int? week;
   bool isLoading = false;
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -28,43 +44,40 @@ class _AddDataHPLState extends State<AddDataHPL> {
     }
   }
 
-  Future<void> _calculateHPL() async {
-    if (selectedDate == null) return;
-    setState(() => isLoading = true);
+Future<void> _calculateHPL() async {
+  if (selectedDate == null) return;
+  setState(() => isLoading = true);
 
-    try {
-      final response = await ApiServiceHPL.calculateHPL(selectedDate!);
-      final data = response['data'];
+  try {
+    final response = await ApiServiceHPL.calculateHPL(selectedDate!);
+    final data = response['data'];
+    final hpht = DateTime.parse(data['hpht']);
+    final hpl = data['hpl'] as String;
+    final mingguKe = (data['minggu_ke'] as num).round(); // pastikan dibulatkan
 
-      if (data == null || data['hpht'] == null || data['hpl'] == null || data['minggu_ke'] == null) {
-        throw Exception('Data dari server tidak lengkap atau salah format.');
-      }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_hpht', data['hpht']);
+    await prefs.setString('last_hpl', hpl);
+    await prefs.setInt('last_week', mingguKe);
 
-      final hpht = DateTime.parse(data['hpht']);
-      final hpl = data['hpl'] as String;
-      final mingguKe = (data['minggu_ke'] as num).round();
+    setState(() {
+      estimatedDate = hpl;
+      week = mingguKe;
+    });
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('last_hpht', data['hpht']);
-      await prefs.setString('last_hpl', hpl);
-      await prefs.setInt('last_week', mingguKe);
+    _controller.forward();
 
-      setState(() {
-        estimatedDate = hpl;
-        week = mingguKe;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hasil HPL berhasil dihitung!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menghitung HPL: $e')),
-      );
-    } finally {
-      setState(() => isLoading = false);
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('HPL berhasil dihitung!')),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Gagal menghitung HPL: $e')),
+    );
+  } finally {
+    setState(() => isLoading = false);
   }
+}
 
   String formatDate(String? date) {
     if (date == null) return '-';
@@ -76,269 +89,176 @@ class _AddDataHPLState extends State<AddDataHPL> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: Color(0xFFE0E0E0), width: 1)),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        title: const Text('Kalkulator HPL', style: TextStyle(color: Colors.black)),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Perkirakan Hari Perkiraan Lahir (HPL)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
             ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1E293B), size: 16),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Kalkulator HPL',
-                  style: TextStyle(
-                    color: Color(0xFF1E293B),
-                    fontSize: 16,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-              ],
+            const SizedBox(height: 6),
+            const Text(
+              'Masukkan Hari Pertama Haid Terakhir (HPHT) untuk menghitung estimasi kelahiran si Kecil.',
+              style: TextStyle(fontSize: 13, color: Colors.black54, fontFamily: 'Poppins'),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'Perkirakan Hari Perkiraan Lahir (HPL)\nsi Kecil',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                            color: Color(0xFF1E293B),
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Hitung perkiraan kelahiran bayi dengan memilih metode dan tanggal yang sesuai',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, color: Colors.black54, fontFamily: 'Poppins'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  const Text('Tanggal', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 6),
-                  GestureDetector(
-                    onTap: _pickDate,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            selectedDate == null
-                                ? 'Pilih Tanggal'
-                                : DateFormat('dd MMM yyyy').format(selectedDate!),
-                            style: TextStyle(
-                              color: selectedDate == null ? Colors.grey : Colors.black,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          const Icon(Icons.calendar_today_outlined, size: 18)
-                        ],
+            const SizedBox(height: 20),
+
+            /// Tanggal Input
+            GestureDetector(
+              onTap: _pickDate,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.date_range, size: 20, color: Color(0xFF4DBAFF)),
+                    const SizedBox(width: 12),
+                    Text(
+                      selectedDate == null
+                          ? 'Pilih Tanggal HPHT'
+                          : DateFormat('dd MMM yyyy').format(selectedDate!),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: selectedDate == null ? Colors.grey : Colors.black,
+                        fontFamily: 'Poppins',
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: estimatedDate == null
-                        ? ElevatedButton(
-                            onPressed: isLoading ? null : _calculateHPL,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isLoading ? const Color(0xFFFC5C9C) : Colors.white,
-                              foregroundColor: const Color(0xFFFC5C9C),
-                              elevation: 2,
-                              side: const BorderSide(color: Color(0xFFFC5C9C)),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: Text(
-                              isLoading ? 'Menghitung...' : 'Hitung',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                color: isLoading ? Colors.white : const Color(0xFFFC5C9C),
-                              ),
-                            ),
-                          )
-                        : ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(context, {
-                                'hpl': estimatedDate,
-                                'mingguKe': week,
-                              });
-                            },
-                            icon: const Icon(Icons.save, color: Colors.white),
-                            label: const Text(
-                              'Kembali',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4DBAFF),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 24),
-                  if (estimatedDate != null && week != null)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD7ECFF),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 3))],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Text(
-                                'Hari Perkiraan Lahir : ',
-                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  formatDate(estimatedDate),
-                                  textAlign: TextAlign.end,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: 'Poppins',
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFCD2DF),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 2))],
-                            ),
-                            child: Text(
-                              'Minggu ke-${week.toString().padLeft(2, '0')}',
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFFB1004B),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 28),
-                  const Text(
-                    'Catatan',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.red,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFDF2F4),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFFFC5D2)),
-                    ),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.info_outline, size: 18, color: Colors.black54),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'HPHT (Hari Pertama Haid Terakhir) digunakan untuk menghitung HPL secara umum.',
-                                style: TextStyle(fontSize: 12, fontFamily: 'Poppins', height: 1.5),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Icon(Icons.info_outline, size: 18, color: Colors.black54),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'USG memberikan hasil yang lebih akurat berdasarkan perkembangan janin.',
-                                style: TextStyle(fontSize: 12, fontFamily: 'Poppins', height: 1.5),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+
+            /// Button
+            SizedBox(
+              width: double.infinity,
+              child: isLoading
+                  ? Shimmer.fromColors(
+                      baseColor: Colors.grey.shade300,
+                      highlightColor: Colors.grey.shade100,
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: _calculateHPL,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4DBAFF),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text(
+                        'Hitung HPL',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+            ),
+
+            const SizedBox(height: 24),
+
+            /// Hasil
+            if (estimatedDate != null && week != null)
+              SlideTransition(
+                position: _slideAnimation,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE1F5FE),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFF4DBAFF)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.calendar_today, size: 18, color: Color(0xFF0288D1)),
+                          SizedBox(width: 8),
+                          Text(
+                            'Hasil Estimasi',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                              color: Color(0xFF0288D1),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Text(
+                            'Hari Perkiraan Lahir: ',
+                            style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
+                          ),
+                          Expanded(
+                            child: Text(
+                              formatDate(estimatedDate),
+                              textAlign: TextAlign.end,
+                              style: const TextStyle(fontFamily: 'Poppins'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF3E0),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          'Usia Kehamilan: Minggu ke-${week.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: Color(0xFFEF6C00),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

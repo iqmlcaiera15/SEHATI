@@ -12,7 +12,7 @@ class WaterIntake extends Model
     protected $fillable = [
         'user_id',
         'jumlah_ml',
-        'tanggal', // jika kamu juga mencatat tanggal minum air
+        'tanggal', // ✅ gunakan tanggal sesuai dengan kolom di tabel
     ];
 
     /**

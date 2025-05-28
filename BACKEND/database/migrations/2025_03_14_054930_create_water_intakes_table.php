@@ -9,18 +9,13 @@ return new class extends Migration {
     {
         Schema::create('water_intakes', function (Blueprint $table) {
             $table->id();
-
-            // Nullable untuk testing tanpa user login
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
-            // Jumlah konsumsi air dalam mililiter
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->integer('jumlah_ml')->default(250);
-
-            // Opsional: Tanggal konsumsi (jika ingin catat per hari)
-            $table->date('tanggal')->nullable();
-
+            $table->date('tanggal');
             $table->timestamps();
+
+            // ✅ Cegah duplikasi entri harian per user
+            $table->unique(['user_id', 'tanggal'], 'unique_user_per_day');
         });
     }
 

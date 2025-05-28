@@ -10,7 +10,9 @@ use Carbon\Carbon;
 
 class PregnancyCalculatorController extends Controller
 {
-    // 🔹 Simpan data HPL
+    /**
+     * 🔹 Simpan data HPL berdasarkan HPHT user
+     */
     public function store(Request $request)
     {
         try {
@@ -19,12 +21,14 @@ class PregnancyCalculatorController extends Controller
             ]);
 
             $user = $request->user();
+
             if (!$user) {
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
 
             $hpht = Carbon::parse($request->hpht);
             $hpl = $hpht->copy()->addDays(7)->subMonthsNoOverflow(3)->addYear();
+            $mingguKe = $hpht->diffInWeeks(now('Asia/Jakarta'));
 
             $data = PregnancyCalculator::create([
                 'user_id' => $user->id,
@@ -32,16 +36,13 @@ class PregnancyCalculatorController extends Controller
                 'hpl' => $hpl->toDateString(),
             ]);
 
-            // Hitung usia kehamilan
-            $weeks = $hpht->diffInWeeks(now());
-
             return response()->json([
-                'message' => 'Data berhasil disimpan',
+                'message' => 'Data kehamilan berhasil disimpan',
                 'data' => [
                     'id' => $data->id,
                     'hpht' => $data->hpht,
                     'hpl' => $data->hpl,
-                    'minggu_ke' => $weeks
+                    'minggu_ke' => $mingguKe
                 ]
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -50,39 +51,49 @@ class PregnancyCalculatorController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            Log::error('❌ Gagal menyimpan HPL:', ['error' => $e->getMessage()]);
             return response()->json([
-                'message' => 'Terjadi kesalahan',
+                'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // 🔹 Ambil semua data milik user login
+    /**
+     * 🔹 Ambil semua data kehamilan semua user (untuk bidan)
+     */
     public function index()
     {
-        $user = Auth::user();
-        $data = PregnancyCalculator::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
-
-        return response()->json([
-            'data' => $data
-        ]);
-    }
-
-    // 🔹 Tampilkan detail berdasarkan ID
-    public function show($id)
-    {
         try {
-            $data = PregnancyCalculator::findOrFail($id);
-
-            // Optional: validasi agar hanya bisa melihat milik sendiri
-            if ($data->user_id !== Auth::id()) {
-                return response()->json(['message' => 'Forbidden'], 403);
-            }
+            $data = PregnancyCalculator::with('user')->orderBy('created_at', 'desc')->get();
 
             return response()->json([
+                'message' => 'Data berhasil diambil',
                 'data' => $data
             ]);
         } catch (\Exception $e) {
+            Log::error('❌ Gagal mengambil data kehamilan:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Gagal mengambil data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 🔹 Tampilkan detail berdasarkan ID
+     */
+    public function show($id)
+    {
+        try {
+            $data = PregnancyCalculator::with('user')->findOrFail($id);
+
+            return response()->json([
+                'message' => 'Detail data berhasil diambil',
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Gagal menampilkan detail HPL:', ['error' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Data tidak ditemukan',
                 'error' => $e->getMessage()
@@ -90,7 +101,9 @@ class PregnancyCalculatorController extends Controller
         }
     }
 
-    // 🔹 Hapus data berdasarkan ID
+    /**
+     * 🔹 Hapus data berdasarkan ID (hanya oleh pemilik)
+     */
     public function destroy($id)
     {
         try {
@@ -106,6 +119,7 @@ class PregnancyCalculatorController extends Controller
                 'message' => 'Data berhasil dihapus'
             ]);
         } catch (\Exception $e) {
+            Log::error('❌ Gagal menghapus data kehamilan:', ['error' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Gagal menghapus data',
                 'error' => $e->getMessage()

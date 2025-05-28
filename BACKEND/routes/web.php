@@ -8,6 +8,7 @@ use App\Http\Controllers\InsentifController;
 use App\Http\Controllers\DeteksiDesktopController;
 use App\Http\Controllers\PrediksiDepresiDesktopController;
 use App\Http\Controllers\IconsController;
+use App\Http\Controllers\PredictionController;
 
 
 /*
@@ -54,6 +55,16 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::get('/depresi', [PrediksiDepresiDesktopController::class, 'index'])->name('depresi.index');
     Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show');
     Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.destroy');
+
+    Route::get('/prediksi', [PredictionController::class, 'index'])->name('bidan.prediksi.index');
+    Route::get('/prediksi/form', function () {
+        return view('prediksi.form');
+    })->name('bidan.prediksi.form');
+    Route::post('/prediksi', [PredictionController::class, 'store'])->name('bidan.prediksi.store');
+    Route::get('/prediksi/result/{id}', [PredictionController::class, 'result'])->name('bidan.prediksi.result');
+    Route::delete('/prediksi/{id}', [PredictionController::class, 'deletebyID'])->name('bidan.prediksi.delete');
+    Route::get('/bidan/prediksi/{id}/print', [PredictionController::class, 'print'])->name('bidan.prediksi.print');
+
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
     // Add more bidan routes here

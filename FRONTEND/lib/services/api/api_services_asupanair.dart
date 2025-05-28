@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ApiServiceAsupanAir {
-  static const String _baseUrl = 'https://sehatiapp-production.up.railway.app/api'; // ✅ Railway production
+  static const String _baseUrl = 'https://sehatiapp-production.up.railway.app/api';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   /// 🔄 Ambil total konsumsi air hari ini & riwayat 7 hari ke belakang
@@ -47,6 +47,7 @@ class ApiServiceAsupanAir {
       throw Exception('Token tidak ditemukan. Silakan login kembali.');
     }
 
+    // ✅ Ganti endpoint ke /add
     final url = Uri.parse('$_baseUrl/water-intake');
 
     try {
@@ -60,11 +61,13 @@ class ApiServiceAsupanAir {
       );
 
       final decoded = jsonDecode(response.body);
-      if (response.statusCode == 200) {
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return {
           'success': true,
+          'data': decoded['data'],
           'total_ml_today': decoded['total_ml_today'] ?? 0,
-          'max_reached': false,
+          'max_reached': decoded['max_reached'] ?? false,
         };
       } else if (response.statusCode == 400) {
         return {

@@ -10,7 +10,7 @@ class Prediction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',                    // Tambahkan ini agar relasi user bisa tersimpan
+        'user_id',
         'usia_ibu',
         'tekanan_darah',
         'riwayat_persalinan',
@@ -30,8 +30,7 @@ class Prediction extends Model
     }
 
     /**
-     * Opsional: Jika kolom faktor disimpan dalam bentuk JSON,
-     * aktifkan casting berikut agar otomatis menjadi array saat diakses.
+     * Casting otomatis untuk kolom faktor jika disimpan dalam bentuk JSON
      */
     protected $casts = [
         'faktor' => 'array',
