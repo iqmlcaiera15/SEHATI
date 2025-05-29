@@ -32,6 +32,7 @@ return new class extends Migration
             $table->string('telepon_suami')->nullable();
             $table->integer('usia_suami')->nullable();
             $table->string('pekerjaan_suami')->nullable();
+            $table->integer('usia_kehamilan')->nullable();
             $table->integer('saldo_total')->nullable()->default(0);
             $table->unsignedBigInteger('selected_icon_id')->nullable();
             $table->string('selected_icon_name_cache')->nullable();

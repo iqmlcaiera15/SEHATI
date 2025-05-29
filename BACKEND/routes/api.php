@@ -34,6 +34,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //Profil
     Route::post('/isidata', [UserController::class, 'isidata']);
+    Route::put('/update-data/{id}', [UserController::class, 'updateData']);
     Route::get('/icons', [IconsController::class, 'index']);
     Route::put('/user/select-icon', [UserController::class, 'updateSelectedIcon']);
 
