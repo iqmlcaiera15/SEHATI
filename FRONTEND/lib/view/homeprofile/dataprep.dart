@@ -17,6 +17,7 @@ class _DataFormPageState extends State<DataFormPage> {
   // Controller untuk setiap field
   TextEditingController tanggalLahirController = TextEditingController();
   TextEditingController usiaController = TextEditingController();
+  TextEditingController usiaKehamilanController = TextEditingController(); // New field
   TextEditingController alamatController = TextEditingController();
   TextEditingController nomorTeleponController = TextEditingController();
   TextEditingController pendidikanTerakhirController = TextEditingController();
@@ -63,6 +64,7 @@ class _DataFormPageState extends State<DataFormPage> {
           body: jsonEncode(<String, dynamic>{
             'tanggal_lahir': tanggalLahirController.text,
             'usia': usiaController.text,
+            'usia_kehamilan': usiaKehamilanController.text, // New field added
             'alamat': alamatController.text,
             'nomor_telepon': nomorTeleponController.text,
             'pendidikan_terakhir': pendidikanTerakhirController.text,
@@ -182,6 +184,7 @@ class _DataFormPageState extends State<DataFormPage> {
                     decoration: InputDecoration(
                       labelText: 'Tanggal Lahir',
                       border: OutlineInputBorder(),
+                      hintText: 'YYYY-MM-DD',
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -196,11 +199,28 @@ class _DataFormPageState extends State<DataFormPage> {
                     decoration: InputDecoration(
                       labelText: 'Usia',
                       border: OutlineInputBorder(),
+                      hintText: 'Masukkan usia dalam tahun',
                     ),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Harap isi usia';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: usiaKehamilanController,
+                    decoration: InputDecoration(
+                      labelText: 'Usia Kehamilan',
+                      border: OutlineInputBorder(),
+                      hintText: 'Masukkan usia kehamilan dalam minggu',
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Harap isi usia kehamilan';
                       }
                       return null;
                     },
@@ -269,6 +289,7 @@ class _DataFormPageState extends State<DataFormPage> {
                     decoration: InputDecoration(
                       labelText: 'Golongan Darah',
                       border: OutlineInputBorder(),
+                      hintText: 'A, B, AB, O',
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -277,12 +298,12 @@ class _DataFormPageState extends State<DataFormPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 24),
                   Text(
                     'Data Suami',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: namaSuamiController,
                     decoration: InputDecoration(
@@ -317,6 +338,7 @@ class _DataFormPageState extends State<DataFormPage> {
                     decoration: InputDecoration(
                       labelText: 'Usia Suami',
                       border: OutlineInputBorder(),
+                      hintText: 'Masukkan usia dalam tahun',
                     ),
                     keyboardType: TextInputType.number,
                     validator: (value) {
@@ -340,7 +362,7 @@ class _DataFormPageState extends State<DataFormPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: _isLoading ? null : submitForm,
                     child: _isLoading 
@@ -369,6 +391,7 @@ class _DataFormPageState extends State<DataFormPage> {
     // Clean up the controllers when the widget is disposed
     tanggalLahirController.dispose();
     usiaController.dispose();
+    usiaKehamilanController.dispose(); // Don't forget to dispose the new controller
     alamatController.dispose();
     nomorTeleponController.dispose();
     pendidikanTerakhirController.dispose();

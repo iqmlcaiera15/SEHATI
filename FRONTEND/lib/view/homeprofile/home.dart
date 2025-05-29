@@ -5,6 +5,7 @@ import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; 
 import 'package:Sehati/view/komunitas/index_komunitas.dart'; 
 import 'package:Sehati/view/polusiudara/index_polusi.dart'; 
+import 'package:Sehati/view/homeprofile/profile.dart'; 
 import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart';
 import 'package:Sehati/view/shop/shop_index.dart';
 import 'package:Sehati/providers/auth_provider.dart';
@@ -78,7 +79,7 @@ class _HomePageState extends State<HomePage> {
                   child: SizedBox(
                     width: 54,
                     child: Text(
-                      '9:41',
+                      '',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: const Color(0xFF1E293B),
@@ -90,40 +91,40 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 // Battery icon
-                Positioned(
-                  left: 389.33,
-                  top: 17.33,
-                  child: Opacity(
-                    opacity: 0.35,
-                    child: Container(
-                      width: 22,
-                      height: 11.33,
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            width: 1,
-                            color: const Color(0xFF1E293B),
-                          ),
-                          borderRadius: BorderRadius.circular(2.67),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 391.33,
-                  top: 19.33,
-                  child: Container(
-                    width: 18,
-                    height: 7.33,
-                    decoration: ShapeDecoration(
-                      color: const Color(0xFF1E293B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(1.33),
-                      ),
-                    ),
-                  ),
-                ),
+                // Positioned(
+                //   left: 389.33,
+                //   top: 17.33,
+                //   child: Opacity(
+                //     opacity: 0.35,
+                //     child: Container(
+                //       width: 22,
+                //       height: 11.33,
+                //       decoration: ShapeDecoration(
+                //         shape: RoundedRectangleBorder(
+                //           side: BorderSide(
+                //             width: 1,
+                //             color: const Color(0xFF1E293B),
+                //           ),
+                //           borderRadius: BorderRadius.circular(2.67),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // Positioned(
+                //   left: 391.33,
+                //   top: 19.33,
+                //   child: Container(
+                //     width: 18,
+                //     height: 7.33,
+                //     decoration: ShapeDecoration(
+                //       color: const Color(0xFF1E293B),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(1.33),
+                //       ),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -898,6 +899,12 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ShopPage()),
+              );
+            }
+              else if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserDataViewPage()),
               );
             }
           });
