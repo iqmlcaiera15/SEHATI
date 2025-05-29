@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
             KomunitasSeeder::class,
             PostpartumArticlesSeeder::class,
             SaranMakananSeeder::class,
-            WaterIntakeSeeder::class,
+            // WaterIntakeSeeder::class,
             ProductSeeder::class
         ]);
     }

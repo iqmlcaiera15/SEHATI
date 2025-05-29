@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Sehati/services/api/api_service_komunitas.dart'; 
 import 'package:Sehati/view/homeprofile/home.dart';
 import 'package:Sehati/view/komunitas/comment_komunitas.dart';
+import 'package:Sehati/view/homeprofile/profile.dart'; 
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({Key? key}) : super(key: key);
@@ -227,7 +228,7 @@ class _CommunityPageState extends State<CommunityPage> {
                     ),
                     const Expanded(
                       child: Text(
-                        'Timeline',
+                        'Timeline MamaShare',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Color(0xFF1E293B),
@@ -433,6 +434,12 @@ class _CommunityPageState extends State<CommunityPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ShopPage()),
+              );
+            }
+            else if (index == 4) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserDataViewPage()),
               );
             }
           });

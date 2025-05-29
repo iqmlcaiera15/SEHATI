@@ -4,6 +4,9 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:Sehati/view/homeprofile/updatedata.dart';
 import 'package:Sehati/view/homeprofile/updateicon.dart';
+import 'package:Sehati/view/homeprofile/home.dart';
+import 'package:Sehati/view/komunitas/index_komunitas.dart';
+import 'package:Sehati/view/shop/shop_index.dart'; 
 
 class UserDataViewPage extends StatefulWidget {
   @override
@@ -15,6 +18,7 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
   bool _isLoading = true;
   Map<String, dynamic>? _userData;
   String? _errorMessage;
+  int _currentIndex = 3; // Indeks untuk halaman Profil
 
   @override
   void initState() {
@@ -29,14 +33,17 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
   // Fetch user data from API
   Future<void> _fetchUserData() async {
-    try {
+    // ... (kode _fetchUserData Anda yang sudah ada tetap di sini)
+     try {
       final token = await getJwtToken();
       
       if (token == null) {
-        setState(() {
-          _errorMessage = 'Anda belum login. Silakan login terlebih dahulu.';
-          _isLoading = false;
-        });
+        if(mounted){
+          setState(() {
+            _errorMessage = 'Anda belum login. Silakan login terlebih dahulu.';
+            _isLoading = false;
+          });
+        }
         return;
       }
 
@@ -48,6 +55,8 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
           'Content-Type': 'application/json',
         },
       );
+      
+      if(!mounted) return;
 
       setState(() {
         _isLoading = false;
@@ -68,14 +77,16 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
         });
       } else {
         setState(() {
-          _errorMessage = 'Gagal memuat data. Silakan coba lagi.';
+          _errorMessage = 'Gagal memuat data (${response.statusCode}). Silakan coba lagi.';
         });
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Terjadi kesalahan: $e';
-      });
+      if(mounted){
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Terjadi kesalahan: $e';
+        });
+      }
     }
   }
 
@@ -91,6 +102,7 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
   // Helper method to display data field
   Widget _buildDataField(String label, String? value) {
+    // ... (kode _buildDataField Anda yang sudah ada tetap di sini)
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -122,6 +134,7 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
   // Helper method to build section header
   Widget _buildSectionHeader(String title) {
+    // ... (kode _buildSectionHeader Anda yang sudah ada tetap di sini)
     return Padding(
       padding: const EdgeInsets.only(top: 24.0, bottom: 12.0),
       child: Text(
@@ -137,6 +150,7 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
   // Widget untuk menampilkan gambar profil user
   Widget _buildUserProfileImage() {
+    // ... (kode _buildUserProfileImage Anda yang sudah ada tetap di sini)
     final imageUrl = _userData?['selected_icon_data_cache'];
     
     return Container(
@@ -211,17 +225,17 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                     ),
             ),
           ),
-          // Tombol untuk ganti gambar (akan diimplementasi nanti)
           Positioned(
             bottom: 0,
             right: 0,
             child: GestureDetector(
-               onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                MaterialPageRoute(builder: (context) =>   SelectProfilePage()), // Assuming HomePage has a const constructor
-               );
-              },
+                onTap: () {
+                  // Await navigation and then refresh if needed
+                  Navigator.push( // Menggunakan push agar bisa kembali
+                    context,
+                    MaterialPageRoute(builder: (context) =>  SelectProfilePage()),
+                  ).then((_) => _refreshData()); // Refresh data setelah kembali dari SelectProfilePage
+                },
               child: Container(
                 width: 36,
                 height: 36,
@@ -243,6 +257,84 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
           ),
         ],
       ),
+    );
+  }
+
+  // Method untuk membangun Bottom Navigation Bar
+  Widget _buildBottomNavigation() {
+    return BottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTap: (index) {
+        if (!mounted) return;
+        if (_currentIndex == index && index == 3) return; // Jika sudah di halaman profil, jangan lakukan apa-apa
+
+        setState(() {
+          _currentIndex = index;
+        });
+
+        switch (index) {
+          case 0:
+            Navigator.pushReplacement( // Gunakan pushReplacement agar tidak menumpuk stack
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+            break;
+          case 1:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const CommunityPage()),
+            );
+            break;
+          case 2:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ShopPage()), // Pastikan ShopPage diimpor
+            );
+            break;
+          case 3:
+             // Jika sudah di halaman ini, tidak perlu navigasi lagi
+            // Jika dari halaman lain, pushReplacement akan membawa ke sini
+            if (ModalRoute.of(context)?.settings.name != '/user_data_view') { // Cek jika bukan halaman ini
+                 Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => UserDataViewPage(), settings: RouteSettings(name: '/user_data_view')),
+                );
+            }
+            break;
+        }
+      },
+      backgroundColor: Colors.white,
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: const Color(0xFF4DBAFF),
+      unselectedItemColor: const Color(0xFF4C617F),
+      selectedLabelStyle: const TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+      ),
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Beranda',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.group),
+          label: 'Komunitas',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_bag),
+          label: 'Shop',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profil',
+        ),
+      ],
     );
   }
 
@@ -313,48 +405,40 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                     padding: EdgeInsets.all(16.0),
                     child: Card(
                       elevation: 4,
+                       shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                       child: Padding(
                         padding: EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // User Profile Image Section
                             _buildUserProfileImage(),
-                            
-                            Divider(height: 32),
-                            
-                            // User Info Section
+                            Divider(height: 32, color: Colors.grey[300]),
                             _buildSectionHeader('Informasi Akun'),
                             _buildDataField('Nama', _userData?['name']),
                             _buildDataField('Email', _userData?['email']),
-                            
-                            Divider(height: 32),
-                            
-                            // Personal Data Section
+                            Divider(height: 32, color: Colors.grey[300]),
                             _buildSectionHeader('Data Pribadi'),
                             _buildDataField('Tanggal Lahir', _userData?['tanggal_lahir']),
                             _buildDataField('Usia', _userData?['usia']?.toString()),
-                            _buildDataField('Usia Kehamilan', _userData?['usia_kehamilan']?.toString() != null 
-                                ? '${_userData?['usia_kehamilan']} minggu' 
-                                : null),
+                            _buildDataField(
+                                'Usia Kehamilan',
+                                _userData?['usia_kehamilan'] != null
+                                    ? '${_userData!['usia_kehamilan']} minggu'
+                                    : null),
                             _buildDataField('Alamat', _userData?['alamat']),
                             _buildDataField('Nomor Telepon', _userData?['nomor_telepon']),
                             _buildDataField('Pendidikan Terakhir', _userData?['pendidikan_terakhir']),
                             _buildDataField('Pekerjaan', _userData?['pekerjaan']),
                             _buildDataField('Golongan Darah', _userData?['golongan_darah']),
-                            
-                            Divider(height: 32),
-                            
-                            // Husband Data Section
+                            Divider(height: 32, color: Colors.grey[300]),
                             _buildSectionHeader('Data Suami'),
                             _buildDataField('Nama Suami', _userData?['nama_suami']),
                             _buildDataField('Telepon Suami', _userData?['telepon_suami']),
                             _buildDataField('Usia Suami', _userData?['usia_suami']?.toString()),
                             _buildDataField('Pekerjaan Suami', _userData?['pekerjaan_suami']),
-                            
                             SizedBox(height: 24),
-                            
-                            // Last updated info
                             if (_userData?['updated_at'] != null)
                               Container(
                                 width: double.infinity,
@@ -364,10 +448,11 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  'Terakhir diperbarui: ${_userData?['updated_at']}',
+                                  'Terakhir diperbarui: ${_userData?['updated_at']}', // Anda mungkin perlu memformat tanggal ini
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -378,36 +463,36 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                     ),
                   ),
                 ),
-                floatingActionButton: _userData != null
-                    ? FloatingActionButton(
-                        onPressed: () async { // Make onPressed async to await Navigator.push
-                          // Navigasi ke UserDataUpdatePage
-                          if (_userData != null && _userData!['id'] != null) { // Ensure userData and its 'id' key are available
-                            final result = await Navigator.push( // await the result of the push
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => UserDataUpdatePage(
-                                  userData: _userData!, // Pass the fetched user data
-                                  userId: _userData!['id'].toString(), // Pass the user ID (assuming key is 'id' and converting to string)
-                                ),
-                              ),
-                            );
-
-                            if (result == true) { // If UserDataUpdatePage returned true (indicating successful update)
-                              _refreshData(); // Refresh the data on UserDataViewPage
-                            }
-                          } else {
-                            // Handle the case where userData or userId is null
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Data pengguna tidak lengkap atau ID pengguna tidak ditemukan untuk diedit.')),
-                            );
-                          }
-                        },
-                        child: Icon(Icons.edit),
-                        backgroundColor: Colors.blue[600],
-                        tooltip: 'Edit Data Profil',
-                      )
-                    : null, // FAB tidak akan tampil jika _userData null
-                );
+      floatingActionButton: _userData != null
+          ? FloatingActionButton(
+              onPressed: () async {
+                if (_userData != null && _userData!['id'] != null) {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserDataUpdatePage(
+                        userData: _userData!,
+                        userId: _userData!['id'].toString(),
+                      ),
+                    ),
+                  );
+                  if (result == true && mounted) {
+                    _refreshData();
+                  }
+                } else {
+                   if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Data pengguna tidak lengkap atau ID pengguna tidak ditemukan untuk diedit.')),
+                    );
+                   }
                 }
+              },
+              child: Icon(Icons.edit, color: Colors.white), // Membuat ikon putih
+              backgroundColor: Colors.blue[600],
+              tooltip: 'Edit Data Profil',
+            )
+          : null,
+      bottomNavigationBar: _buildBottomNavigation(), // Tambahkan BottomNavigationBar di sini
+    );
+  }
 }

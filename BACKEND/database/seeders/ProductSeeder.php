@@ -18,37 +18,44 @@ class ProductSeeder extends Seeder
         // Product::truncate(); // atau DB::table('products')->delete();
 
         Product::create([
-            'produk' => 'Vitamin C Super',
-            'deskripsi' => 'Suplemen Vitamin C dosis tinggi untuk menjaga daya tahan tubuh.',
-            'harga' => 75000.00,
-            'gambar' => 'iconshttps://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
-            'link' => 'https://shopee.co.id/Mmflight-Stroller-Baby-Lipat-Traveling-Kereta-Dorong-Bayi-2-Arah-Cabin-Size-i.899195971.19162760795?sp_atk=81f88bd3-2427-40c0-8bfa-adbab417c936&xptdk=81f88bd3-2427-40c0-8bfa-adbab417c936'
+            'produk' => 'Baby Walker alas Babywalker fimily',
+            'deskripsi' => 'Premium Fold Up Baby Walker 5 in 1, Baby Walker yang dapat di lipat dengan system Soft Closing.',
+            'harga' => 253000.000,
+            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/produk/stroller.png',
+            'link' => 'https://id.shp.ee/H68N6Ps'
         ]);
 
         Product::create([
-            'produk' => 'Obat Batuk Herbal Anak',
-            'deskripsi' => 'Sirup obat batuk herbal alami, aman untuk anak-anak usia 2 tahun ke atas.',
-            'harga' => 45000.00,
-            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
-            'link' => 'https://shopee.co.id/Mmflight-Stroller-Baby-Lipat-Traveling-Kereta-Dorong-Bayi-2-Arah-Cabin-Size-i.899195971.19162760795?sp_atk=81f88bd3-2427-40c0-8bfa-adbab417c936&xptdk=81f88bd3-2427-40c0-8bfa-adbab417c936'
+            'produk' => 'V-BABYCARE Stroller Baby',
+            'deskripsi' => 'kereta aluminium aloi, aman, kuat dan seimbang.',
+            'harga' => 199000.200,
+            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/produk/stroller_1.png',
+            'link' => 'https://id.shp.ee/MVvQXos'
         ]);
 
         Product::create([
-            'produk' => 'Stroller',
-            'deskripsi' => 'Masker medis standar N95 untuk perlindungan maksimal dari virus dan bakteri.',
-            'harga' => 200000.00,
-            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
-            'link' => 'https://shopee.co.id/Mmflight-Stroller-Baby-Lipat-Traveling-Kereta-Dorong-Bayi-2-Arah-Cabin-Size-i.899195971.19162760795?sp_atk=81f88bd3-2427-40c0-8bfa-adbab417c936&xptdk=81f88bd3-2427-40c0-8bfa-adbab417c936'
+            'produk' => 'Alamii Puffs Snack 25gr ',
+            'deskripsi' => 'Alamii Puffs - Cemilan / Snack Anak.',
+            'harga' => 18500.500,
+            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/produk/alami.png',
+            'link' => 'https://id.shp.ee/zsQPbQS'
         ]);
 
         Product::create([
-            'produk' => 'Hand Sanitizer Antiseptik',
-            'deskripsi' => 'Pembersih tangan antiseptik dengan kandungan alkohol 70%, efektif membunuh kuman.',
-            'harga' => 25000.00,
-            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
-            'link' => 'https://shopee.co.id/Mmflight-Stroller-Baby-Lipat-Traveling-Kereta-Dorong-Bayi-2-Arah-Cabin-Size-i.899195971.19162760795?sp_atk=81f88bd3-2427-40c0-8bfa-adbab417c936&xptdk=81f88bd3-2427-40c0-8bfa-adbab417c936'
+            'produk' => 'Babygrow - Kaldu Tulang Ayam Organik MPASI',
+            'deskripsi' => 'FORMULA KHUSUS BAYI, MPASI, ANAK, IBU HAMIL, DAN MENYUSUI.',
+            'harga' => 89000.991,
+            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/produk/grow.png',
+            'link' => 'https://id.shp.ee/E7wx7HQ'
         ]);
 
-        // Anda bisa menambahkan lebih banyak produk di sini
+        Product::create([
+            'produk' => 'Think Baby Gendongan Bayi Hipseat Karakter',
+            'deskripsi' => 'Think Baby Gendongan Hipseat Karakter.',
+            'harga' => 94000.990,
+            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/produk/hipseat.png',
+            'link' => 'https://id.shp.ee/dCtaRUq'
+        ]);
+
     }
 }

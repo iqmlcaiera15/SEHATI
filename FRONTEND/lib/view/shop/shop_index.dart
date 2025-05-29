@@ -3,7 +3,8 @@ import 'package:Sehati/services/api/api_service_shop.dart';
 import 'package:Sehati/view/homeprofile/home.dart';
 import 'package:Sehati/view/komunitas/index_komunitas.dart';
 import 'package:Sehati/models/product_model.dart';
-import 'package:url_launcher/url_launcher.dart'; // Import untuk membuka URL
+import 'package:url_launcher/url_launcher.dart'; 
+import 'package:Sehati/view/homeprofile/profile.dart'; 
 
 class ShopPage extends StatefulWidget {
   const ShopPage({Key? key}) : super(key: key);
@@ -402,6 +403,11 @@ class _ShopPageState extends State<ShopPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const CommunityPage()),
+              );
+            }   else if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserDataViewPage()),
               );
             }
           });

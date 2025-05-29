@@ -14,39 +14,39 @@ class IconSeeder extends Seeder
     public function run(): void
     {
         Icons::create([
-            'name' => 'Wajah Senyum',
-            'type' => 'material',
-            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg' 
+            'name' => 'Ibu hamil 1',
+            'type' => 'Profile',
+            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/Foto+bumil/Ibu_hamil_1.jpg' 
         ]);
 
         Icons::create([
-            'name' => 'Hati',
+            'name' => 'Ibu hamil 2',
             'type' => 'material',
-            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg' 
+            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/Foto+bumil/Ibu_hamil_2.jpg' 
         ]);
 
         Icons::create([
-            'name' => 'Bintang',
+            'name' => 'Ibu hamil 3',
             'type' => 'material',
-            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg' 
+            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/Foto+bumil/Ibu_hamil_3.jpg' 
         ]);
 
         Icons::create([
-            'name' => 'Rumah',
+            'name' => 'Ibu hamil 4',
             'type' => 'material',
-            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg' 
+            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/Foto+bumil/Ibu_hamil_4.jpg' 
         ]);
 
         Icons::create([
-            'name' => 'Avatar Pria 1',
+            'name' => 'Pasangan',
             'type' => 'url',
-            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg' // Bisa sama dengan identifier atau path lokal
+            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/Foto+bumil/pasangan_1.jpg' 
         ]);
 
          Icons::create([
-            'name' => 'Kucing SVG',
+            'name' => 'Suami',
             'type' => 'svg_string',
-            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg' 
+            'data' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/Foto+bumil/suami_1.jpg' 
         ]);
     }
 }
