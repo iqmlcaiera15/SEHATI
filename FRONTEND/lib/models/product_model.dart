@@ -5,6 +5,7 @@ class ProductModel {
   final String deskripsi;
   final double harga;
   final String? gambar; // URL atau path ke gambar
+  final String? link; // URL link untuk mengarahkan ke web
   final String? createdAt;
   final String? updatedAt;
 
@@ -14,6 +15,7 @@ class ProductModel {
     required this.deskripsi,
     required this.harga,
     this.gambar,
+    this.link,
     this.createdAt,
     this.updatedAt,
   });
@@ -34,6 +36,7 @@ class ProductModel {
       deskripsi: json['deskripsi'] as String? ?? '',
       harga: parsedHarga,
       gambar: json['gambar'] as String?,
+      link: json['link'] as String?, // Menambahkan parsing kolom link
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
     );
@@ -46,6 +49,7 @@ class ProductModel {
       'deskripsi': deskripsi,
       'harga': harga,
       'gambar': gambar,
+      'link': link, // Menambahkan link ke dalam toJson
       'created_at': createdAt,
       'updated_at': updatedAt,
     };

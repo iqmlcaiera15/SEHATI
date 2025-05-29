@@ -1,3 +1,4 @@
+import 'package:Sehati/view/shop/shop_index.dart';
 import 'package:flutter/material.dart';
 import 'package:Sehati/services/api/api_service_komunitas.dart'; 
 import 'package:Sehati/view/homeprofile/home.dart';
@@ -428,6 +429,12 @@ class _CommunityPageState extends State<CommunityPage> {
                 MaterialPageRoute(builder: (context) => const HomePage()),
               );
             }
+            else if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ShopPage()),
+              );
+            }
           });
         },
         backgroundColor: Colors.white,
@@ -458,8 +465,8 @@ class _CommunityPageState extends State<CommunityPage> {
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Tersimpan', 
+            icon: Icon(Icons.shopping_bag),
+            label: 'Shop',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

@@ -2,28 +2,30 @@
 import 'dart:convert';
 import 'dart:async'; // Untuk TimeoutException
 import 'package:http/http.dart' as http;
-import 'package:Sehati/models/product_model.dart'; // <- IMPORT ProductModel DI SINI
+import 'package:Sehati/models/product_model.dart'; 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiServiceShop {
-  // Pastikan URL ini benar dan sesuai dengan backend Anda
-  // Jika backend di lokal: 'http://10.0.2.2:8000/api' (untuk Android emulator)
-  // atau 'http://localhost:8000/api' (untuk iOS simulator/web)
-  static const String baseUrl = 'http://your-laravel-backend.com/api';
+   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  static Map<String, String> get _headers => {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    // Jika API Anda memerlukan token otentikasi:
-    // 'Authorization': 'Bearer YOUR_AUTH_TOKEN',
-  };
+  static const String baseUrl = 'https://sehatiapp-production.up.railway.app/api';
+
 
   static Future<List<ProductModel>> fetchProducts() async {
     try {
+      final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
       // print('[ApiServiceShop] Fetching products from $baseUrl/products'); // Hapus/komentari untuk produksi
-      final response = await http.get(
-        Uri.parse('$baseUrl/products'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 20)); // Tambahkan timeout
+    final response = await http.get(
+      Uri.parse('$baseUrl/products'),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
       // print('[ApiServiceShop] Response status: ${response.statusCode}');
       // print('[ApiServiceShop] Response body: ${response.body}');
@@ -64,12 +66,22 @@ class ApiServiceShop {
   }
 
   static Future<ProductModel> fetchProductById(int id) async {
+
     try {
+      final token = await _storage.read(key: 'jwt_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
       // print('[ApiServiceShop] Fetching product with ID: $id from $baseUrl/products/$id');
-      final response = await http.get(
-        Uri.parse('$baseUrl/products/$id'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 20));
+    final response = await http.get(
+      Uri.parse('$baseUrl/products'),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
       // print('[ApiServiceShop] Response status: ${response.statusCode}');
       // print('[ApiServiceShop] Response body: ${response.body}');

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:Sehati/services/api/api_service_shop.dart';
 import 'package:Sehati/view/homeprofile/home.dart';
 import 'package:Sehati/view/komunitas/index_komunitas.dart';
+import 'package:Sehati/models/product_model.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import untuk membuka URL
 
 class ShopPage extends StatefulWidget {
   const ShopPage({Key? key}) : super(key: key);
@@ -68,6 +70,28 @@ class _ShopPageState extends State<ShopPage> {
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), 
       (Match m) => '${m[1]}.'
     )}';
+  }
+
+  // Function to launch URL
+  Future<void> _launchURL(String? url) async {
+    if (url == null || url.isEmpty) {
+      _showSnackBar('Link produk tidak tersedia', backgroundColor: Colors.orange);
+      return;
+    }
+
+    try {
+      final Uri uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication, // Membuka di browser eksternal
+        );
+      } else {
+        _showSnackBar('Tidak dapat membuka link: $url');
+      }
+    } catch (e) {
+      _showSnackBar('Error membuka link: $e');
+    }
   }
 
   @override
@@ -410,10 +434,6 @@ class _ShopPageState extends State<ShopPage> {
             label: 'Shop',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Tersimpan', 
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profil',
           ),
@@ -641,17 +661,14 @@ class _ShopPageState extends State<ShopPage> {
                         
                         const SizedBox(height: 20),
                         
-                        // Action Buttons
+                        // Action Buttons - Button utama untuk buka link
                         Row(
                           children: [
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.pop(context);
-                                  _showSnackBar(
-                                    'Produk ditambahkan ke keranjang', 
-                                    backgroundColor: Colors.green
-                                  );
+                                  _launchURL(product.link); // Mengarahkan ke link produk
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF4DBAFF),
@@ -660,13 +677,24 @@ class _ShopPageState extends State<ShopPage> {
                                   ),
                                   padding: const EdgeInsets.symmetric(vertical: 12),
                                 ),
-                                child: const Text(
-                                  'Tambah ke Keranjang',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(
+                                      Icons.open_in_new,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Beli Sekarang',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -711,49 +739,4 @@ class _ShopPageState extends State<ShopPage> {
         },
       );
     }
-}
-
-// Product Model for API Response
-class ProductModel {
-  final int? id;
-  final String produk;
-  final String deskripsi;
-  final double harga;
-  final String? gambar;
-  final String? createdAt;
-  final String? updatedAt;
-
-  ProductModel({
-    this.id,
-    required this.produk,
-    required this.deskripsi,
-    required this.harga,
-    this.gambar,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  factory ProductModel.fromJson(Map<String, dynamic> json) {
-    return ProductModel(
-      id: json['id'],
-      produk: json['produk'] ?? '',
-      deskripsi: json['deskripsi'] ?? '',
-      harga: (json['harga'] ?? 0).toDouble(),
-      gambar: json['gambar'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'produk': produk,
-      'deskripsi': deskripsi,
-      'harga': harga,
-      'gambar': gambar,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
 }
