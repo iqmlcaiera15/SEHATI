@@ -20,6 +20,7 @@ class Product extends Model
         'deskripsi',
         'harga',
         'gambar',
+        'link',
     ];
 
     /**

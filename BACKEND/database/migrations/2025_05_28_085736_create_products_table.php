@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('deskripsi'); // Deskripsi produk
             $table->decimal('harga', 15, 2); // Harga produk (misal: 15 digit total, 2 digit desimal)
             $table->string('gambar')->nullable(); // URL gambar, bisa null
+            $table->string('link')->nullable(); // URL gambar, bisa null
             $table->timestamps(); // Kolom created_at dan updated_at
         });
     }

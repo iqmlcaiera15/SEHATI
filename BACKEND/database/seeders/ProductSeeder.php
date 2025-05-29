@@ -22,6 +22,7 @@ class ProductSeeder extends Seeder
             'deskripsi' => 'Suplemen Vitamin C dosis tinggi untuk menjaga daya tahan tubuh.',
             'harga' => 75000.00,
             'gambar' => 'iconshttps://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
+            'link' => 'https://shopee.co.id/Mmflight-Stroller-Baby-Lipat-Traveling-Kereta-Dorong-Bayi-2-Arah-Cabin-Size-i.899195971.19162760795?sp_atk=81f88bd3-2427-40c0-8bfa-adbab417c936&xptdk=81f88bd3-2427-40c0-8bfa-adbab417c936'
         ]);
 
         Product::create([
@@ -29,13 +30,15 @@ class ProductSeeder extends Seeder
             'deskripsi' => 'Sirup obat batuk herbal alami, aman untuk anak-anak usia 2 tahun ke atas.',
             'harga' => 45000.00,
             'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
+            'link' => 'https://shopee.co.id/Mmflight-Stroller-Baby-Lipat-Traveling-Kereta-Dorong-Bayi-2-Arah-Cabin-Size-i.899195971.19162760795?sp_atk=81f88bd3-2427-40c0-8bfa-adbab417c936&xptdk=81f88bd3-2427-40c0-8bfa-adbab417c936'
         ]);
 
         Product::create([
-            'produk' => 'Masker Medis N95 (Box isi 20)',
+            'produk' => 'Stroller',
             'deskripsi' => 'Masker medis standar N95 untuk perlindungan maksimal dari virus dan bakteri.',
-            'harga' => 120000.00,
-            'gambar' => 'hhttps://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
+            'harga' => 200000.00,
+            'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
+            'link' => 'https://shopee.co.id/Mmflight-Stroller-Baby-Lipat-Traveling-Kereta-Dorong-Bayi-2-Arah-Cabin-Size-i.899195971.19162760795?sp_atk=81f88bd3-2427-40c0-8bfa-adbab417c936&xptdk=81f88bd3-2427-40c0-8bfa-adbab417c936'
         ]);
 
         Product::create([
@@ -43,6 +46,7 @@ class ProductSeeder extends Seeder
             'deskripsi' => 'Pembersih tangan antiseptik dengan kandungan alkohol 70%, efektif membunuh kuman.',
             'harga' => 25000.00,
             'gambar' => 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/rekomenmakanan/ikan_salmon.jpg',
+            'link' => 'https://shopee.co.id/Mmflight-Stroller-Baby-Lipat-Traveling-Kereta-Dorong-Bayi-2-Arah-Cabin-Size-i.899195971.19162760795?sp_atk=81f88bd3-2427-40c0-8bfa-adbab417c936&xptdk=81f88bd3-2427-40c0-8bfa-adbab417c936'
         ]);
 
         // Anda bisa menambahkan lebih banyak produk di sini
