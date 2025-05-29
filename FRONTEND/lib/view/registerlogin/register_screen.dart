@@ -1,8 +1,10 @@
+import 'package:Sehati/view/homeprofile/dataprep.dart'; // Dari iqmal2 (dan sudah ada sebelumnya)
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Sehati/providers/auth_provider.dart';
-import 'package:Sehati/view/homeprofile/home.dart';
-import 'package:Sehati/view/registerlogin/login_screen.dart';
+// Menggabungkan import dari kedua branch, menghilangkan duplikasi
+import 'package:Sehati/view/homeprofile/home.dart'; // Dari main
+import 'package:Sehati/view/registerlogin/login_screen.dart'; // Dari kedua branch
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -64,7 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Back Button
                 Positioned(
                   top: 10,
@@ -88,7 +90,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
-                
+
                 // Main content
                 SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
@@ -153,7 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ],
                           ),
                         ),
-                        
+
                         // Error message
                         if (authProvider.error != null)
                           Container(
@@ -177,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ],
                             ),
                           ),
-                        
+
                         // Registration form fields
                         Text(
                           'Informasi Personal',
@@ -188,8 +190,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         SizedBox(height: 16),
-                        
-                        // Name field
+
+                        // Name field (dari main)
                         _buildInputField(
                           controller: _nameController,
                           label: 'Nama Lengkap',
@@ -202,8 +204,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         SizedBox(height: 16),
-                        
-                        // Email field
+
+                        // Email field (dari main)
                         _buildInputField(
                           controller: _emailController,
                           label: 'Email',
@@ -220,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         SizedBox(height: 24),
-                        
+
                         Text(
                           'Keamanan',
                           style: TextStyle(
@@ -230,8 +232,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         SizedBox(height: 16),
-                        
-                        // Password field
+
+                        // Password field (dari main)
                         _buildInputField(
                           controller: _passwordController,
                           label: 'Password',
@@ -259,8 +261,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         SizedBox(height: 16),
-                        
-                        // Confirm Password field
+
+                        // Confirm Password field (dari main)
                         _buildInputField(
                           controller: _passwordConfirmationController,
                           label: 'Konfirmasi Password',
@@ -288,18 +290,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         SizedBox(height: 32),
-                        
-                        // Register Button
+
+                        // Register Button (logika navigasi dari iqmal2, styling dari main)
                         SizedBox(
                           width: double.infinity,
-                          height: 55,
+                          height: 55, // Menggunakan tinggi dari main branch
                           child: ElevatedButton(
                             onPressed: authProvider.isLoading
                                 ? null
                                 : () async {
                                     // Clear previous errors
                                     authProvider.clearErrors();
-                                    
+
                                     if (_formKey.currentState!.validate()) {
                                       try {
                                         final success = await authProvider.register(
@@ -308,22 +310,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           _passwordController.text,
                                           _passwordConfirmationController.text,
                                         );
-                                        
+
                                         if (success && mounted) {
-                                          // Successfully registered, navigate to home screen
+                                          // Successfully registered, navigate to DataFormPage (dari iqmal2)
                                           Navigator.of(context).pushAndRemoveUntil(
                                             MaterialPageRoute(
-                                              builder: (_) => const HomePage(),
+                                              builder: (_) => DataFormPage(), // Tujuan navigasi dari iqmal2
                                             ),
                                             (route) => false, // Remove all routes from stack
                                           );
                                         }
                                       } catch (e) {
                                         // Error handling is managed by the provider
+                                        // AuthProvider will set the error property
                                       }
                                     }
                                   },
-                            style: ElevatedButton.styleFrom(
+                            style: ElevatedButton.styleFrom( // Styling dari main
                               foregroundColor: Colors.white,
                               backgroundColor: Color(0xFF4DBAFF),
                               elevation: 3,
@@ -332,7 +335,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               padding: EdgeInsets.symmetric(vertical: 15),
                             ),
-                            child: authProvider.isLoading
+                            child: authProvider.isLoading // Indikator loading dari main
                                 ? SizedBox(
                                     width: 24,
                                     height: 24,
@@ -350,8 +353,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                           ),
                         ),
-                        
-                        // Login link
+
+                        // Login link (dari main)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.only(top: 20.0),
@@ -387,7 +390,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                         ),
-                        
+
                         SizedBox(height: 30),
                       ],
                     ),
@@ -400,7 +403,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
-  
+
+  // Helper method _buildInputField (dari main)
   Widget _buildInputField({
     required TextEditingController controller,
     required String label,

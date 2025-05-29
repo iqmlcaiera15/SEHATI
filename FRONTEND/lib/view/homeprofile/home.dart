@@ -5,7 +5,9 @@ import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; 
 import 'package:Sehati/view/komunitas/index_komunitas.dart'; 
 import 'package:Sehati/view/polusiudara/index_polusi.dart'; 
+import 'package:Sehati/view/homeprofile/profile.dart'; 
 import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart';
+import 'package:Sehati/view/shop/shop_index.dart';
 import 'package:Sehati/providers/auth_provider.dart';
 import 'package:Sehati/services/api/dio_client.dart';
 import 'package:Sehati/view/registerlogin/login_screen.dart';
@@ -88,7 +90,7 @@ class _HomePageState extends State<HomePage> {
                   child: SizedBox(
                     width: 54,
                     child: Text(
-                      '9:41',
+                      '',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: const Color(0xFF1E293B),
@@ -100,40 +102,40 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 // Battery icon
-                Positioned(
-                  left: 389.33,
-                  top: 17.33,
-                  child: Opacity(
-                    opacity: 0.35,
-                    child: Container(
-                      width: 22,
-                      height: 11.33,
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            width: 1,
-                            color: const Color(0xFF1E293B),
-                          ),
-                          borderRadius: BorderRadius.circular(2.67),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 391.33,
-                  top: 19.33,
-                  child: Container(
-                    width: 18,
-                    height: 7.33,
-                    decoration: ShapeDecoration(
-                      color: const Color(0xFF1E293B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(1.33),
-                      ),
-                    ),
-                  ),
-                ),
+                // Positioned(
+                //   left: 389.33,
+                //   top: 17.33,
+                //   child: Opacity(
+                //     opacity: 0.35,
+                //     child: Container(
+                //       width: 22,
+                //       height: 11.33,
+                //       decoration: ShapeDecoration(
+                //         shape: RoundedRectangleBorder(
+                //           side: BorderSide(
+                //             width: 1,
+                //             color: const Color(0xFF1E293B),
+                //           ),
+                //           borderRadius: BorderRadius.circular(2.67),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // Positioned(
+                //   left: 391.33,
+                //   top: 19.33,
+                //   child: Container(
+                //     width: 18,
+                //     height: 7.33,
+                //     decoration: ShapeDecoration(
+                //       color: const Color(0xFF1E293B),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(1.33),
+                //       ),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -670,13 +672,13 @@ class _HomePageState extends State<HomePage> {
       ),
       // Bottom Navigation
       bottomNavigationBar: _buildBottomNavigation(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Action menu button
-        },
-        backgroundColor: const Color(0xFFAEE2FF),
-        child: const Icon(Icons.grid_view, color: Color(0xFF414549)),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     // Action menu button
+      //   },
+      //   backgroundColor: const Color(0xFFAEE2FF),
+      //   child: const Icon(Icons.grid_view, color: Color(0xFF414549)),
+      // ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
@@ -930,75 +932,69 @@ String _formatHPL(String? hpl) {
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return BottomNavigationBar(
-      currentIndex: _currentIndex,
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-          // Tambahkan logika navigasi di sini
-          if (index == 1) { // Indeks untuk item 'Komunitas' (dimulai dari 0)
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CommunityPage()),
-            );
-          } else if (index == 0) {
-            // Navigasi ke halaman Beranda (jika Anda punya halaman Beranda terpisah)
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => const BerandaPage()),
-            // );
-          } else if (index == 3) {
-            // Navigasi ke halaman Tersimpan
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => const TersimpanPage()),
-            // );
-          } else if (index == 4) {
-            // Navigasi ke halaman Profil
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => const ProfilPage()),
-            // );
-          }
-        });
-      },
-      backgroundColor: Colors.white,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF4DBAFF),
-      unselectedItemColor: const Color(0xFF4C617F),
-      selectedLabelStyle: const TextStyle(
-        fontFamily: 'Poppins',
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontFamily: 'Poppins',
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Beranda',
+    Widget _buildBottomNavigation() {
+      return BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+            if (index == 0) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+              );
+            } else if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CommunityPage()),
+              );
+            }
+              else if (index == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ShopPage()),
+              );
+            }
+              else if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserDataViewPage()),
+              );
+            }
+          });
+        },
+        backgroundColor: Colors.white,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF4DBAFF),
+        unselectedItemColor: const Color(0xFF4C617F),
+        selectedLabelStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.group),
-          label: 'Komunitas',
+        unselectedLabelStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
-        BottomNavigationBarItem(
-          icon: SizedBox(), // Empty space for FAB
-          label: '',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.bookmark),
-          label: 'Tersimpan',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profil',
-        ),
-      ],
-    );
-  }
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.group),
+            label: 'Komunitas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag),
+            label: 'Shop',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+        ],
+      );
+    }
 }
