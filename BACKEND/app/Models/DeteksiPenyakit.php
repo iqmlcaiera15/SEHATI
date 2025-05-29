@@ -13,6 +13,7 @@ class DeteksiPenyakit extends Model
     protected $primaryKey = 'deteksi_id';
 
     protected $fillable = [
+        'nama',
         'pregnancies', 
         'bs', 
         'blood_pressure', 
@@ -27,6 +28,7 @@ class DeteksiPenyakit extends Model
         'diastolic_bp', 
         'heart_rate', 
         'body_temp', 
+        'user_id',
     
         // Kolom hasil prediksi
         'diabetes_prediction', 
@@ -34,6 +36,8 @@ class DeteksiPenyakit extends Model
         'maternal_health_prediction'
     ];
     
-    
-
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -3,12 +3,14 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\SkorEpds;
 
 return new class extends Migration {
     public function up()
     {
         Schema::create('prediksi_depresi', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->integer('umur');
             $table->integer('merasa_sedih'); // 0, 1, 2
             $table->integer('mudah_tersinggung'); // 0, 1, 2
@@ -21,6 +23,12 @@ return new class extends Migration {
             $table->timestamps();
         });
     }
+
+    public function epds()
+    {
+        return $this->hasOne(SkorEpds::class, 'prediksi_depresi_id');
+    }
+
 
     public function down()
     {

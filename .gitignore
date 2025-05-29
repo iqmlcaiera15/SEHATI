@@ -5,3 +5,5 @@ composer.lock
 /FRONTEND/linux/flutter
 FRONTEND/pubspec.lock
 FRONTEND/pubspec.lock
+BACKEND/composer.lock
+BACKEND/composer.json

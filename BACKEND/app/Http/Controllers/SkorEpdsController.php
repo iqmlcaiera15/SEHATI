@@ -14,6 +14,7 @@ class SkorEpdsController extends Controller
     {
         try {
             $validated = $request->validate([
+                'prediksi_depresi_id' => 'required|exists:prediksi_depresi,id',
                 'answers' => 'required|array|size:10',
                 'answers.*' => 'integer|min:0|max:3',
             ]);
@@ -21,6 +22,7 @@ class SkorEpdsController extends Controller
             $score = array_sum($validated['answers']);
 
             $result = SkorEpds::create([
+                'prediksi_depresi_id' => $request->input('prediksi_depresi_id'),
                 'answers' => $validated['answers'],
                 'score' => $score,
             ]);

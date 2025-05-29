@@ -11,22 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('saran_makanan', function (Blueprint $table) {
-            $table->id('makanan_id'); 
-            $table->string('kategori');
-            $table->string('gambar')->nullable(); 
-            $table->string('nama_makanan');
-            $table->string('deskripsi');
-            $table->string('cocok');
+        Schema::create('like', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('post_id')
+                ->constrained('komunitas', 'post_id')
+                ->onDelete('cascade');
+            $table->string('user_id'); 
             $table->timestamps();
+
+    
         });
     }
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('like');
     }
 };

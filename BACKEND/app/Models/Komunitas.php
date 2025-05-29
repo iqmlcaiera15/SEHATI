@@ -16,9 +16,19 @@ class Komunitas extends Model
         'user_id', 
         'judul', 
         'deskripsi', 
-        'komen', 
-        'likes'
+        'gambar', 
+        'apresiasi',
+        'komen'
     ];
 
+    public function komentar()
+    {
+        return $this->hasMany(KomentarKomunitas::class, 'id');
+    }
+
+        public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 }
