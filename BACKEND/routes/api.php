@@ -33,6 +33,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
 Route::group(['middleware' => 'auth:api'], function () {
 
     //Profil
+    Route::get('/user-data', [UserController::class, 'getUserData']);
     Route::post('/isidata', [UserController::class, 'isidata']);
     Route::put('/update-data/{id}', [UserController::class, 'updateData']);
     Route::get('/icons', [IconsController::class, 'index']);

@@ -11,6 +11,36 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+        public function getUserData()
+    {
+        try {
+            // Ambil ID user dari token JWT
+            $userId = auth()->id();
+
+            if (!$userId) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            // Ambil data user dari database
+            $user = User::find($userId);
+
+            if (!$user) {
+                return response()->json(['message' => 'User tidak ditemukan'], 404);
+            }
+
+            return response()->json([
+                'message' => 'Data user berhasil diambil',
+                'data' => $user
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error in getUserData: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function isidata(Request $request)
     {   
         try {
