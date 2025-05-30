@@ -10,7 +10,7 @@ return new class extends Migration {
     {
         Schema::create('prediksi_depresi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->integer('umur');
             $table->integer('merasa_sedih'); // 0, 1, 2
             $table->integer('mudah_tersinggung'); // 0, 1, 2

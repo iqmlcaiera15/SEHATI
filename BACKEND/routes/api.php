@@ -12,12 +12,13 @@ use App\Http\Controllers\SkorEpdsController;
 use App\Http\Controllers\PredictionController;
 use App\Http\Controllers\WaterIntakeController;
 use App\Http\Controllers\PregnancyCalculatorController;
-use App\Http\Controllers\FetalMonitoringController;
 use App\Http\Controllers\PostpartumArticleController;
 use App\Http\Controllers\HomeProfileController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\IconsController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
+
 
 // Auth routes - Pindahkan ke api.php jika menggunakan API
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
@@ -30,9 +31,14 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
 
 // Semua route terproteksi
 Route::group(['middleware' => 'auth:api'], function () {
-    
-    //ISI DATA IBU HAMIL
+
+    //Profil
+    Route::get('/user-data', [UserController::class, 'getUserData']);
     Route::post('/isidata', [UserController::class, 'isidata']);
+    Route::post('/update-data/{id}', [UserController::class, 'updateData']);
+    Route::get('/icons', [IconsController::class, 'index']);
+    Route::put('/user/select-icon', [UserController::class, 'updateSelectedIcon']);
+
     // Air Quality
     Route::get('/kualitasudara', [AirQualityController::class, 'getCityData']);
 
@@ -44,7 +50,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('/komunitas/history/{id}', [KomunitasController::class, 'deleteById']);
     Route::post('/komunitas/komen/add/{id}', [KomunitasController::class, 'addComment']);
     Route::post('/komunitas/like/add/{id}', [KomunitasController::class, 'addLike']);
-    Route::post('/komunitas/komen/{id}', [KomunitasController::class, 'getComments']);
+    Route::get('/komunitas/komen/{id}', [KomunitasController::class, 'getComments']);
 
     // Catatan Kunjungan
     Route::get('/catatan/history', [CatatanController::class, 'index']);
@@ -87,8 +93,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     // Prediksi Metode Persalinan
     Route::get('/predictions', [PredictionController::class, 'index']);
-    Route::get('/predictions/{id}', [PredictionController::class, 'show']);
     Route::post('/predictions', [PredictionController::class, 'store']);
+    Route::get('/predictions/{id}', [PredictionController::class, 'show']);
     Route::put('/predictions/{id}', [PredictionController::class, 'update']);
     Route::delete('/predictions/{id}', [PredictionController::class, 'destroy']);
 
@@ -106,13 +112,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'update']);
     Route::delete('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'destroy']);
 
-    // Fetal Monitoring
-    Route::get('fetal-monitorings', [FetalMonitoringController::class, 'index']);
-    Route::post('fetal-monitorings', [FetalMonitoringController::class, 'store']);
-    Route::get('fetal-monitorings/{id}', [FetalMonitoringController::class, 'show']);
-    Route::put('fetal-monitorings/{id}', [FetalMonitoringController::class, 'update']);
-    Route::delete('fetal-monitorings/{id}', [FetalMonitoringController::class, 'destroy']);
-
     // PostPartum Article
     Route::get('/postpartum', [PostpartumArticleController::class, 'index']);
     Route::get('/postpartum/{id}', [PostpartumArticleController::class, 'show']);
@@ -121,6 +120,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/protected-data', function () {
         return response()->json(['message' => 'Data protected by JWT']);
     });
+
+    // Shop
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::get('/products/{product}', [ProductController::class, 'show']);
+    Route::put('/products/{product}', [ProductController::class, 'update']);
+    Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
 
 });

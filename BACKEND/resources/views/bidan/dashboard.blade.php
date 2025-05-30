@@ -16,7 +16,7 @@
                     Total Ibu Hamil
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
+                    <a class="small text-white stretched-link" href="{{ route('ibu_hamil.show', $ibuHamil->id) ) }}">Lihat Detail</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
@@ -40,7 +40,7 @@
                     Total Prediksi Depresi
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
+                    <a class="small text-white stretched-link" href="{{ route('depresi.index') }}">Lihat Detail</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                     Total Prediksi Persalinan
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
+                    <a class="small text-white stretched-link" href="{{ route('bidan.prediksi.index') }}">Lihat Detail</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
@@ -199,35 +199,63 @@
                     <div class="card border-left-success h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
-                                <h5 class="card-title">ID: {{ $depresi->id }}</h5>
-                                <span class="badge {{ $depresi->hasil_prediksi ? 'bg-danger' : 'bg-success' }}">
-                                    {{ $depresi->hasil_prediksi ? 'Depresi' : 'Tidak Depresi' }}
-                                </span>
+                                <h5 class="card-title">{{ $depresi->user->name ?? 'Tidak diketahui' }}</h5>
+
+                                @if($depresi->epds && $depresi->epds->score)
+                                    <!-- Badge untuk EPDS jika ada data -->
+                                    <span class="badge
+                                        @if($depresi->epds->score >= 14) bg-danger
+                                        @elseif($depresi->epds->score >= 12) bg-warning
+                                        @else bg-success
+                                        @endif">
+                                        @if($depresi->epds->score >= 14)
+                                            Risiko Tinggi Depresi
+                                        @elseif($depresi->epds->score >= 12)
+                                            Kemungkinan Depresi
+                                        @else
+                                            Gejala Ringan
+                                        @endif
+                                        ({{ $depresi->epds->score }})
+                                    </span>
+                                @else
+                                    <!-- Badge untuk prediksi depresi jika tidak ada EPDS -->
+                                    <span class="badge {{ $depresi->hasil_prediksi ? 'bg-danger' : 'bg-success' }}">
+                                        {{ $depresi->hasil_prediksi ? 'Bergejala Depresi' : 'Tidak Bergejala Depresi' }}
+                                    </span>
+                                @endif
                             </div>
                             <hr>
                             <div class="row mb-2">
                                 <div class="col-md-6 fw-bold">Umur</div>
-                                <div class="col-md-6">{{ $depresi->umur }} tahun</div>
+                                <div class="col-md-6">{{ $depresi->user->usia ?? '-' }} tahun</div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Merasa Sedih</div>
-                                <div class="col-md-6">{{ $depresi->merasa_sedih }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Mudah Tersinggung</div>
-                                <div class="col-md-6">{{ $depresi->mudah_tersinggung }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Masalah Tidur</div>
-                                <div class="col-md-6">{{ $depresi->masalah_tidur }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Masalah Fokus</div>
-                                <div class="col-md-6">{{ $depresi->masalah_fokus }}</div>
-                            </div>
+
+                             <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Merasa Sedih</div>
+                                    <div class="col-md-6">{{ $depresi->merasa_sedih_text }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Mudah Tersinggung</div>
+                                    <div class="col-md-6">{{ $depresi->mudah_tersinggung_text}}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Masalah Tidur</div>
+                                    <div class="col-md-6">{{ $depresi->masalah_tidur_text}}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Masalah Fokus</div>
+                                    <div class="col-md-6">{{ $depresi->masalah_fokus_text}}</div>
+                                </div>
+                            @if($depresi->epds && $depresi->epds->score)
+                                <!-- Tampilkan info EPDS jika ada -->
+                                <div class="row mb-2">
+                                    <div class="col-md-6 fw-bold">Skor EPDS</div>
+                                    <div class="col-md-6">{{ $depresi->epds->score }} / 30</div>
+                                </div>
+                            @endif
                         </div>
                         <div class="card-footer">
-                            <a href="#" class="btn btn-sm btn-success w-100">Detail Lengkap</a>
+                            <a href="{{ route('depresi.show', $depresi->id) }}" class="btn btn-sm btn-success w-100">Detail Lengkap</a>
                         </div>
                     </div>
                 </div>
@@ -242,57 +270,71 @@
         </div>
     </div>
 
-    <!-- Prediksi Janin / Persalinan -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-baby me-1"></i>
-            Prediksi Persalinan Terbaru
-        </div>
-        <div class="card-body">
-            <div class="row">
-                @forelse($prediksiJanin->take(6) as $janin)
+<!-- Prediksi Janin / Persalinan -->
+<div class="card mb-4">
+    <div class="card-header bg-white text-dark fw-semibold">
+        <i class="fas fa-baby me-1 text-danger"></i>
+        Prediksi Persalinan Terbaru
+    </div>
+    <div class="card-body">
+        <div class="row">
+            @forelse($prediksiJanin->take(6) as $janin)
+                @php
+                    $method = strtolower($janin->metode_persalinan);
+                    $isCaesar = $method === 'caesar';
+                    $textClass = $isCaesar ? 'text-danger' : 'text-primary';
+                    $borderClass = $isCaesar ? 'border-danger' : 'border-primary';
+                    $buttonClass = $isCaesar ? 'btn-outline-danger' : 'btn-outline-primary';
+                @endphp
+
                 <div class="col-xl-4 col-md-6 mb-4">
-                    <div class="card border-left-danger h-100">
+                    <div class="card h-100 border border-2 {{ $borderClass }}">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <h5 class="card-title">ID: {{ $janin->id }}</h5>
-                                <span class="badge bg-info">{{ $janin->metode_persalinan }}</span>
+                            {{-- Header --}}
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0 fw-semibold">Prediksi #{{ $janin->id }}</h5>
+                                <span class="fw-bold small {{ $textClass }}">
+                                    {{ ucfirst($janin->metode_persalinan) }}
+                                </span>
                             </div>
-                            <hr>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Usia Ibu</div>
-                                <div class="col-md-6">{{ $janin->usia_ibu }} tahun</div>
+
+                            {{-- Informasi Klinis --}}
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span><i class="fas fa-birthday-cake me-1 text-muted"></i> Usia Ibu</span>
+                                <span>{{ $janin->usia_ibu }} tahun</span>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Tekanan Darah</div>
-                                <div class="col-md-6">{{ $janin->tekanan_darah }}</div>
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span><i class="fas fa-tachometer-alt me-1 text-muted"></i> Tekanan Darah</span>
+                                <span>{{ ucfirst($janin->tekanan_darah) }}</span>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Riwayat Persalinan</div>
-                                <div class="col-md-6">{{ $janin->riwayat_persalinan }}</div>
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span><i class="fas fa-history me-1 text-muted"></i> Riwayat Persalinan</span>
+                                <span>{{ ucfirst($janin->riwayat_persalinan) }}</span>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Posisi Janin</div>
-                                <div class="col-md-6">{{ $janin->posisi_janin }}</div>
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span><i class="fas fa-baby-carriage me-1 text-muted"></i> Posisi Janin</span>
+                                <span>{{ ucfirst($janin->posisi_janin) }}</span>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-md-6 fw-bold">Kondisi Kesehatan</div>
-                                <div class="col-md-6">{{ $janin->kondisi_kesehatan_janin ?? 'Normal' }}</div>
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span><i class="fas fa-heartbeat me-1 text-muted"></i> Kondisi Janin</span>
+                                <span>{{ ucfirst($janin->kondisi_kesehatan_janin) ?? 'Normal' }}</span>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <a href="#" class="btn btn-sm btn-danger w-100">Detail Lengkap</a>
+
+                        {{-- Footer --}}
+                        <div class="card-footer bg-transparent border-top-0">
+                            <a href="{{ route('bidan.prediksi.result', $janin->id) }}"
+                               class="btn btn-sm {{ $buttonClass }} w-100">
+                                <i class="fas fa-eye me-1"></i> Lihat Detail
+                            </a>
                         </div>
                     </div>
                 </div>
-                @empty
+            @empty
                 <div class="col-12">
-                    <div class="alert alert-info">
-                        Belum ada data prediksi persalinan.
-                    </div>
+                    <div class="alert alert-info">Belum ada data prediksi persalinan.</div>
                 </div>
-                @endforelse
-            </div>
+            @endforelse
         </div>
     </div>
 </div>

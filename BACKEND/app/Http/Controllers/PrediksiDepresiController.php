@@ -3,28 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\PrediksiDepresi;
+use App\Models\Prediction;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 
-class PrediksiDepresiController extends Controller
+class PredictionController extends Controller
 {
     public function index()
     {
-        return response()->json(PrediksiDepresi::all());
+        return response()->json(Prediction::all());
     }
 
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'umur' => 'required|integer|min:0|max:120',
-            'merasa_sedih' => 'required|in:Tidak,Kadang-kadang,Ya',
-            'mudah_tersinggung' => 'required|in:Tidak,Kadang-kadang,Ya',
-            'masalah_tidur' => 'required|in:Tidak,Dua hari dalam seminggu/lebih,Ya',
-            'masalah_fokus' => 'required|in:Tidak,Ya,Sering',
-            'pola_makan' => 'required|in:Tidak sama sekali,Kadang-kadang,Ya',
-            'merasa_bersalah' => 'required|in:Tidak,Mungkin,Ya',
-            'suicide_attempt' => 'required|in:Tidak,Ya,Tidak ingin menjawab',
+            'usia_ibu' => 'required|integer|min:15|max:50',
+            'tekanan_darah' => 'required|in:normal,rendah,tinggi',
+            'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
+            'posisi_janin' => 'required|in:normal,lintang,sungsang',
+            'riwayat_kesehatan_ibu' => 'nullable|string',
+            'kondisi_kesehatan_janin' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -35,28 +33,45 @@ class PrediksiDepresiController extends Controller
         }
 
         try {
-            // Konversi jawaban ke angka
-            $dataKuisioner = [
-                'umur' => $this->categorizeUmur($request->umur),
-                'merasa_sedih' => $this->convertToNumber('merasa_sedih', $request->merasa_sedih),
-                'mudah_tersinggung' => $this->convertToNumber('mudah_tersinggung', $request->mudah_tersinggung),
-                'masalah_tidur' => $this->convertToNumber('masalah_tidur', $request->masalah_tidur),
-                'masalah_fokus' => $this->convertToNumber('masalah_fokus', $request->masalah_fokus),
-                'pola_makan' => $this->convertToNumber('pola_makan', $request->pola_makan),
-                'merasa_bersalah' => $this->convertToNumber('merasa_bersalah', $request->merasa_bersalah),
-                'suicide_attempt' => $this->convertToNumber('suicide_attempt', $request->suicide_attempt),
+            $user = $request->user(); // optional: check if using auth
+            $dataInput = [
+                'usia_ibu' => (int) $request->usia_ibu,
+                'tekanan_darah' => strtolower($request->tekanan_darah),
+                'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
+                'posisi_janin' => strtolower($request->posisi_janin),
+                'riwayat_kesehatan_ibu' => $request->riwayat_kesehatan_ibu ?? 'normal',
+                'kondisi_kesehatan_janin' => $request->kondisi_kesehatan_janin ?? 'normal',
             ];
 
-            // Panggil model SVM Flask
-            $dataKuisioner['hasil_prediksi'] = $this->predictDepresi($dataKuisioner);
+            // Kirim data ke Flask API
+            $response = Http::post('https://sehatimlpredict-production.up.railway.app/predict', $dataInput);
 
-            // Simpan ke database
-            $prediksi = PrediksiDepresi::create($dataKuisioner);
+            if ($response->failed()) {
+                throw new \Exception("Gagal memanggil Flask API. Status: " . $response->status());
+            }
+
+            $result = $response->json();
+            $hasil = $result['hasil_prediksi'] ?? null;
+            $faktor = $result['faktor'] ?? '-';
+
+            if (!$hasil) {
+                throw new \Exception("Respons Flask tidak lengkap: " . json_encode($result));
+            }
+
+            // Simpan ke DB
+            $prediction = Prediction::create(array_merge(
+                $dataInput,
+                [
+                    'metode_persalinan' => $hasil,
+                    'faktor' => $faktor,
+                    'user_id' => $user?->id, // bisa null
+                ]
+            ));
 
             return response()->json([
                 "status" => "success",
-                "message" => "Prediksi berhasil disimpan",
-                "data" => $prediksi
+                "message" => $result['message'] ?? "Prediksi berhasil",
+                "data" => $prediction
             ], 201);
 
         } catch (\Exception $e) {
@@ -70,46 +85,33 @@ class PrediksiDepresiController extends Controller
 
     public function show($id)
     {
-        $prediksi = PrediksiDepresi::find($id);
+        $prediction = Prediction::find($id);
 
-        if (!$prediksi) {
+        if (!$prediction) {
             return response()->json([
                 "status" => "error",
                 "message" => "Data tidak ditemukan"
             ], 404);
         }
 
-        // Konversi angka kembali ke teks
-        $rekapData = [
-            'umur' => $this->convertToText('umur', $prediksi->umur),
-            'merasa_sedih' => $this->convertToText('merasa_sedih', $prediksi->merasa_sedih),
-            'mudah_tersinggung' => $this->convertToText('mudah_tersinggung', $prediksi->mudah_tersinggung),
-            'masalah_tidur' => $this->convertToText('masalah_tidur', $prediksi->masalah_tidur),
-            'masalah_fokus' => $this->convertToText('masalah_fokus', $prediksi->masalah_fokus),
-            'pola_makan' => $this->convertToText('pola_makan', $prediksi->pola_makan),
-            'merasa_bersalah' => $this->convertToText('merasa_bersalah', $prediksi->merasa_bersalah),
-            'suicide_attempt' => $this->convertToText('suicide_attempt', $prediksi->suicide_attempt),
-            'hasil_prediksi' => $prediksi->hasil_prediksi ? "Terindikasi Depresi" : "Tidak Terindikasi Depresi"
-        ];
-
         return response()->json([
             "status" => "success",
-            "data" => $rekapData
+            "data" => $prediction
         ]);
     }
 
     public function deletebyID($id)
     {
-        $prediksi = PrediksiDepresi::find($id);
+        $prediction = Prediction::find($id);
 
-        if (!$prediksi) {
+        if (!$prediction) {
             return response()->json([
                 "status" => "error",
                 "message" => "Data tidak ditemukan"
             ], 404);
         }
 
-        $prediksi->delete();
+        $prediction->delete();
 
         return response()->json([
             "status" => "success",
@@ -150,13 +152,13 @@ class PrediksiDepresiController extends Controller
                 1 => '31-35',
                 2 => '36-40',
                 3 => '41-45',
-                4 => '46-50',
+                4 => '46-50'
             ],
             'merasa_sedih' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
             'mudah_tersinggung' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
             'masalah_tidur' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Dua hari dalam seminggu/lebih'],
             'masalah_fokus' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Sering'],
-            'pola_makan' => [2=> 'Tidak sama sekali', 1 => 'Ya', 1 => 'Kadang-kadang'],
+            'pola_makan' => [2=> 'Tidak sama sekali', 1 => 'Ya', 0 => 'Kadang-kadang'],
             'merasa_bersalah' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Mungkin'],
             'suicide_attempt' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Tidak ingin menjawab'],
         ];
@@ -171,15 +173,15 @@ class PrediksiDepresiController extends Controller
             // $response = Http::post('http://127.0.0.1:5000/predict', [
             'features' => array_values($data)
         ]);
-    
+
         if ($response->failed()) {
             $status = $response->status();
             $body = $response->body();
-    
+
             throw new \Exception("Gagal memanggil Flask API. Status: $status. Respons: $body");
         }
-    
+
         return $response->json()['prediction'] ?? null;
     }
-    
+
 }

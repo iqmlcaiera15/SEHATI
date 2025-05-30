@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\icons;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -28,6 +32,10 @@ class User extends Authenticatable implements JWTSubject
         'usia_suami',
         'pekerjaan_suami',
         'saldo_total',
+        'usia_kehamilan',
+        'selected_icon_id',
+        'selected_icon_name_cache',
+        'selected_icon_data_cache',
         
         // BIDAN
         'nomor_str',
@@ -66,6 +74,12 @@ class User extends Authenticatable implements JWTSubject
         return $this->getKey();
     }
 
+     public function selectedIcon(): BelongsTo 
+    {
+        
+        return $this->belongsTo(Icons::class, 'selected_icon_id', 'id');
+    }
+    
     public function getJWTCustomClaims()
     {
         return [];

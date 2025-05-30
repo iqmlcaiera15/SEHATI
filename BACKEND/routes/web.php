@@ -7,6 +7,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsentifController;
 use App\Http\Controllers\DeteksiDesktopController;
 use App\Http\Controllers\PrediksiDepresiDesktopController;
+use App\Http\Controllers\IconsController;
+use App\Http\Controllers\PredictionController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -47,9 +51,20 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::get('/deteksi/latest', [DeteksiDesktopController::class, 'indexlatest'])->name('deteksi.latest');
     Route::get('/deteksi/delete-all', [DeteksiDesktopController::class, 'deleteAll'])->name('deteksi.deleteAll');
     Route::delete('/deteksi/{id}', [DeteksiDesktopController::class, 'destroy'])->name('deteksi.destroy');
-
+    Route::get('/detail/{id}', [IbuHamilController::class, 'show'])->name('ibu_hamil.show');
     Route::get('/depresi', [PrediksiDepresiDesktopController::class, 'index'])->name('depresi.index');
-    Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.delete');
+    Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show');
+    Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.destroy');
+
+    Route::get('/prediksi', [PredictionController::class, 'index'])->name('bidan.prediksi.index');
+    Route::get('/prediksi/form', function () {
+        return view('prediksi.form');
+    })->name('bidan.prediksi.form');
+    Route::post('/prediksi', [PredictionController::class, 'store'])->name('bidan.prediksi.store');
+    Route::get('/prediksi/result/{id}', [PredictionController::class, 'result'])->name('bidan.prediksi.result');
+    Route::delete('/prediksi/{id}', [PredictionController::class, 'deletebyID'])->name('bidan.prediksi.delete');
+    Route::get('/bidan/prediksi/{id}/print', [PredictionController::class, 'print'])->name('bidan.prediksi.print');
+
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
     // Add more bidan routes here
@@ -72,7 +87,7 @@ Route::middleware(['auth'])->prefix('dinkes')->group(function () {
     Route::get('/dinkes/saldo/{id}/tambah', [InsentifController::class, 'showTambahSaldoForm'])->name('dinkes.form.tambah.saldo');
     Route::post('saldo/{userId}', [InsentifController::class, 'tambahSaldo'])->name('dinkes.tambah.saldo');
     // Add more dinkes routes here
-    
+
 });
 
     Route::get('saldo/{userId}', [InsentifController::class, 'Saldo'])->name('dinkes.dinkessaldo');
@@ -99,6 +114,6 @@ Route::get('/home', function() {
             return redirect()->route('dinkes.dashboard');
         }
     }
-    
+
     return redirect()->route('login');
 })->name('home');

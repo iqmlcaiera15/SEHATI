@@ -75,6 +75,7 @@ class DeteksiDesktopController extends Controller
 
             // Simpan ke database
             $deteksi = DeteksiPenyakit::create([
+                'user_id' => $user->id,
                 'bidan_id' => $user->id,
                 'nama' => $request->nama,
                 'pregnancies' => $request->pregnancies,

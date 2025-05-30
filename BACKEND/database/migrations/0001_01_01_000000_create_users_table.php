@@ -32,7 +32,15 @@ return new class extends Migration
             $table->string('telepon_suami')->nullable();
             $table->integer('usia_suami')->nullable();
             $table->string('pekerjaan_suami')->nullable();
+            $table->integer('usia_kehamilan')->nullable();
             $table->integer('saldo_total')->nullable()->default(0);
+            $table->unsignedBigInteger('selected_icon_id')->nullable();
+            $table->string('selected_icon_name_cache')->nullable();
+            $table->string('selected_icon_data_cache')->nullable();
+            $table->foreign('selected_icon_id')    
+                  ->references('id')            
+                  ->on('icons')
+                  ->onDelete('set null');
             // $table->integer('jumlah_kehamilan_sebelumnya')->nullable();
             // $table->integer('jumlah_anak_hidup')->nullable();
             // $table->date('hpht')->nullable();

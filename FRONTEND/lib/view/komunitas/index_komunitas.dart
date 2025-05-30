@@ -1,6 +1,9 @@
+import 'package:Sehati/view/shop/shop_index.dart';
 import 'package:flutter/material.dart';
 import 'package:Sehati/services/api/api_service_komunitas.dart'; 
 import 'package:Sehati/view/homeprofile/home.dart';
+import 'package:Sehati/view/komunitas/comment_komunitas.dart';
+import 'package:Sehati/view/homeprofile/profile.dart'; 
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({Key? key}) : super(key: key);
@@ -62,7 +65,9 @@ class _CommunityPageState extends State<CommunityPage> {
   }
 
   // Helper function to format the API timestamp into a "time ago" format
-  static String _formatTimeAgo(String dateString) {
+  static String _formatTimeAgo(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return 'baru saja';
+    
     try {
       final DateTime date = DateTime.parse(dateString);
       final Duration difference = DateTime.now().difference(date);
@@ -83,6 +88,33 @@ class _CommunityPageState extends State<CommunityPage> {
     } catch (e) {
       print('Error formatting date: $e');
       return 'baru saja';
+    }
+  }
+
+  // Helper method to build user avatar
+  Widget _buildUserAvatar(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty || imageUrl == 'assets/images/default_user.png') {
+      return const Icon(
+        Icons.person,
+        color: Colors.white,
+        size: 20,
+      );
+    } else {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 20,
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -196,7 +228,7 @@ class _CommunityPageState extends State<CommunityPage> {
                     ),
                     const Expanded(
                       child: Text(
-                        'Timeline',
+                        'Timeline MamaShare',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Color(0xFF1E293B),
@@ -398,6 +430,18 @@ class _CommunityPageState extends State<CommunityPage> {
                 MaterialPageRoute(builder: (context) => const HomePage()),
               );
             }
+            else if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ShopPage()),
+              );
+            }
+            else if (index == 4) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserDataViewPage()),
+              );
+            }
           });
         },
         backgroundColor: Colors.white,
@@ -428,8 +472,8 @@ class _CommunityPageState extends State<CommunityPage> {
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Tersimpan', 
+            icon: Icon(Icons.shopping_bag),
+            label: 'Shop',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -440,7 +484,20 @@ class _CommunityPageState extends State<CommunityPage> {
     }
 
     Widget _buildPostCard(PostModel post) {
-      return Container(
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the comment page when post is tapped
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CommentPage(post: post),
+          ),
+        ).then((_) {
+          // Refresh the posts when returning from comment page
+          _loadPosts();
+        });
+      },
+      child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -465,8 +522,9 @@ class _CommunityPageState extends State<CommunityPage> {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: AssetImage(post.userImage ?? 'assets/images/default_user.png'),
                         radius: 20,
+                        backgroundColor: const Color(0xFF4DBAFF),
+                        child: _buildUserAvatar(post.userImage),
                       ),
                       const SizedBox(width: 12),
                       Column(
@@ -481,7 +539,7 @@ class _CommunityPageState extends State<CommunityPage> {
                             ),
                           ),
                           Text(
-                            post.timeAgo ?? 'baru saja',
+                            _formatTimeAgo(post.timeAgo),
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 12,
@@ -536,13 +594,24 @@ class _CommunityPageState extends State<CommunityPage> {
                 children: [
                   _buildActionButton(
                     Icons.thumb_up_outlined, 
-                    "Apresiasi (${post.likes})",
+                    "apresiasi (${post.apresiasi})",
                     () => _handleLikePost(post),
                   ),
                   _buildActionButton(
                     Icons.comment_outlined, 
                     "Komentar (${post.komentar})",
-                    () => _showCommentSheet(post),
+                    () {
+                      // Navigate to the comment page when comment button is tapped
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CommentPage(post: post),
+                        ),
+                      ).then((_) {
+                        // Refresh the posts when returning from comment page
+                        _loadPosts();
+                      });
+                    },
                   ),
                   _buildActionButton(
                     Icons.share_outlined, 
@@ -554,8 +623,9 @@ class _CommunityPageState extends State<CommunityPage> {
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
     
     Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
       return InkWell(
@@ -578,16 +648,17 @@ class _CommunityPageState extends State<CommunityPage> {
     }
     
     void _handleLikePost(PostModel post) async {
+      print('[CommunityPage] _handleLikePost DIPANGGIL untuk post ID: ${post.id}'); // <-- TAMBAHKAN INI
       if (post.id != null) {
         setState(() {
           isLoading = true;
         });
         
         try {
-          await ApiServicePosts.updateLikes(post.id!, post.likes + 1);
+          await ApiServicePosts.updateLikes(post.id!, post.apresiasi + 1);
           _loadPosts(); // Reload posts to get updated data
         } catch (e) {
-          _showSnackBar('Error updating likes: $e');
+          _showSnackBar('Error updating apresiasi: $e');
         } finally {
           setState(() {
             isLoading = false;

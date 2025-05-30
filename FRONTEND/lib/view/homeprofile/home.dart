@@ -1,32 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:Sehati/services/api/api_service_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
-import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; // Import disease index page
-import 'package:Sehati/view/komunitas/index_komunitas.dart'; // Import disease index page
+import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; 
+import 'package:Sehati/view/komunitas/index_komunitas.dart'; 
+import 'package:Sehati/view/polusiudara/index_polusi.dart'; 
+import 'package:Sehati/view/homeprofile/profile.dart'; 
+import 'package:Sehati/view/rekomenmakanan/index_rekomen.dart';
+import 'package:Sehati/view/shop/shop_index.dart';
+import 'package:Sehati/providers/auth_provider.dart';
+import 'package:Sehati/services/api/dio_client.dart';
+import 'package:Sehati/view/registerlogin/login_screen.dart';
+import 'package:Sehati/view/prediksipersalinan/index_prediksi.dart';
+import 'package:Sehati/view/asupanair/index_asupanair.dart';
+import 'package:Sehati/view/kalkulatorhpl/index_hpl.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Sehati/view/prediksidepresi/index_depresi.dart';
 import 'package:Sehati/view/kickcounter/index_kickcounter.dart';
 import 'package:Sehati/view/postpartum/postpartum.dart';
 
-void main() {
-  runApp(const SehatiApp());
-}
 
-class SehatiApp extends StatelessWidget {
-  const SehatiApp({super.key});
-  
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sehati App',
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        primaryColor: const Color(0xFF4DBAFF),
-        fontFamily: 'Poppins',
-      ),
-      home: const HomePage(),
-    );
-  }
-}
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -38,11 +31,21 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<dynamic>> _recentData;
   int _currentIndex = 0;
+
+  final DioClient _dioClient = DioClient();
+  String _protectedData = '';
+  bool _isLoading = false;
+  String? _hpl;
+  int? _mingguKe;
+
   
   @override
   void initState() {
     super.initState();
     _loadRecentData();
+    _fetchProtectedData();
+    _fetchProtectedData();
+    _loadHPLData(); // ← tambahan ini
   }
 
   void _loadRecentData() {
@@ -72,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                   child: SizedBox(
                     width: 54,
                     child: Text(
-                      '9:41',
+                      '',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: const Color(0xFF1E293B),
@@ -84,40 +87,40 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 // Battery icon
-                Positioned(
-                  left: 389.33,
-                  top: 17.33,
-                  child: Opacity(
-                    opacity: 0.35,
-                    child: Container(
-                      width: 22,
-                      height: 11.33,
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            width: 1,
-                            color: const Color(0xFF1E293B),
-                          ),
-                          borderRadius: BorderRadius.circular(2.67),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 391.33,
-                  top: 19.33,
-                  child: Container(
-                    width: 18,
-                    height: 7.33,
-                    decoration: ShapeDecoration(
-                      color: const Color(0xFF1E293B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(1.33),
-                      ),
-                    ),
-                  ),
-                ),
+                // Positioned(
+                //   left: 389.33,
+                //   top: 17.33,
+                //   child: Opacity(
+                //     opacity: 0.35,
+                //     child: Container(
+                //       width: 22,
+                //       height: 11.33,
+                //       decoration: ShapeDecoration(
+                //         shape: RoundedRectangleBorder(
+                //           side: BorderSide(
+                //             width: 1,
+                //             color: const Color(0xFF1E293B),
+                //           ),
+                //           borderRadius: BorderRadius.circular(2.67),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // Positioned(
+                //   left: 391.33,
+                //   top: 19.33,
+                //   child: Container(
+                //     width: 18,
+                //     height: 7.33,
+                //     decoration: ShapeDecoration(
+                //       color: const Color(0xFF1E293B),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(1.33),
+                //       ),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -235,8 +238,8 @@ class _HomePageState extends State<HomePage> {
                               Icon(Icons.calendar_today, color: Colors.white, size: 18),
                               const SizedBox(width: 8),
                               Text(
-                                'Minggu ke-28',
-                                style: TextStyle(
+                                _mingguKe != null ? 'Minggu ke-$_mingguKe' : 'Minggu belum dihitung',
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -248,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              _buildStatItem('HPL', '15 Jun 2025'),
+                              _buildStatItem('HPL', _formatHPL(_hpl)),
                               _buildStatItem('Usia', '30 tahun'),
                               _buildStatItem('BMI', '23.5'),
                             ],
@@ -481,18 +484,66 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Fitur Kesehatan Kehamilan lainnya',
-                          style: TextStyle(
-                            color: Color(0xFF1E293B),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                          SizedBox(
+                            height: 180,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const RekomendasiMakananPage()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Makanan Dengan Nutrisi Penting Untuk Ibu Hamil',
+                                    'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
+                                    Icons.restaurant,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const IndexPolusi()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Cek Kualitas Udara',
+                                    'Cek Kualitas Udara Untuk Bandung dan Sekitarnya',
+                                    Icons.wind_power_sharp,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    // TODO: Navigasi ke halaman TidurPage
+                                    // Navigator.push(context, MaterialPageRoute(builder: (context) => TidurPage()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Pola Tidur Sehat',
+                                    'Istirahat cukup untuk kesehatan ibu dan janin',
+                                    Icons.hotel,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    // TODO: Navigasi ke Kalkulator HPL
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AddDataHPL()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Kalkulator HPL',
+                                    'Hitung perkiraan hari lahir bayi Anda secara cepat',
+                                    Icons.date_range,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    // TODO: Navigasi ke Hidrasi Harian
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AsupanAirPage()));
+                                  },
+                                  child: _buildTipCard(
+                                    'Hidrasi Harian',
+                                    'Pantau asupan cairan Anda setiap hari',
+                                    Icons.local_drink,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -562,13 +613,14 @@ class _HomePageState extends State<HomePage> {
       ),
       // Bottom Navigation
       bottomNavigationBar: _buildBottomNavigation(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Action menu button
-        },
-        backgroundColor: const Color(0xFFAEE2FF),
-        child: Icon(Icons.grid_view, color: const Color(0xFF414549)),
-      ),
+
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     // Action menu button
+      //   },
+      //   backgroundColor: const Color(0xFFAEE2FF),
+      //   child: const Icon(Icons.grid_view, color: Color(0xFF414549)),
+      // ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
@@ -596,7 +648,24 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
-  
+  Future<void> _loadHPLData() async {
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    _hpl = prefs.getString('last_hpl');
+    _mingguKe = prefs.getInt('last_week');
+  });
+}
+
+String _formatHPL(String? hpl) {
+  if (hpl == null) return 'Belum dihitung';
+  try {
+    final parsedDate = DateTime.parse(hpl);
+    return DateFormat('dd MMM yyyy').format(parsedDate);
+  } catch (_) {
+    return 'Format salah';
+  }
+}
+
   Widget _buildServiceItem(String label, IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -805,75 +874,69 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return BottomNavigationBar(
-      currentIndex: _currentIndex,
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-          // Tambahkan logika navigasi di sini
-          if (index == 1) { // Indeks untuk item 'Komunitas' (dimulai dari 0)
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CommunityPage()),
-            );
-          } else if (index == 0) {
-            // Navigasi ke halaman Beranda (jika Anda punya halaman Beranda terpisah)
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => const BerandaPage()),
-            // );
-          } else if (index == 3) {
-            // Navigasi ke halaman Tersimpan
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => const TersimpanPage()),
-            // );
-          } else if (index == 4) {
-            // Navigasi ke halaman Profil
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => const ProfilPage()),
-            // );
-          }
-        });
-      },
-      backgroundColor: Colors.white,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF4DBAFF),
-      unselectedItemColor: const Color(0xFF4C617F),
-      selectedLabelStyle: const TextStyle(
-        fontFamily: 'Poppins',
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontFamily: 'Poppins',
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Beranda',
+    Widget _buildBottomNavigation() {
+      return BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+            if (index == 0) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+              );
+            } else if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CommunityPage()),
+              );
+            }
+              else if (index == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ShopPage()),
+              );
+            }
+              else if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserDataViewPage()),
+              );
+            }
+          });
+        },
+        backgroundColor: Colors.white,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF4DBAFF),
+        unselectedItemColor: const Color(0xFF4C617F),
+        selectedLabelStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.group),
-          label: 'Komunitas',
+        unselectedLabelStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
-        BottomNavigationBarItem(
-          icon: SizedBox(), // Empty space for FAB
-          label: '',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.bookmark),
-          label: 'Tersimpan',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profil',
-        ),
-      ],
-    );
-  }
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.group),
+            label: 'Komunitas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag),
+            label: 'Shop',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+        ],
+      );
+    }
 }

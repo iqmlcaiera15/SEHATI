@@ -13,12 +13,17 @@ class KomentarKomunitas extends Model
 
     protected $fillable = [
         'post_id',
-        // 'user_id',
+        'user_id',
         'komentar',
     ];
 
     public function komunitas()
     {
         return $this->belongsTo(Komunitas::class, 'post_id');
+    }
+
+        public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

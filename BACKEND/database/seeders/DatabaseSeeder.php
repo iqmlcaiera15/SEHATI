@@ -35,6 +35,14 @@ class DatabaseSeeder extends Seeder
             'alamat' => 'Jl. Melati No. 10',
         ]);
 
-
+        // Jalankan semua seeder lainnya
+        $this->call([
+            IconSeeder::class,
+            KomunitasSeeder::class,
+            PostpartumArticlesSeeder::class,
+            SaranMakananSeeder::class,
+            // WaterIntakeSeeder::class,
+            ProductSeeder::class
+        ]);
     }
 }
