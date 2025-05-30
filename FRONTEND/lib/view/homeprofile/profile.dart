@@ -33,7 +33,6 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
   // Fetch user data from API
   Future<void> _fetchUserData() async {
-    // ... (kode _fetchUserData Anda yang sudah ada tetap di sini)
      try {
       final token = await getJwtToken();
       
@@ -102,7 +101,6 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
   // Helper method to display data field
   Widget _buildDataField(String label, String? value) {
-    // ... (kode _buildDataField Anda yang sudah ada tetap di sini)
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -114,16 +112,25 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                color: Color(0xFF1E293B),
+                fontSize: 14,
               ),
             ),
           ),
-          Text(': '),
+          Text(
+            ': ',
+            style: TextStyle(
+              color: Color(0xFF1E293B),
+              fontSize: 14,
+            ),
+          ),
           Expanded(
             child: Text(
               value ?? 'Tidak tersedia',
               style: TextStyle(
-                color: value != null ? Colors.black87 : Colors.grey,
+                color: value != null ? Color(0xFF1E293B) : Color(0xFF4C617F),
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ),
@@ -134,15 +141,14 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
   // Helper method to build section header
   Widget _buildSectionHeader(String title) {
-    // ... (kode _buildSectionHeader Anda yang sudah ada tetap di sini)
     return Padding(
       padding: const EdgeInsets.only(top: 24.0, bottom: 12.0),
       child: Text(
         title,
         style: TextStyle(
           fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.blue[800],
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF1E293B),
         ),
       ),
     );
@@ -150,12 +156,11 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
   // Widget untuk menampilkan gambar profil user
   Widget _buildUserProfileImage() {
-    // ... (kode _buildUserProfileImage Anda yang sudah ada tetap di sini)
     final imageUrl = _userData?['selected_icon_data_cache'];
     
     return Container(
       alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(vertical: 16.0),
+      padding: EdgeInsets.symmetric(vertical: 20.0),
       child: Stack(
         children: [
           Container(
@@ -164,15 +169,15 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.blue[300]!,
+                color: Color(0xFF4DBAFF),
                 width: 3,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Color(0x29000000),
                   spreadRadius: 2,
                   blurRadius: 8,
-                  offset: Offset(0, 3),
+                  offset: Offset(0, 4),
                 ),
               ],
             ),
@@ -188,7 +193,7 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                         return Container(
                           width: 120,
                           height: 120,
-                          color: Colors.grey[200],
+                          color: Color(0xFFF4F4F4),
                           child: Center(
                             child: CircularProgressIndicator(
                               value: loadingProgress.expectedTotalBytes != null
@@ -196,6 +201,7 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                                       loadingProgress.expectedTotalBytes!
                                   : null,
                               strokeWidth: 2,
+                              color: Color(0xFF4DBAFF),
                             ),
                           ),
                         );
@@ -204,11 +210,11 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                         return Container(
                           width: 120,
                           height: 120,
-                          color: Colors.grey[200],
+                          color: Color(0xFFF4F4F4),
                           child: Icon(
                             Icons.person,
                             size: 60,
-                            color: Colors.grey[500],
+                            color: Color(0xFF4C617F),
                           ),
                         );
                       },
@@ -216,11 +222,11 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                   : Container(
                       width: 120,
                       height: 120,
-                      color: Colors.grey[200],
+                      color: Color(0xFFF4F4F4),
                       child: Icon(
                         Icons.person,
                         size: 60,
-                        color: Colors.grey[500],
+                        color: Color(0xFF4C617F),
                       ),
                     ),
             ),
@@ -230,22 +236,28 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
             right: 0,
             child: GestureDetector(
                 onTap: () {
-                  // Await navigation and then refresh if needed
-                  Navigator.push( // Menggunakan push agar bisa kembali
+                  Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>  SelectProfilePage()),
-                  ).then((_) => _refreshData()); // Refresh data setelah kembali dari SelectProfilePage
+                    MaterialPageRoute(builder: (context) => SelectProfilePage()),
+                  ).then((_) => _refreshData());
                 },
               child: Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Colors.blue[600],
+                  color: Color(0xFF4DBAFF),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: Colors.white,
                     width: 2,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x29000000),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Icon(
                   Icons.camera_alt,
@@ -266,7 +278,7 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
       currentIndex: _currentIndex,
       onTap: (index) {
         if (!mounted) return;
-        if (_currentIndex == index && index == 3) return; // Jika sudah di halaman profil, jangan lakukan apa-apa
+        if (_currentIndex == index && index == 3) return;
 
         setState(() {
           _currentIndex = index;
@@ -274,7 +286,7 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
 
         switch (index) {
           case 0:
-            Navigator.pushReplacement( // Gunakan pushReplacement agar tidak menumpuk stack
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const HomePage()),
             );
@@ -288,13 +300,11 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
           case 2:
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const ShopPage()), // Pastikan ShopPage diimpor
+              MaterialPageRoute(builder: (context) => const ShopPage()),
             );
             break;
           case 3:
-             // Jika sudah di halaman ini, tidak perlu navigasi lagi
-            // Jika dari halaman lain, pushReplacement akan membawa ke sini
-            if (ModalRoute.of(context)?.settings.name != '/user_data_view') { // Cek jika bukan halaman ini
+            if (ModalRoute.of(context)?.settings.name != '/user_data_view') {
                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => UserDataViewPage(), settings: RouteSettings(name: '/user_data_view')),
@@ -341,13 +351,22 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF4F4F4),
       appBar: AppBar(
-        title: Text('Data Pengguna'),
-        backgroundColor: Colors.blue[600],
-        foregroundColor: Colors.white,
+        title: Text(
+          'Data Pengguna',
+          style: TextStyle(
+            color: Color(0xFF1E293B),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Color(0xFF4C617F)),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: Color(0xFF4DBAFF)),
             onPressed: _refreshData,
             tooltip: 'Refresh Data',
           ),
@@ -358,40 +377,64 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(color: Color(0xFF4DBAFF)),
                   SizedBox(height: 16),
-                  Text('Memuat data...'),
+                  Text(
+                    'Memuat data...',
+                    style: TextStyle(
+                      color: Color(0xFF4C617F),
+                      fontSize: 14,
+                    ),
+                  ),
                 ],
               ),
             )
           : _errorMessage != null
               ? Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(24.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.red[400],
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFFCEFEE),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Color(0xFFFC5C9C),
+                          ),
                         ),
-                        SizedBox(height: 16),
+                        SizedBox(height: 24),
                         Text(
                           _errorMessage!,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.red[600],
+                            color: Color(0xFF1E293B),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: _refreshData,
-                          child: Text('Coba Lagi'),
+                          child: Text(
+                            'Coba Lagi',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[600],
-                            foregroundColor: Colors.white,
+                            backgroundColor: Color(0xFF4DBAFF),
+                            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
                           ),
                         ),
                       ],
@@ -400,58 +443,101 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                 )
               : RefreshIndicator(
                   onRefresh: _refreshData,
+                  color: Color(0xFF4DBAFF),
                   child: SingleChildScrollView(
                     physics: AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.all(16.0),
-                    child: Card(
-                      elevation: 4,
-                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                    padding: EdgeInsets.all(24.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x29000000),
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(20.0),
+                        padding: EdgeInsets.all(24.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildUserProfileImage(),
-                            Divider(height: 32, color: Colors.grey[300]),
+                            Divider(height: 32, color: Color(0xFFF4F4F4), thickness: 2),
+                            
                             _buildSectionHeader('Informasi Akun'),
-                            _buildDataField('Nama', _userData?['name']),
-                            _buildDataField('Email', _userData?['email']),
-                            Divider(height: 32, color: Colors.grey[300]),
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF9F9F9),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                children: [
+                                  _buildDataField('Nama', _userData?['name']),
+                                  _buildDataField('Email', _userData?['email']),
+                                ],
+                              ),
+                            ),
+                            
                             _buildSectionHeader('Data Pribadi'),
-                            _buildDataField('Tanggal Lahir', _userData?['tanggal_lahir']),
-                            _buildDataField('Usia', _userData?['usia']?.toString()),
-                            _buildDataField(
-                                'Usia Kehamilan',
-                                _userData?['usia_kehamilan'] != null
-                                    ? '${_userData!['usia_kehamilan']} minggu'
-                                    : null),
-                            _buildDataField('Alamat', _userData?['alamat']),
-                            _buildDataField('Nomor Telepon', _userData?['nomor_telepon']),
-                            _buildDataField('Pendidikan Terakhir', _userData?['pendidikan_terakhir']),
-                            _buildDataField('Pekerjaan', _userData?['pekerjaan']),
-                            _buildDataField('Golongan Darah', _userData?['golongan_darah']),
-                            Divider(height: 32, color: Colors.grey[300]),
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF9F9F9),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                children: [
+                                  _buildDataField('Tanggal Lahir', _userData?['tanggal_lahir']),
+                                  _buildDataField('Usia', _userData?['usia']?.toString()),
+                                  _buildDataField(
+                                      'Usia Kehamilan',
+                                      _userData?['usia_kehamilan'] != null
+                                          ? '${_userData!['usia_kehamilan']} minggu'
+                                          : null),
+                                  _buildDataField('Alamat', _userData?['alamat']),
+                                  _buildDataField('Nomor Telepon', _userData?['nomor_telepon']),
+                                  _buildDataField('Pendidikan Terakhir', _userData?['pendidikan_terakhir']),
+                                  _buildDataField('Pekerjaan', _userData?['pekerjaan']),
+                                  _buildDataField('Golongan Darah', _userData?['golongan_darah']),
+                                ],
+                              ),
+                            ),
+                            
                             _buildSectionHeader('Data Suami'),
-                            _buildDataField('Nama Suami', _userData?['nama_suami']),
-                            _buildDataField('Telepon Suami', _userData?['telepon_suami']),
-                            _buildDataField('Usia Suami', _userData?['usia_suami']?.toString()),
-                            _buildDataField('Pekerjaan Suami', _userData?['pekerjaan_suami']),
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF9F9F9),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                children: [
+                                  _buildDataField('Nama Suami', _userData?['nama_suami']),
+                                  _buildDataField('Telepon Suami', _userData?['telepon_suami']),
+                                  _buildDataField('Usia Suami', _userData?['usia_suami']?.toString()),
+                                  _buildDataField('Pekerjaan Suami', _userData?['pekerjaan_suami']),
+                                ],
+                              ),
+                            ),
+                            
                             SizedBox(height: 24),
                             if (_userData?['updated_at'] != null)
                               Container(
                                 width: double.infinity,
-                                padding: EdgeInsets.all(12),
+                                padding: EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: Color(0xFFF4F4F4),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
-                                  'Terakhir diperbarui: ${_userData?['updated_at']}', // Anda mungkin perlu memformat tanggal ini
+                                  'Terakhir diperbarui: ${_userData?['updated_at']}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[600],
+                                    color: Color(0xFF4C617F),
                                     fontStyle: FontStyle.italic,
                                   ),
                                   textAlign: TextAlign.center,
@@ -482,17 +568,21 @@ class _UserDataViewPageState extends State<UserDataViewPage> {
                 } else {
                    if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Data pengguna tidak lengkap atau ID pengguna tidak ditemukan untuk diedit.')),
+                    SnackBar(
+                      content: Text('Data pengguna tidak lengkap atau ID pengguna tidak ditemukan untuk diedit.'),
+                      backgroundColor: Color(0xFFFC5C9C),
+                    ),
                     );
                    }
                 }
               },
-              child: Icon(Icons.edit, color: Colors.white), // Membuat ikon putih
-              backgroundColor: Colors.blue[600],
+              child: Icon(Icons.edit, color: Colors.white),
+              backgroundColor: Color(0xFF4DBAFF),
               tooltip: 'Edit Data Profil',
+              elevation: 4,
             )
           : null,
-      bottomNavigationBar: _buildBottomNavigation(), // Tambahkan BottomNavigationBar di sini
+      bottomNavigationBar: _buildBottomNavigation(),
     );
   }
 }
