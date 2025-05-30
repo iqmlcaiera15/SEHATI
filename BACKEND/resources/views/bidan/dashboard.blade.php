@@ -16,7 +16,7 @@
                     Total Ibu Hamil
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ route('ibu_hamil.show', $ibuHamil->id) }}">Lihat Detail</a>
+                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
@@ -95,7 +95,7 @@
                         </div>
                         <div class="card-footer">
                             <div class="d-flex justify-content-between">
-                                <a href="#" class="btn btn-sm btn-primary">Detail</a>
+                                <a href="{{ route('ibu_hamil.show', $ibu->id) }}" class="btn btn-sm btn-primary">Detail</a>
                                 <a href="#" class="btn btn-sm btn-success">Riwayat Kesehatan</a>
                             </div>
                         </div>
