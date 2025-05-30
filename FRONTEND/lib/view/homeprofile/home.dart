@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:Sehati/services/api/api_service_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/add_data_penyakit.dart';
 import 'package:Sehati/view/deteksipenyakit/index_penyakit.dart'; 
@@ -16,6 +15,10 @@ import 'package:Sehati/view/asupanair/index_asupanair.dart';
 import 'package:Sehati/view/kalkulatorhpl/index_hpl.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:Sehati/view/prediksidepresi/index_depresi.dart';
+import 'package:Sehati/view/kickcounter/index_kickcounter.dart';
+import 'package:Sehati/view/postpartum/postpartum.dart';
+
 
 
 class HomePage extends StatefulWidget {
@@ -28,6 +31,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<dynamic>> _recentData;
   int _currentIndex = 0;
+
   final DioClient _dioClient = DioClient();
   String _protectedData = '';
   bool _isLoading = false;
@@ -51,25 +55,6 @@ class _HomePageState extends State<HomePage> {
         return data.take(3).toList();
       });
     });
-  }
-
-  Future<void> _fetchProtectedData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final response = await _dioClient.get('/protected-data');
-      setState(() {
-        _protectedData = response.data['message'];
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _protectedData = '';
-        _isLoading = false;
-      });
-    }
   }
 
   @override
@@ -166,36 +151,16 @@ class _HomePageState extends State<HomePage> {
                     letterSpacing: 0.12,
                   ),
                 ),
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, _) {
-                    return GestureDetector(
-                      onTap: () async {
-                        if (authProvider.isAuthenticated) {
-                          final success = await authProvider.logout();
-                          if (success && mounted) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => const LoginScreen(),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: const BoxDecoration(),
-                        child: Stack(
-                          children: [
-                            authProvider.isAuthenticated
-                                ? const Icon(Icons.logout, size: 24, color: Color(0xFF4C617F))
-                                : const SizedBox(),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                Container(
+                  width: 24,
+                  height: 24,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: const BoxDecoration(),
+                  child: const Stack(
+                    children: [
+                      // Notification icon could be placed here
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -223,34 +188,27 @@ class _HomePageState extends State<HomePage> {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 24),
-                      child: Consumer<AuthProvider>(
-                        builder: (context, authProvider, _) {
-                          final user = authProvider.user;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user != null 
-                                    ? 'Selamat Datang, ${user.name}!' 
-                                    : 'Selamat Datang, Bunda!',
-                                style: const TextStyle(
-                                  color: Color(0xFF1E293B),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Pantau kesehatan kehamilan Anda bersama Sehati',
-                                style: const TextStyle(
-                                  color: Color(0xFF4C617F),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Selamat Datang, Bunda!',
+                            style: TextStyle(
+                              color: Color(0xFF1E293B),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Pantau kesehatan kehamilan Anda bersama Sehati',
+                            style: TextStyle(
+                              color: const Color(0xFF4C617F),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     
@@ -277,7 +235,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.calendar_today, color: Colors.white, size: 18),
+                              Icon(Icons.calendar_today, color: Colors.white, size: 18),
                               const SizedBox(width: 8),
                               Text(
                                 _mingguKe != null ? 'Minggu ke-$_mingguKe' : 'Minggu belum dihitung',
@@ -334,23 +292,24 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
                               _buildServiceItem(
-                              'Deteksi Depresi', 
-                              Icons.sentiment_dissatisfied_outlined,
-                              () {
-                                // TODO: Navigasi ke halaman deteksi depresi
-                                // Navigator.push(context, MaterialPageRoute(builder: (_) => const DeteksiDepresiPage()));
-                              },
-                            ),
-                                _buildServiceItem(
-                                  'Prediksi Persalinan', 
-                                  Icons.pregnant_woman_outlined,
+                                  'Prediksi Depresi Antenatal', 
+                                  Icons.assignment_outlined,
                                   () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => IndexPrediksi()),
+                                      MaterialPageRoute(
+                                        builder: (context) => IndexDepresi(),
+                                      ),
                                     );
                                   },
                                 ),
+                              _buildServiceItem(
+                                'Konsultasi', 
+                                Icons.chat_outlined,
+                                () {
+                                  // Navigate to consultation page
+                                },
+                              ),
                             ],
                           ),
                         ],
@@ -384,10 +343,10 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 },
-                                child: const Text(
+                                child: Text(
                                   'Lihat Semua',
                                   style: TextStyle(
-                                    color: Color(0xFF4DBAFF),
+                                    color: const Color(0xFF4DBAFF),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -422,12 +381,12 @@ class _HomePageState extends State<HomePage> {
                                         child: Center(
                                           child: Column(
                                             children: [
-                                              const Icon(Icons.folder_open, color: Color(0xFF4DBAFF), size: 48),
+                                              Icon(Icons.folder_open, color: const Color(0xFF4DBAFF), size: 48),
                                               const SizedBox(height: 8),
-                                              const Text(
+                                              Text(
                                                 'Belum ada data kesehatan',
                                                 style: TextStyle(
-                                                  color: Color(0xFF4C617F),
+                                                  color: const Color(0xFF4C617F),
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -453,7 +412,7 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                                 ),
-                                                child: const Text(
+                                                child: Text(
                                                   'Tambah Data Baru',
                                                   style: TextStyle(
                                                     color: Colors.white,
@@ -471,8 +430,8 @@ class _HomePageState extends State<HomePage> {
                                       shrinkWrap: true,
                                       physics: const NeverScrollableScrollPhysics(),
                                       itemCount: data.length,
-                                      separatorBuilder: (context, index) => const Divider(
-                                        color: Color(0xFFD9D9D9),
+                                      separatorBuilder: (context, index) => Divider(
+                                        color: const Color(0xFFD9D9D9),
                                         thickness: 1,
                                       ),
                                       itemBuilder: (context, index) {
@@ -517,7 +476,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Fitur Kesehatan Kehamilan lainnya',
+                            'Tips Kesehatan Kehamilan',
                             style: TextStyle(
                               color: Color(0xFF1E293B),
                               fontSize: 16,
@@ -586,79 +545,61 @@ class _HomePageState extends State<HomePage> {
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-
-                    // Protected Data Section (only shown if authenticated)
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, _) {
-                        if (!authProvider.isAuthenticated || _protectedData.isEmpty) {
-                          return const SizedBox();
-                        }
-                        
-                        return Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 180,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
                             children: [
-                              const Text(
-                                'Data Pribadi',
-                                style: TextStyle(
-                                  color: Color(0xFF1E293B),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                              // InkWell(
+                              //   onTap: () {
+                              //     Navigator.push(context, MaterialPageRoute(builder: (context) => RekomendasiMakananPage()));
+                              //   },
+                              //   child: _buildTipCard(
+                              //     'Makanan Dengan Nutrisi Penting Untuk Ibu Hamil',
+                              //     'Penuhi kebutuhan gizi dengan makanan bergizi seimbang',
+                              //     Icons.restaurant,
+                              //   ),
+                              // ),
+                              // InkWell(
+                              //   onTap: () {
+                              //     Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPolusi()));
+                              //   },
+                              //   child: _buildTipCard(
+                              //     'Olahraga Ringan',
+                              //     'Jalan santai dan yoga untuk ibu hamil',
+                              //     Icons.directions_walk,
+                              //   ),
+                              // ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexKickCounter()));
+                                },
+                                child: _buildTipCard(
+                                  'Hitung Tendangan Bayi',
+                                  'Hitung tendangan untuk memantau kesehatan bayi',
+                                  Icons.monitor_heart,
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPostpartum()));
+                                },
+                                child: _buildTipCard(
+                                  'Perawatan PostPartum',
+                                  'Artikel perawatan setelah melahirkan',
+                                  Icons.healing,
                                 ),
-                                child: _isLoading
-                                    ? const Center(child: CircularProgressIndicator(color: Color(0xFF4DBAFF)))
-                                    : Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _protectedData,
-                                            style: const TextStyle(
-                                              color: Color(0xFF1E293B),
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                          ElevatedButton(
-                                            onPressed: _fetchProtectedData,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: const Color(0xFF4DBAFF),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              'Refresh Data',
-                                              style: TextStyle(color: Colors.white),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
                               ),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                      ],
+                    ),
+                  ),
+                        ],
+                      ),
                     ),
                     
                     // Spacer at the bottom
@@ -672,6 +613,7 @@ class _HomePageState extends State<HomePage> {
       ),
       // Bottom Navigation
       bottomNavigationBar: _buildBottomNavigation(),
+
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () {
       //     // Action menu button
@@ -697,7 +639,7 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -745,8 +687,8 @@ String _formatHPL(String? hpl) {
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFF1E293B),
+            style: TextStyle(
+              color: const Color(0xFF1E293B),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -791,8 +733,8 @@ String _formatHPL(String? hpl) {
           const SizedBox(height: 12),
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF1E293B),
+            style: TextStyle(
+              color: const Color(0xFF1E293B),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -800,8 +742,8 @@ String _formatHPL(String? hpl) {
           const SizedBox(height: 8),
           Text(
             description,
-            style: const TextStyle(
-              color: Color(0xFF4C617F),
+            style: TextStyle(
+              color: const Color(0xFF4C617F),
               fontSize: 12,
               fontWeight: FontWeight.w400,
             ),
