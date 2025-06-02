@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Auth;
 
 class PredictionController extends Controller
 {
-    // GET /api/predictions (JSON for mobile) | /bidan/prediksi (Blade for web)
+    // GET /api/predictions | /bidan/prediksi
     public function index(Request $request)
     {
+        // Pakai $request->user() untuk API
+        $user = $request->user() ?? Auth::user();
         $query = Prediction::latest();
 
-        // Optional filter dari query string
         if ($request->filled('method')) {
             $query->where('metode_persalinan', $request->method);
         }
@@ -23,27 +24,31 @@ class PredictionController extends Controller
             $query->whereDate('created_at', $request->date);
         }
 
-        // Untuk user mobile: hanya tampilkan miliknya (kecuali role bidan)
-        if (Auth::check() && Auth::user()->role == 'user') {
-            $query->where('user_id', Auth::id());
+        // Hanya prediksi milik user, kecuali bidan
+        if ($user && ($user->role ?? null) === 'user') {
+            $query->where('user_id', $user->id);
         }
 
         $predictions = $query->get();
 
-        // === MOBILE / FLUTTER (JSON) ===
         if ($request->wantsJson() || $request->is('api/*')) {
             return response()->json([
                 'success' => true,
                 'data' => $predictions
             ], 200);
         }
-        // === WEB (Blade) ===
+
         return view('prediksi.index', compact('predictions'));
     }
 
-    // POST /api/predictions (JSON for mobile) | /bidan/prediksi (web)
+    // POST /api/predictions | /bidan/prediksi
     public function store(Request $request)
     {
+        $user = $request->user() ?? Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
         $validator = Validator::make($request->all(), [
             'usia_ibu' => 'required|integer|min:15|max:50',
             'tekanan_darah' => 'required|in:normal,rendah,tinggi',
@@ -111,11 +116,10 @@ class PredictionController extends Controller
                 'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
                 'metode_persalinan' => $hasil,
                 'faktor' => $faktor,
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
             ]);
 
             if ($request->wantsJson() || $request->is('api/*')) {
-                // Kembalikan format sesuai kebutuhan Flutter
                 return response()->json([
                     'success' => true,
                     'message' => 'Berhasil melakukan prediksi.',
@@ -124,7 +128,6 @@ class PredictionController extends Controller
                     'data' => $prediction
                 ], 201);
             }
-            // WEB: redirect ke hasil prediksi
             return redirect()->route('bidan.prediksi.result', $prediction->id);
         } catch (\Exception $e) {
             if ($request->wantsJson() || $request->is('api/*')) {
@@ -140,6 +143,11 @@ class PredictionController extends Controller
     // DELETE /api/predictions/{id}
     public function deletebyID($id, Request $request)
     {
+        $user = $request->user() ?? Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
         $prediction = Prediction::find($id);
 
         if (!$prediction) {
@@ -149,8 +157,7 @@ class PredictionController extends Controller
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
 
-        // Batasi hanya owner/bidan bisa hapus
-        if (Auth::id() !== $prediction->user_id && Auth::user()->role !== 'bidan') {
+        if ($user->id !== $prediction->user_id && ($user->role ?? null) !== 'bidan') {
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
             }
@@ -168,6 +175,11 @@ class PredictionController extends Controller
     // GET /api/predictions/{id}
     public function result($id, Request $request)
     {
+        $user = $request->user() ?? Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
         $prediction = Prediction::find($id);
 
         if (!$prediction) {
@@ -177,8 +189,7 @@ class PredictionController extends Controller
             abort(404);
         }
 
-        // Batasi hanya owner/bidan bisa akses
-        if (Auth::id() !== $prediction->user_id && Auth::user()->role !== 'bidan') {
+        if ($user->id !== $prediction->user_id && ($user->role ?? null) !== 'bidan') {
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
             }
