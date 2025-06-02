@@ -6,15 +6,23 @@ use App\Models\Prediction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Auth;
 
 class PredictionController extends Controller
 {
+    // GET /api/predictions
     public function index(Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
         $query = Prediction::latest();
 
-        // Filter
+        // Filter prediksi hanya milik user login (user_id)
+        $query->where('user_id', $user->id);
+
+        // Optional filter
         if ($request->filled('method')) {
             $query->where('metode_persalinan', $request->method);
         }
@@ -22,25 +30,22 @@ class PredictionController extends Controller
             $query->whereDate('created_at', $request->date);
         }
 
-        // Untuk user biasa, tampilkan prediksi miliknya saja (kecuali bidan)
-        if (Auth::check() && Auth::user()->role == 'user') {
-            $query->where('user_id', Auth::id());
-        }
-
         $predictions = $query->get();
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $predictions
-            ]);
-        } else {
-            return view('prediksi.index', compact('predictions'));
-        }
+        return response()->json([
+            'success' => true,
+            'data' => $predictions
+        ], 200);
     }
 
+    // POST /api/predictions
     public function store(Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
         $validator = Validator::make($request->all(), [
             'usia_ibu' => 'required|integer|min:15|max:50',
             'tekanan_darah' => 'required|in:normal,rendah,tinggi',
@@ -51,13 +56,10 @@ class PredictionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $validator->errors()
-                ], 422);
-            }
-            return redirect()->back()->withErrors($validator)->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
         }
 
         try {
@@ -75,13 +77,10 @@ class PredictionController extends Controller
 
             if ($response->failed()) {
                 $msg = "Gagal memanggil Flask API. Status: {$response->status()}. Respons: {$response->body()}";
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $msg
-                    ], $response->status());
-                }
-                throw new \Exception($msg);
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg
+                ], $response->status());
             }
 
             $result = $response->json();
@@ -90,13 +89,10 @@ class PredictionController extends Controller
 
             if (!$hasil) {
                 $msg = "Respons Flask tidak lengkap: " . json_encode($result);
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $msg
-                    ], 500);
-                }
-                throw new \Exception($msg);
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg
+                ], 500);
             }
 
             $prediction = Prediction::create([
@@ -108,86 +104,71 @@ class PredictionController extends Controller
                 'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
                 'metode_persalinan' => $hasil,
                 'faktor' => $faktor,
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
             ]);
 
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'data' => $prediction
-                ]);
-            } else {
-                return redirect()->route('bidan.prediksi.result', $prediction->id);
-            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil melakukan prediksi.',
+                'hasil_prediksi' => $hasil,
+                'faktor' => $faktor,
+                'data' => $prediction
+            ], 201);
+
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat prediksi: ' . $e->getMessage()
-                ], 500);
-            }
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat prediksi: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat prediksi: ' . $e->getMessage()
+            ], 500);
         }
     }
 
+    // DELETE /api/predictions/{id}
     public function deletebyID($id, Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
         $prediction = Prediction::find($id);
 
         if (!$prediction) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
-            }
-            return redirect()->back()->with('error', 'Data tidak ditemukan');
+            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
         }
 
-        // Batasi hanya owner/bidan bisa hapus
-        if (Auth::id() !== $prediction->user_id && Auth::user()->role !== 'bidan') {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-            }
-            return redirect()->back()->with('error', 'Tidak diizinkan.');
+        // Pastikan hanya owner yang boleh hapus
+        if ($user->id !== $prediction->user_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $prediction->delete();
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Riwayat prediksi berhasil dihapus']);
-        }
-        return redirect()->route('bidan.prediksi.index')->with('success', 'Riwayat prediksi berhasil dihapus');
+        return response()->json(['success' => true, 'message' => 'Riwayat prediksi berhasil dihapus']);
     }
 
+    // GET /api/predictions/{id}
     public function result($id, Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
         $prediction = Prediction::find($id);
 
         if (!$prediction) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
-            }
-            abort(404);
+            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
         }
 
-        // Batasi hanya owner/bidan bisa akses
-        if (Auth::id() !== $prediction->user_id && Auth::user()->role !== 'bidan') {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-            }
-            abort(403);
+        // Pastikan hanya owner yang boleh akses
+        if ($user->id !== $prediction->user_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $prediction
-            ]);
-        }
-        return view('prediksi.result', compact('prediction'));
-    }
-
-    public function print($id)
-    {
-        $prediction = Prediction::findOrFail($id);
-        return view('prediksi.print', compact('prediction'));
+        return response()->json([
+            'success' => true,
+            'data' => $prediction
+        ]);
     }
 }
