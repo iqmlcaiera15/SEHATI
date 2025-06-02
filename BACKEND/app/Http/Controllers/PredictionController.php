@@ -14,20 +14,29 @@ class PredictionController extends Controller
     {
         $query = Prediction::latest();
 
-        // Filter berdasarkan metode persalinan
+        // Filter
         if ($request->filled('method')) {
             $query->where('metode_persalinan', $request->method);
         }
-
-        // Filter berdasarkan tanggal prediksi
         if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
         }
 
-        // Ambil hasil akhir
+        // Untuk user biasa, tampilkan prediksi miliknya saja (kecuali bidan)
+        if (Auth::check() && Auth::user()->role == 'user') {
+            $query->where('user_id', Auth::id());
+        }
+
         $predictions = $query->get();
 
-        return view('prediksi.index', compact('predictions'));
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $predictions
+            ]);
+        } else {
+            return view('prediksi.index', compact('predictions'));
+        }
     }
 
     public function store(Request $request)
@@ -42,6 +51,12 @@ class PredictionController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()
+                ], 422);
+            }
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
@@ -59,7 +74,14 @@ class PredictionController extends Controller
             $response = Http::post($flaskUrl, $dataToSend);
 
             if ($response->failed()) {
-                throw new \Exception("Gagal memanggil Flask API. Status: {$response->status()}. Respons: {$response->body()}");
+                $msg = "Gagal memanggil Flask API. Status: {$response->status()}. Respons: {$response->body()}";
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $msg
+                    ], $response->status());
+                }
+                throw new \Exception($msg);
             }
 
             $result = $response->json();
@@ -67,7 +89,14 @@ class PredictionController extends Controller
             $faktor = $result['faktor'] ?? '-';
 
             if (!$hasil) {
-                throw new \Exception("Respons Flask tidak lengkap: " . json_encode($result));
+                $msg = "Respons Flask tidak lengkap: " . json_encode($result);
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $msg
+                    ], 500);
+                }
+                throw new \Exception($msg);
             }
 
             $prediction = Prediction::create([
@@ -82,37 +111,83 @@ class PredictionController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
-            return redirect()->route('bidan.prediksi.result', $prediction->id);
-
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $prediction
+                ]);
+            } else {
+                return redirect()->route('bidan.prediksi.result', $prediction->id);
+            }
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat prediksi: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Terjadi kesalahan saat prediksi: ' . $e->getMessage());
         }
     }
 
-    public function deletebyID($id)
+    public function deletebyID($id, Request $request)
     {
         $prediction = Prediction::find($id);
 
         if (!$prediction) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+            }
             return redirect()->back()->with('error', 'Data tidak ditemukan');
+        }
+
+        // Batasi hanya owner/bidan bisa hapus
+        if (Auth::id() !== $prediction->user_id && Auth::user()->role !== 'bidan') {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            return redirect()->back()->with('error', 'Tidak diizinkan.');
         }
 
         $prediction->delete();
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Riwayat prediksi berhasil dihapus']);
+        }
         return redirect()->route('bidan.prediksi.index')->with('success', 'Riwayat prediksi berhasil dihapus');
     }
 
-    public function result($id)
+    public function result($id, Request $request)
     {
-        $prediction = Prediction::findOrFail($id);
+        $prediction = Prediction::find($id);
 
+        if (!$prediction) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+            }
+            abort(404);
+        }
+
+        // Batasi hanya owner/bidan bisa akses
+        if (Auth::id() !== $prediction->user_id && Auth::user()->role !== 'bidan') {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            abort(403);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $prediction
+            ]);
+        }
         return view('prediksi.result', compact('prediction'));
     }
 
     public function print($id)
     {
         $prediction = Prediction::findOrFail($id);
-
         return view('prediksi.print', compact('prediction'));
     }
 }

@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\WaterIntake;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class WaterIntakeController extends Controller
 {
     /**
-     * 🔹 Simpan konsumsi air 250ml per klik (maks 2000ml per hari per user)
+     * 🔹 Simpan konsumsi air (default 250ml per klik, max 2000ml per hari per user)
      */
     public function store(Request $request)
     {
@@ -23,29 +22,41 @@ class WaterIntakeController extends Controller
             }
 
             $todayDate = Carbon::today('Asia/Jakarta')->toDateString();
+            $jumlahBaru = $request->input('jumlah_ml', 250);
 
-            $totalToday = WaterIntake::where('user_id', $user->id)
+            // Validasi batas konsumsi harian
+            $waterIntake = WaterIntake::where('user_id', $user->id)
                 ->where('tanggal', $todayDate)
-                ->sum('jumlah_ml');
+                ->first();
 
-            if ($totalToday >= 2000) {
-                return response()->json([
-                    'message' => 'Batas konsumsi air hari ini telah tercapai',
-                    'total_ml_today' => $totalToday,
-                    'max_reached' => true
-                ], 400);
+            if ($waterIntake) {
+                if (($waterIntake->jumlah_ml + $jumlahBaru) > 2000) {
+                    return response()->json([
+                        'message' => 'Batas konsumsi air hari ini telah tercapai',
+                        'total_ml_today' => $waterIntake->jumlah_ml,
+                        'max_reached' => true
+                    ], 400);
+                }
+
+                // Update jumlah_ml
+                $waterIntake->jumlah_ml += $jumlahBaru;
+                $waterIntake->save();
+                $totalToday = $waterIntake->jumlah_ml;
+                $entry = $waterIntake;
+            } else {
+                // Insert baru
+                $entry = WaterIntake::create([
+                    'user_id' => $user->id,
+                    'jumlah_ml' => $jumlahBaru,
+                    'tanggal' => $todayDate,
+                ]);
+                $totalToday = $jumlahBaru;
             }
-
-            $entry = WaterIntake::create([
-                'user_id' => $user->id,
-                'jumlah_ml' => 250,
-                'tanggal' => $todayDate,
-            ]);
 
             return response()->json([
                 'message' => 'Konsumsi air berhasil disimpan',
                 'data' => $entry,
-                'total_ml_today' => $totalToday + 250,
+                'total_ml_today' => $totalToday,
                 'max_reached' => false
             ], 201);
         } catch (\Exception $e) {
@@ -60,33 +71,33 @@ class WaterIntakeController extends Controller
     /**
      * 🔹 Tampilkan riwayat konsumsi air 7 hari terakhir (termasuk hari ini)
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $user = Auth::user();
+            $user = $request->user();
 
             if (!$user) {
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
 
             $today = Carbon::today('Asia/Jakarta');
-            $history = collect();
+            $history = [];
 
             for ($i = 6; $i >= 0; $i--) {
                 $date = $today->copy()->subDays($i)->toDateString();
                 $jumlah = WaterIntake::where('user_id', $user->id)
                     ->where('tanggal', $date)
-                    ->sum('jumlah_ml');
+                    ->value('jumlah_ml') ?? 0;
 
-                $history->push([
+                $history[] = [
                     'tanggal' => $date,
                     'jumlah_ml' => $jumlah,
-                ]);
+                ];
             }
 
             $totalKonsumsiHariIni = WaterIntake::where('user_id', $user->id)
                 ->where('tanggal', $today->toDateString())
-                ->sum('jumlah_ml');
+                ->value('jumlah_ml') ?? 0;
 
             return response()->json([
                 'message' => 'Data riwayat berhasil diambil',
