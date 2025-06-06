@@ -97,16 +97,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Column(
                             children: [
                               // App logo with heart icon
-                              Container(
-                                width: 100,
-                                height: 100,
+                                Container(
+                                width: 80,
+                                height: 80,
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [Color(0xFF4DBAFF), Color(0xFF2D9CFF)],
-                                  ),
-                                  borderRadius: BorderRadius.circular(25),
+                                  borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Color(0xFF4DBAFF).withOpacity(0.3),
@@ -115,10 +110,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ],
                                 ),
-                                child: Icon(
-                                  Icons.favorite_rounded,
-                                  size: 50,
-                                  color: Colors.white,
+                                child: ClipRRect( // Untuk memastikan gambar juga memiliki border radius
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.asset(
+                                    'assets/images/sehati_logo.png', // 
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover, // Sesuaikan sesuai kebutuhan tampilan logo
+                                  ),
                                 ),
                               ),
                               SizedBox(height: 24),

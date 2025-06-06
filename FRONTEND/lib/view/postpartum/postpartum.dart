@@ -9,6 +9,7 @@ class PostpartumArticle {
   final String judul;
   final String konten;
   final String? kategori;
+  final String? gambar; // Added gambar field
   final DateTime createdAt;
 
   PostpartumArticle({
@@ -16,6 +17,7 @@ class PostpartumArticle {
     required this.judul,
     required this.konten,
     this.kategori,
+    this.gambar, // Added gambar field
     required this.createdAt,
   });
 
@@ -25,6 +27,7 @@ class PostpartumArticle {
       judul: json['judul'],
       konten: json['konten'],
       kategori: json['kategori'],
+      gambar: json['gambar'], // Added gambar field
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -252,23 +255,63 @@ class _IndexPostpartumState extends State<IndexPostpartum> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Article Image Placeholder
+            // Article Image
             Container(
               height: 150,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFF4DBAFF).withOpacity(0.1),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
                 ),
               ),
-              child: Center(
-                child: Icon(
-                  Icons.article,
-                  color: const Color(0xFF4DBAFF),
-                  size: 48,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
                 ),
+                child: article.gambar != null && article.gambar!.isNotEmpty
+                    ? Image.network(
+                        article.gambar!,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: const Color(0xFF4DBAFF).withOpacity(0.1),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                color: const Color(0xFF4DBAFF),
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: const Color(0xFF4DBAFF).withOpacity(0.1),
+                            child: const Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Color(0xFF4DBAFF),
+                                size: 48,
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Container(
+                        color: const Color(0xFF4DBAFF).withOpacity(0.1),
+                        child: const Center(
+                          child: Icon(
+                            Icons.article,
+                            color: Color(0xFF4DBAFF),
+                            size: 48,
+                          ),
+                        ),
+                      ),
               ),
             ),
             
@@ -439,9 +482,9 @@ class _DetailPostpartumState extends State<DetailPostpartum> {
           
           return CustomScrollView(
             slivers: [
-              // App Bar
+              // App Bar with Image
               SliverAppBar(
-                expandedHeight: 200,
+                expandedHeight: 250,
                 floating: false,
                 pinned: true,
                 backgroundColor: const Color(0xFF4DBAFF),
@@ -479,16 +522,66 @@ class _DetailPostpartumState extends State<DetailPostpartum> {
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    color: const Color(0xFF4DBAFF),
-                    child: Center(
-                      child: Icon(
-                        Icons.article,
-                        color: Colors.white.withOpacity(0.7),
-                        size: 80,
-                      ),
-                    ),
-                  ),
+                  background: article.gambar != null && article.gambar!.isNotEmpty
+                      ? Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              article.gambar!,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  color: const Color(0xFF4DBAFF),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded /
+                                              loadingProgress.expectedTotalBytes!
+                                          : null,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: const Color(0xFF4DBAFF),
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      color: Colors.white.withOpacity(0.7),
+                                      size: 80,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            // Gradient overlay for better text readability
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.3),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(
+                          color: const Color(0xFF4DBAFF),
+                          child: Center(
+                            child: Icon(
+                              Icons.article,
+                              color: Colors.white.withOpacity(0.7),
+                              size: 80,
+                            ),
+                          ),
+                        ),
                 ),
               ),
               

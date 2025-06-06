@@ -1,10 +1,8 @@
-import 'package:Sehati/view/homeprofile/dataprep.dart'; // Dari iqmal2 (dan sudah ada sebelumnya)
+import 'package:Sehati/view/homeprofile/dataprep.dart'; 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Sehati/providers/auth_provider.dart';
-// Menggabungkan import dari kedua branch, menghilangkan duplikasi
-import 'package:Sehati/view/homeprofile/home.dart'; // Dari main
-import 'package:Sehati/view/registerlogin/login_screen.dart'; // Dari kedua branch
+import 'package:Sehati/view/registerlogin/login_screen.dart'; 
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -25,7 +23,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    // Clear any previous errors when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AuthProvider>(context, listen: false).clearErrors();
     });
@@ -103,16 +100,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Center(
                           child: Column(
                             children: [
-                              // App logo placeholder
                               Container(
                                 width: 80,
                                 height: 80,
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [Color(0xFF4DBAFF), Color(0xFF2D9CFF)],
-                                  ),
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
@@ -122,14 +113,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                                   ],
                                 ),
-                                child: Center(
-                                  child: Text(
-                                    "S",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 42,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                child: ClipRRect( // Untuk memastikan gambar juga memiliki border radius
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.asset(
+                                    'assets/images/sehati_logo.png', // 
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover, // Sesuaikan sesuai kebutuhan tampilan logo
                                   ),
                                 ),
                               ),

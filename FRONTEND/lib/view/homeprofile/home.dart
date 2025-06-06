@@ -17,9 +17,9 @@ import 'package:Sehati/view/kalkulatorhpl/index_hpl.dart';
 import 'package:Sehati/view/kalkulatorhpl/kalkulator_hpl_intro.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:Sehati/view/prediksidepresi/index_depresi.dart'; // Added from second file
-import 'package:Sehati/view/kickcounter/index_kickcounter.dart'; // Added from second file
-import 'package:Sehati/view/postpartum/postpartum.dart'; // Added from second file
+import 'package:Sehati/view/prediksidepresi/index_depresi.dart'; 
+import 'package:Sehati/view/kickcounter/index_kickcounter.dart'; 
+import 'package:Sehati/view/postpartum/postpartum.dart'; 
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -31,9 +31,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<dynamic>> _recentData;
   int _currentIndex = 0;
-  final DioClient _dioClient = DioClient(); // From first file
+  final DioClient _dioClient = DioClient(); 
   String _protectedData = ''; // From first file
-  bool _isLoading = false; // From first file
+  bool _isLoading = false; 
   String? _hpl;
   int? _mingguKe;
 
@@ -553,17 +553,6 @@ String _formatHPL(String? hpl) {
                                     'Cek Kualitas Udara',
                                     'Cek Kualitas Udara Untuk Bandung dan Sekitarnya',
                                     Icons.wind_power_sharp,
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    // TODO: Navigasi ke halaman TidurPage
-                                    // Navigator.push(context, MaterialPageRoute(builder: (context) => TidurPage()));
-                                  },
-                                  child: _buildTipCard(
-                                    'Pola Tidur Sehat',
-                                    'Istirahat cukup untuk kesehatan ibu dan janin',
-                                    Icons.hotel,
                                   ),
                                 ),
                                 InkWell(

@@ -15,6 +15,7 @@ class PostpartumArticlesSeeder extends Seeder
                 'judul' => 'Perawatan Diri Setelah Melahirkan',
                 'konten' => 'Setelah melahirkan, penting untuk menjaga kebersihan, nutrisi, dan kesehatan mental agar proses pemulihan berjalan optimal.',
                 'kategori' => 'Perawatan',
+                'gambar'=> 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/artikel/perawatan.png',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
@@ -22,6 +23,7 @@ class PostpartumArticlesSeeder extends Seeder
                 'judul' => 'Tanda-Tanda Baby Blues dan Cara Mengatasinya',
                 'konten' => 'Baby blues sering terjadi beberapa hari setelah melahirkan. Ibu perlu memahami gejala seperti mood swing, sedih tanpa sebab, dan mudah marah.',
                 'kategori' => 'Kesehatan Mental',
+                'gambar'=> 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/artikel/babyblues.jpeg',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
@@ -29,6 +31,7 @@ class PostpartumArticlesSeeder extends Seeder
                 'judul' => 'Nutrisi Penting untuk Ibu Nifas',
                 'konten' => 'Selama masa nifas, ibu memerlukan makanan tinggi zat besi, protein, dan vitamin untuk mempercepat pemulihan tubuh.',
                 'kategori' => 'Nutrisi',
+                'gambar'=> 'https://amazon-datazone-sehatiapp.s3.ap-southeast-1.amazonaws.com/artikel/makannifas.jpeg',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]
