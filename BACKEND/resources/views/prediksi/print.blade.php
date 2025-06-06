@@ -38,7 +38,7 @@
     <hr>
     <div style="margin-bottom:12px;">
         <div class="row"><span class="label">Nama :</span> {{ $prediction->user->name ?? '-' }}</div>
-        <div class="row"><span class="label">Nomor Telp :</span> {{ $prediction->user->no_hp ?? '-' }}</div>
+        <div class="row"><span class="label">Nomor Telp :</span> {{ $prediction->user->nomor_telepon ?? '-' }}</div>
         <div class="row"><span class="label">Hari Perkiraan Lahir :</span>
             {{ $prediction->hpl && $prediction->hpl->hpl ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d F Y') : '-' }}
         </div>

@@ -40,4 +40,5 @@ flutter:
     # Daftar aset gambar dan lainnya jika diperlukan
     - assets/images/background.jpg
     - assets/images/default_user.png
+    - assets/images/sehati_logo.png
     

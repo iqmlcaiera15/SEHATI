@@ -77,29 +77,29 @@
                                         : '-' }}
                                 </td>
                                 <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-primary shadow-sm" type="button" id="aksiDropdown{{ $prediction->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="aksiDropdown{{ $prediction->id }}">
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-2 text-primary fw-semibold" href="{{ route('prediksi.show', $prediction->id) }}">
-                                                <i class="bi bi-eye"></i>
-                                                <span>Lihat Detail</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="dropdown-item d-flex align-items-center gap-2 text-danger fw-semibold" type="submit">
-                                                    <i class="bi bi-trash"></i>
-                                                    <span>Hapus</span>
-                                                </button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-primary shadow-sm" type="button" id="aksiDropdown{{ $prediction->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical fs-5"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="aksiDropdown{{ $prediction->id }}">
+                                            <li>
+                                                <a class="dropdown-item d-flex align-items-center gap-2 text-primary fw-semibold" href="{{ route('prediksi.show', $prediction->id) }}">
+                                                    <i class="bi bi-eye"></i>
+                                                    <span>Lihat Detail</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="dropdown-item d-flex align-items-center gap-2 text-danger fw-semibold" type="submit">
+                                                        <i class="bi bi-trash"></i>
+                                                        <span>Hapus</span>
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
