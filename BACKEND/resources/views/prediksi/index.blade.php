@@ -5,13 +5,13 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 class="fw-semibold text-primary">Riwayat Prediksi Metode Persalinan</h2>
-        <a href="{{ route('bidan.prediksi.form') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center px-3 py-2 fw-semibold shadow-sm">
+        <a href="{{ route('prediksi.form') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center px-3 py-2 fw-semibold shadow-sm">
             <i class="bi bi-plus me-1"></i> Prediksi Baru
         </a>
     </div>
 
     {{-- Filter --}}
-    <form method="GET" action="{{ route('bidan.prediksi.index') }}" class="row g-3 align-items-end mb-4">
+    <form method="GET" action="{{ route('prediksi.index') }}" class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
             <label for="method" class="form-label">Metode Persalinan</label>
             <select name="method" id="method" class="form-select shadow-sm">
@@ -104,8 +104,8 @@
 
                                 <td>{{ $prediction->created_at->format('d-m-Y') }}</td>
                                 <td>
-                                    <a href="{{ route('bidan.prediksi.show', $prediction->id) }}" class="btn btn-sm btn-outline-info me-1">Lihat</a>
-                                    <form action="{{ route('bidan.prediksi.delete', $prediction->id) }}" method="POST" class="d-inline">
+                                    <a href="{{ route('prediksi.show', $prediction->id) }}" class="btn btn-sm btn-outline-info me-1">Lihat</a>
+                                    <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
