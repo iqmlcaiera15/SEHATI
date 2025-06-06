@@ -26,10 +26,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Authentication Routes (if you're using Laravel's default auth)
 Auth::routes();
 
-// Custom Registration Routes
 Route::get('/register/bidan', [RegisterController::class, 'showBidanRegistrationForm'])->name('register.bidan.form');
 Route::post('/register/bidan', [RegisterController::class, 'registerBidan'])->name('register.bidan');
 

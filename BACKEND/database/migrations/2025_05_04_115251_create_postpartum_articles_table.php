@@ -13,6 +13,7 @@ class CreatePostpartumArticlesTable extends Migration
             $table->string('judul');
             $table->text('konten');
             $table->string('kategori')->nullable();
+            $table->string('gambar');
             $table->timestamps();
         });
     }
