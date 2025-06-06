@@ -2,63 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Prediction;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Prediction;
+use App\Models\User;
 
 class PredictionDesktopController extends Controller
 {
-    // Tampilkan seluruh prediksi (bidan/admin: bisa lihat semua user)
     public function index(Request $request)
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Harap login terlebih dahulu.');
+
+        // Jika bidan, lihat semua. Jika bukan, hanya data miliknya
+        if ($user->role === 'bidan') {
+            $query = Prediction::with('user')->latest();
+            // Filter tambahan
+            if ($request->filled('method')) $query->where('metode_persalinan', $request->method);
+            if ($request->filled('date')) $query->whereDate('created_at', $request->date);
+            if ($request->filled('user_id')) $query->where('user_id', $request->user_id);
+
+            $predictions = $query->get();
+        } else {
+            $predictions = Prediction::with('user')->where('user_id', $user->id)->latest()->get();
         }
 
-        $query = Prediction::latest();
-
-        // Filter opsional
-        if ($request->filled('method')) {
-            $query->where('metode_persalinan', $request->method);
-        }
-        if ($request->filled('date')) {
-            $query->whereDate('created_at', $request->date);
-        }
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-
-        $predictions = $query->get();
-        $users = User::all(); // Untuk filter & pilihan user di form
-
+        $users = User::all();
         return view('prediksi.index', compact('predictions', 'users'));
     }
 
-    // Form tambah prediksi
     public function create()
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Harap login terlebih dahulu.');
-        }
         $users = User::all();
         return view('prediksi.form', compact('users'));
     }
 
-    // Proses simpan prediksi
+    public function show($id)
+    {
+        $user = Auth::user();
+        $prediction = Prediction::with('user')->findOrFail($id);
+
+        // Jika bukan bidan, hanya bisa lihat milik sendiri
+        if ($user->role !== 'bidan' && $user->id !== $prediction->user_id) {
+            return redirect()->route('prediksi.index')->with('error', 'Anda tidak memiliki akses ke data ini');
+        }
+
+        return view('prediksi.result', compact('prediction'));
+    }
+
+    public function indexlatest()
+    {
+        $user = Auth::user();
+
+        $prediction = $user->role === 'bidan'
+            ? Prediction::with('user')->latest()->first()
+            : Prediction::with('user')->where('user_id', $user->id)->latest()->first();
+
+        if (!$prediction) {
+            return redirect()->route('prediksi.index')->with('info', 'Belum ada data prediksi');
+        }
+
+        return redirect()->route('prediksi.show', ['id' => $prediction->id]);
+    }
+
     public function store(Request $request)
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Harap login terlebih dahulu.');
-        }
 
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id', // bidan bisa pilih user
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
             'usia_ibu' => 'required|integer|min:15|max:50',
             'tekanan_darah' => 'required|in:normal,rendah,tinggi',
             'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
@@ -67,13 +80,9 @@ class PredictionDesktopController extends Controller
             'kondisi_kesehatan_janin' => 'required|string',
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
         try {
             $dataToSend = [
-                'usia_ibu' => (int) $request->usia_ibu,
+                'usia_ibu' => (int)$request->usia_ibu,
                 'tekanan_darah' => strtolower($request->tekanan_darah),
                 'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
                 'posisi_janin' => strtolower($request->posisi_janin),
@@ -81,31 +90,24 @@ class PredictionDesktopController extends Controller
                 'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
             ];
 
-            $flaskUrl = 'https://sehatimlprediksi-production.up.railway.app/predict';
-            $response = Http::post($flaskUrl, $dataToSend);
-
-            if ($response->failed()) {
-                return redirect()->back()->with('error', 'Gagal memanggil Flask API: ' . $response->body());
-            }
-
+            // Request ke Flask
+            $response = Http::post('https://sehatimlprediksi-production.up.railway.app/predict', $dataToSend);
             $result = $response->json();
-            $hasil = $result['hasil_prediksi'] ?? null;
-            $faktor = $result['faktor'] ?? '-';
 
-            if (!$hasil) {
-                return redirect()->back()->with('error', 'Respons Flask tidak lengkap: ' . json_encode($result));
+            if (!$response->ok() || !isset($result['hasil_prediksi'])) {
+                return redirect()->back()->with('error', 'Prediksi gagal. Coba lagi.');
             }
 
             $prediction = Prediction::create([
-                'user_id' => $request->user_id, // bisa dipilih dari form
+                'user_id' => $request->user_id,
                 'usia_ibu' => $dataToSend['usia_ibu'],
                 'tekanan_darah' => $dataToSend['tekanan_darah'],
                 'riwayat_persalinan' => $dataToSend['riwayat_persalinan'],
                 'posisi_janin' => $dataToSend['posisi_janin'],
                 'riwayat_kesehatan_ibu' => $dataToSend['riwayat_kesehatan_ibu'],
                 'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
-                'metode_persalinan' => $hasil,
-                'faktor' => $faktor,
+                'metode_persalinan' => $result['hasil_prediksi'],
+                'faktor' => $result['faktor'] ?? '-',
             ]);
 
             return redirect()->route('prediksi.show', $prediction->id)
@@ -115,71 +117,30 @@ class PredictionDesktopController extends Controller
         }
     }
 
-    // Detail prediksi (show)
-    public function show($id)
+    public function deleteAll()
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Harap login terlebih dahulu.');
-        }
 
-        $prediction = Prediction::findOrFail($id);
-
-        return view('prediksi.result', compact('prediction'));
-    }
-
-    // Print
-    public function print($id)
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Harap login terlebih dahulu.');
-        }
-
-        $prediction = Prediction::findOrFail($id);
-        return view('prediksi.print', compact('prediction'));
-    }
-
-    // Hapus 1 prediksi
-    public function destroy($id)
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Harap login terlebih dahulu.');
-        }
-
-        $prediction = Prediction::findOrFail($id);
-        $prediction->delete();
-
-        return redirect()->route('prediksi.index')->with('success', 'Data prediksi berhasil dihapus');
-    }
-
-    // Hapus semua prediksi milik user tertentu (opsional)
-    public function deleteAll(Request $request)
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Harap login terlebih dahulu.');
-        }
-
-        if ($request->filled('user_id')) {
-            Prediction::where('user_id', $request->user_id)->delete();
-        } else {
+        if ($user->role === 'bidan') {
             Prediction::truncate();
+        } else {
+            Prediction::where('user_id', $user->id)->delete();
         }
 
         return redirect()->route('prediksi.index')->with('success', 'Semua data prediksi berhasil dihapus');
     }
 
-    // Tampilkan data prediksi terbaru
-    public function latest()
+    public function destroy($id)
     {
-        $prediction = Prediction::latest()->first();
+        $user = Auth::user();
+        $prediction = Prediction::findOrFail($id);
 
-        if (!$prediction) {
-            return redirect()->route('prediksi.index')->with('info', 'Belum ada data prediksi');
+        // Jika bukan bidan, hanya bisa hapus milik sendiri
+        if ($user->role !== 'bidan' && $user->id !== $prediction->user_id) {
+            return redirect()->route('prediksi.index')->with('error', 'Anda tidak memiliki akses menghapus data ini');
         }
 
-        return redirect()->route('prediksi.show', ['id' => $prediction->id]);
+        $prediction->delete();
+        return redirect()->route('prediksi.index')->with('success', 'Data prediksi berhasil dihapus');
     }
 }
