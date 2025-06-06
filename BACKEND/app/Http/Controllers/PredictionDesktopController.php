@@ -10,21 +10,23 @@ use App\Models\User;
 
 class PredictionDesktopController extends Controller
 {
+    // Daftar prediksi: filter HPL, Nama Ibu, Metode
     public function index(Request $request)
     {
         $user = Auth::user();
 
-        // Jika bidan, lihat semua. Jika bukan, hanya data miliknya
         if ($user->role === 'bidan') {
             $query = Prediction::with(['user', 'hpl'])->latest();
 
+            // Filter by Metode
             if ($request->filled('method')) {
                 $query->where('metode_persalinan', $request->method);
             }
+            // Filter by Nama Ibu (user_id)
             if ($request->filled('user_id')) {
                 $query->where('user_id', $request->user_id);
             }
-            // FILTER HPL
+            // Filter by HPL
             if ($request->filled('hpl')) {
                 $query->whereHas('hpl', function ($q) use ($request) {
                     $q->whereDate('hpl', $request->hpl);
@@ -40,20 +42,31 @@ class PredictionDesktopController extends Controller
                         $sub->whereDate('hpl', $request->hpl);
                     });
                 })
+                ->when($request->filled('method'), function ($q) use ($request) {
+                    $q->where('metode_persalinan', $request->method);
+                })
                 ->latest()
                 ->get();
         }
 
-        $users = User::all();
+        $users = User::where('role', 'ibu_hamil')->get();
         return view('prediksi.index', compact('predictions', 'users'));
     }
 
+    // Form input prediksi
+    public function create()
+    {
+        $users = User::where('role', 'ibu_hamil')->get();
+        return view('prediksi.form', compact('users'));
+    }
+
+    // Menampilkan detail hasil prediksi
     public function show($id)
     {
         $user = Auth::user();
         $prediction = Prediction::with(['user', 'hpl'])->findOrFail($id);
 
-        // Jika bukan bidan, hanya bisa lihat milik sendiri
+        // Validasi akses data
         if ($user->role !== 'bidan' && $user->id !== $prediction->user_id) {
             return redirect()->route('prediksi.index')->with('error', 'Anda tidak memiliki akses ke data ini');
         }
@@ -61,12 +74,13 @@ class PredictionDesktopController extends Controller
         return view('prediksi.result', compact('prediction'));
     }
 
+    // Menampilkan halaman cetak hasil prediksi
     public function print($id)
     {
         $user = Auth::user();
         $prediction = Prediction::with(['user', 'hpl'])->findOrFail($id);
 
-        // Jika bukan bidan, hanya bisa lihat milik sendiri
+        // Validasi akses data
         if ($user->role !== 'bidan' && $user->id !== $prediction->user_id) {
             return redirect()->route('prediksi.index')->with('error', 'Anda tidak memiliki akses ke data ini');
         }
@@ -74,6 +88,7 @@ class PredictionDesktopController extends Controller
         return view('prediksi.print', compact('prediction'));
     }
 
+    // Tampilkan data prediksi terbaru (latest)
     public function indexlatest()
     {
         $user = Auth::user();
@@ -89,6 +104,7 @@ class PredictionDesktopController extends Controller
         return redirect()->route('prediksi.show', ['id' => $prediction->id]);
     }
 
+    // Proses simpan prediksi baru
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -111,7 +127,7 @@ class PredictionDesktopController extends Controller
                 'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
             ];
 
-            // Request ke Flask
+            // Request ke Flask API
             $response = Http::post('https://sehatimlprediksi-production.up.railway.app/predict', $dataToSend);
             $result = $response->json();
 
@@ -138,6 +154,7 @@ class PredictionDesktopController extends Controller
         }
     }
 
+    // Hapus semua data prediksi
     public function deleteAll()
     {
         $user = Auth::user();
@@ -151,12 +168,13 @@ class PredictionDesktopController extends Controller
         return redirect()->route('prediksi.index')->with('success', 'Semua data prediksi berhasil dihapus');
     }
 
+    // Hapus satu data prediksi
     public function destroy($id)
     {
         $user = Auth::user();
         $prediction = Prediction::findOrFail($id);
 
-        // Jika bukan bidan, hanya bisa hapus milik sendiri
+        // Validasi akses hapus
         if ($user->role !== 'bidan' && $user->id !== $prediction->user_id) {
             return redirect()->route('prediksi.index')->with('error', 'Anda tidak memiliki akses menghapus data ini');
         }
