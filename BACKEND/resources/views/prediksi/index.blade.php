@@ -104,7 +104,7 @@
 
                                 <td>{{ $prediction->created_at->format('d-m-Y') }}</td>
                                 <td>
-                                    <a href="{{ route('bidan.prediksi.result', $prediction->id) }}" class="btn btn-sm btn-outline-info me-1">Lihat</a>
+                                    <a href="{{ route('bidan.prediksi.show', $prediction->id) }}" class="btn btn-sm btn-outline-info me-1">Lihat</a>
                                     <form action="{{ route('bidan.prediksi.delete', $prediction->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
