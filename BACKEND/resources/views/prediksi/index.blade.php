@@ -3,7 +3,7 @@
 @section('content')
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-        <h2 class="fw-semibold text-primary">Riwayat Prediksi Metode Persalinan</h2>
+        <h2 class="fw-semibold text-primary">Daftar Prediksi Metode Persalinan</h2>
         <a href="{{ route('prediksi.form') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center px-3 py-2 fw-semibold shadow-sm">
             <i class="bi bi-plus me-1"></i> Prediksi Baru
         </a>
@@ -77,27 +77,29 @@
                                         : '-' }}
                                 </td>
                                 <td>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-light border shadow-sm" type="button" id="aksiDropdown{{ $prediction->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="aksiDropdown{{ $prediction->id }}">
-                                            <li>
-                                                <a class="dropdown-item" href="{{ route('prediksi.show', $prediction->id) }}">
-                                                    <i class="fas fa-eye me-1 text-primary"></i> Lihat Detail
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="dropdown-item text-danger" type="submit">
-                                                        <i class="fas fa-trash me-1"></i> Hapus
-                                                    </button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-primary shadow-sm" type="button" id="aksiDropdown{{ $prediction->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="aksiDropdown{{ $prediction->id }}">
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2 text-primary fw-semibold" href="{{ route('prediksi.show', $prediction->id) }}">
+                                                <i class="bi bi-eye"></i>
+                                                <span>Lihat Detail</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="dropdown-item d-flex align-items-center gap-2 text-danger fw-semibold" type="submit">
+                                                    <i class="bi bi-trash"></i>
+                                                    <span>Hapus</span>
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
                                 </td>
                             </tr>
                         @empty
