@@ -54,12 +54,12 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show');
     Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.destroy');
 
-    Route::get('/prediksi', [PredictionDesktopController::class, 'index'])->name('bidan.prediksi.index');
-    Route::get('/prediksi/form', [PredictionDesktopController::class, 'create'])->name('bidan.prediksi.form');
-    Route::post('/prediksi', [PredictionDesktopController::class, 'store'])->name('bidan.prediksi.store');
-    Route::get('/prediksi/{id}', [PredictionDesktopController::class, 'show'])->name('bidan.prediksi.show');
-    Route::delete('/prediksi/{id}', [PredictionDesktopController::class, 'destroy'])->name('bidan.prediksi.delete');
-    Route::get('/prediksi/{id}/print', [PredictionDesktopController::class, 'print'])->name('bidan.prediksi.print');
+    Route::get('/prediksi', [PredictionDesktopController::class, 'index'])->name('prediksi.index');
+    Route::get('/prediksi/form', [PredictionDesktopController::class, 'create'])->name('prediksi.form');
+    Route::post('/prediksi', [PredictionDesktopController::class, 'store'])->name('prediksi.store');
+    Route::get('/prediksi/{id}', [PredictionDesktopController::class, 'show'])->name('prediksi.show');
+    Route::delete('/prediksi/{id}', [PredictionDesktopController::class, 'destroy'])->name('prediksi.delete');
+    Route::get('/prediksi/{id}/print', [PredictionDesktopController::class, 'print'])->name('prediksi.print');
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
     // Add more bidan routes here
