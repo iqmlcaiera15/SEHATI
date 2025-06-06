@@ -6,7 +6,7 @@
         <h3 class="text-primary fw-semibold border-start border-4 ps-3 border-success">
             <i class="fas fa-stethoscope me-2"></i> Form Prediksi Metode Persalinan
         </h3>
-        <a href="{{ route('bidan.prediksi.index') }}" class="btn btn-outline-secondary">
+        <a href="{{ route('prediksi.index') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> Kembali
         </a>
     </div>
@@ -28,7 +28,7 @@
 
     <div class="card shadow-sm border-0 bg-light">
         <div class="card-body">
-            <form action="{{ route('bidan.prediksi.store') }}" method="POST" class="needs-validation" novalidate>
+            <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate>
                 @csrf
 
                 <div class="row g-3">
