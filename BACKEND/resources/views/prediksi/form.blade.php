@@ -32,6 +32,26 @@
                 @csrf
 
                 <div class="row g-3">
+                    {{-- Bidan: Pilih user --}}
+                    @if(Auth::user()->role === 'bidan')
+                    <div class="col-md-6">
+                        <label for="user_id" class="form-label">
+                            Nama Ibu Hamil <span class="text-danger">*</span>
+                        </label>
+                        <select id="user_id" name="user_id" class="form-select" required>
+                            <option value="">-- Pilih Ibu Hamil --</option>
+                            @foreach($users as $user)
+                                @if($user->role === 'ibu_hamil')
+                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->nomor_telepon ?? '' }})</option>
+                                @endif
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback">Nama ibu wajib dipilih.</div>
+                    </div>
+                    @else
+                        <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+                    @endif
+
                     <div class="col-md-6">
                         <label for="usia_ibu" class="form-label">
                             Usia Ibu (tahun) <span class="text-danger">*</span>
@@ -115,7 +135,6 @@
 
 @push('scripts')
 <script>
-    // Tooltip & Bootstrap validation
     document.addEventListener('DOMContentLoaded', function () {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         tooltipTriggerList.map(function (tooltipTriggerEl) {
