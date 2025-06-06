@@ -16,15 +16,13 @@ class PredictionDesktopController extends Controller
 
         // Jika bidan, lihat semua. Jika bukan, hanya data miliknya
         if ($user->role === 'bidan') {
-            $query = Prediction::with('user')->latest();
-            // Filter tambahan
+            $query = Prediction::with(['user', 'hpl'])->latest();
             if ($request->filled('method')) $query->where('metode_persalinan', $request->method);
             if ($request->filled('date')) $query->whereDate('created_at', $request->date);
             if ($request->filled('user_id')) $query->where('user_id', $request->user_id);
-
             $predictions = $query->get();
         } else {
-            $predictions = Prediction::with('user')->where('user_id', $user->id)->latest()->get();
+            $predictions = Prediction::with(['user', 'hpl'])->where('user_id', $user->id)->latest()->get();
         }
 
         $users = User::all();
@@ -33,7 +31,6 @@ class PredictionDesktopController extends Controller
 
     public function create()
     {
-        $user = Auth::user();
         $users = User::all();
         return view('prediksi.form', compact('users'));
     }
@@ -41,7 +38,7 @@ class PredictionDesktopController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $prediction = Prediction::with('user')->findOrFail($id);
+        $prediction = Prediction::with(['user', 'hpl'])->findOrFail($id);
 
         // Jika bukan bidan, hanya bisa lihat milik sendiri
         if ($user->role !== 'bidan' && $user->id !== $prediction->user_id) {
@@ -51,13 +48,26 @@ class PredictionDesktopController extends Controller
         return view('prediksi.result', compact('prediction'));
     }
 
+    public function print($id)
+    {
+        $user = Auth::user();
+        $prediction = Prediction::with(['user', 'hpl'])->findOrFail($id);
+
+        // Jika bukan bidan, hanya bisa lihat milik sendiri
+        if ($user->role !== 'bidan' && $user->id !== $prediction->user_id) {
+            return redirect()->route('prediksi.index')->with('error', 'Anda tidak memiliki akses ke data ini');
+        }
+
+        return view('prediksi.print', compact('prediction'));
+    }
+
     public function indexlatest()
     {
         $user = Auth::user();
 
         $prediction = $user->role === 'bidan'
-            ? Prediction::with('user')->latest()->first()
-            : Prediction::with('user')->where('user_id', $user->id)->latest()->first();
+            ? Prediction::with(['user', 'hpl'])->latest()->first()
+            : Prediction::with(['user', 'hpl'])->where('user_id', $user->id)->latest()->first();
 
         if (!$prediction) {
             return redirect()->route('prediksi.index')->with('info', 'Belum ada data prediksi');
@@ -68,8 +78,6 @@ class PredictionDesktopController extends Controller
 
     public function store(Request $request)
     {
-        $user = Auth::user();
-
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'usia_ibu' => 'required|integer|min:15|max:50',

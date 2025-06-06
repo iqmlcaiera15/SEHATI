@@ -51,6 +51,7 @@
                     <thead class="table-light text-center">
                         <tr>
                             <th>Nama Ibu Hamil</th>
+                            <th>HPL</th>
                             <th>Usia Ibu</th>
                             <th>Tekanan Darah</th>
                             <th>Riwayat Persalinan</th>
@@ -66,6 +67,9 @@
                         @forelse($predictions as $prediction)
                             <tr>
                                 <td>{{ $prediction->user->name ?? '-' }}</td>
+                                <td>
+                                    {{ $prediction->hpl && $prediction->hpl->hpl ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d-m-Y') : '-' }}
+                                </td>
                                 <td>{{ $prediction->usia_ibu }} tahun</td>
                                 <td>
                                     @php
@@ -117,7 +121,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center text-muted py-4">Belum ada data prediksi.</td>
+                                <td colspan="11" class="text-center text-muted py-4">Belum ada data prediksi.</td>
                             </tr>
                         @endforelse
                     </tbody>
