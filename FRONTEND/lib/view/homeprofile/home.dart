@@ -14,6 +14,7 @@ import 'package:Sehati/view/registerlogin/login_screen.dart';
 import 'package:Sehati/view/prediksipersalinan/index_prediksi.dart';
 import 'package:Sehati/view/asupanair/index_asupanair.dart';
 import 'package:Sehati/view/kalkulatorhpl/index_hpl.dart';
+import 'package:Sehati/view/kalkulatorhpl/kalkulator_hpl_intro.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Sehati/view/prediksidepresi/index_depresi.dart'; // Added from second file
@@ -81,15 +82,26 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  String _formatHPL(String? hpl) {
-    if (hpl == null) return 'Belum dihitung';
+String _formatHPL(String? hpl) {
+  if (hpl == null || hpl.isEmpty) return '-';
+  try {
+    // Tangani format YYYY-MM-DD atau YYYY-MM-DDTHH:MM:SS
+    return DateFormat('dd MMM yy', 'id_ID').format(DateTime.parse(hpl));
+  } catch (_) {
     try {
-      final parsedDate = DateTime.parse(hpl);
-      return DateFormat('dd MMM yyyy', 'id_ID').format(parsedDate); // Using id_ID for Indonesian month
-    } catch (_) {
-      return 'Format salah';
-    }
+      // Tangani format DD-MM-YYYY
+      final parts = hpl.split('-');
+      if (parts.length == 3 && parts[0].length == 2) {
+        final day = int.parse(parts[0]);
+        final month = int.parse(parts[1]);
+        final year = int.parse(parts[2]);
+        final dt = DateTime(year, month, day);
+        return DateFormat('dd MMM yy', 'id_ID').format(dt);
+      }
+    } catch (_) {}
+    return hpl; // fallback tampilkan raw
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -556,7 +568,19 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AddDataHPL()));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => KalkulatorHPLIntro(
+                                          onStart: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (_) => const AddDataHPL()),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    );
                                   },
                                   child: _buildTipCard(
                                     'Kalkulator HPL',

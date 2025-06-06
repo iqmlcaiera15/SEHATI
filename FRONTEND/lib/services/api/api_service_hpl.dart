@@ -6,7 +6,7 @@ class ApiServiceHPL {
   static const String baseUrl = 'https://sehatiapp-production.up.railway.app/api';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  /// 🔹 Hitung HPL berdasarkan tanggal HPHT
+  /// 🔹 Hitung & simpan HPL berdasarkan tanggal HPHT (POST)
   static Future<Map<String, dynamic>> calculateHPL(DateTime hpht) async {
     final token = await _storage.read(key: 'jwt_token');
     if (token == null || token.isEmpty) {
@@ -24,9 +24,42 @@ class ApiServiceHPL {
     );
 
     if (response.statusCode == 201) {
+      // Kembalikan data yang sudah diparse
       return jsonDecode(response.body);
     } else {
       throw Exception('Gagal menghitung HPL (${response.statusCode})');
+    }
+  }
+
+  /// 🔹 Ambil semua data HPL user yang sedang login (GET)
+  static Future<List<dynamic>> getDataHPL() async {
+    final token = await _storage.read(key: 'jwt_token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Token tidak ditemukan. Pengguna mungkin belum login.');
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/pregnancy-calculators'),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+
+      // Struktur: { "message": "...", "data": [ ... ] }
+      if (body is Map && body.containsKey('data')) {
+        return List<Map<String, dynamic>>.from(body['data']);
+      } else if (body is List) {
+        return body;
+      } else {
+        throw Exception('Struktur response tidak sesuai, data HPL tidak ditemukan.');
+      }
+    } else {
+      throw Exception('Gagal mengambil data HPL (${response.statusCode})');
     }
   }
 }
