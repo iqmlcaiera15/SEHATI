@@ -12,7 +12,7 @@
     {{-- Filter --}}
     <form method="GET" action="{{ route('prediksi.index') }}" class="row g-3 align-items-end mb-4">
         @if(Auth::user()->role === 'bidan')
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label for="user_id" class="form-label">Nama Ibu Hamil</label>
             <select name="user_id" id="user_id" class="form-select shadow-sm">
                 <option value="">Semua</option>
@@ -27,7 +27,7 @@
         </div>
         @endif
 
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label for="method" class="form-label">Metode Persalinan</label>
             <select name="method" id="method" class="form-select shadow-sm">
                 <option value="">Semua</option>
@@ -35,11 +35,11 @@
                 <option value="caesar" {{ request('method') == 'caesar' ? 'selected' : '' }}>Caesar</option>
             </select>
         </div>
-        <div class="col-md-3">
-            <label for="date" class="form-label">Tanggal Prediksi</label>
-            <input type="date" name="date" id="date" class="form-control shadow-sm" value="{{ request('date') }}">
+        <div class="col-md-4">
+            <label for="hpl" class="form-label">HPL</label>
+            <input type="date" name="hpl" id="hpl" class="form-control shadow-sm" value="{{ request('hpl') }}">
         </div>
-        <div class="col-md-3 d-grid">
+        <div class="col-md-12 d-grid mt-2">
             <button type="submit" class="btn btn-outline-primary shadow-sm">Terapkan Filter</button>
         </div>
     </form>
@@ -51,15 +51,8 @@
                     <thead class="table-light text-center">
                         <tr>
                             <th>Nama Ibu Hamil</th>
-                            <th>HPL</th>
-                            <th>Usia Ibu</th>
-                            <th>Tekanan Darah</th>
-                            <th>Riwayat Persalinan</th>
-                            <th>Riwayat Kesehatan</th>
-                            <th>Posisi Janin</th>
-                            <th>Kondisi Janin</th>
                             <th>Metode</th>
-                            <th>Tanggal</th>
+                            <th>HPL</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -67,37 +60,6 @@
                         @forelse($predictions as $prediction)
                             <tr>
                                 <td>{{ $prediction->user->name ?? '-' }}</td>
-                                <td>
-                                    {{ $prediction->hpl && $prediction->hpl->hpl ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d-m-Y') : '-' }}
-                                </td>
-                                <td>{{ $prediction->usia_ibu }} tahun</td>
-                                <td>
-                                    @php
-                                        $tekanan = strtolower($prediction->tekanan_darah);
-                                        $tekananClass = match($tekanan) {
-                                            'normal' => 'text-primary',
-                                            'rendah' => 'text-warning',
-                                            'tinggi' => 'text-danger',
-                                            default => 'text-muted',
-                                        };
-                                    @endphp
-                                    <span class="{{ $tekananClass }}">{{ ucfirst($tekanan) }}</span>
-                                </td>
-                                <td>{{ ucfirst($prediction->riwayat_persalinan) }}</td>
-                                <td>{{ ucfirst($prediction->riwayat_kesehatan_ibu) }}</td>
-                                <td>
-                                    @php
-                                        $posisi = strtolower($prediction->posisi_janin);
-                                        $posisiClass = match($posisi) {
-                                            'normal' => 'text-primary',
-                                            'lintang' => 'text-warning',
-                                            'sungsang' => 'text-danger',
-                                            default => 'text-muted',
-                                        };
-                                    @endphp
-                                    <span class="{{ $posisiClass }}">{{ ucfirst($posisi) }}</span>
-                                </td>
-                                <td>{{ ucfirst($prediction->kondisi_kesehatan_janin) }}</td>
                                 <td>
                                     @php
                                         $metode = strtolower($prediction->metode_persalinan);
@@ -109,19 +71,38 @@
                                     @endphp
                                     <span class="{{ $metodeClass }}">{{ ucfirst($metode) }}</span>
                                 </td>
-                                <td>{{ $prediction->created_at->format('d-m-Y') }}</td>
                                 <td>
-                                    <a href="{{ route('prediksi.show', $prediction->id) }}" class="btn btn-sm btn-outline-info me-1">Lihat</a>
-                                    <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
-                                    </form>
+                                    {{ $prediction->hpl && $prediction->hpl->hpl
+                                        ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d-m-Y')
+                                        : '-' }}
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border shadow-sm" type="button" id="aksiDropdown{{ $prediction->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="aksiDropdown{{ $prediction->id }}">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('prediksi.show', $prediction->id) }}">
+                                                    <i class="fas fa-eye me-1 text-primary"></i> Lihat Detail
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="dropdown-item text-danger" type="submit">
+                                                        <i class="fas fa-trash me-1"></i> Hapus
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center text-muted py-4">Belum ada data prediksi.</td>
+                                <td colspan="4" class="text-center text-muted py-4">Belum ada data prediksi.</td>
                             </tr>
                         @endforelse
                     </tbody>

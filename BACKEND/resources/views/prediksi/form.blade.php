@@ -26,23 +26,23 @@
         </div>
     @endif
 
-    <div class="card shadow-sm border-0 bg-light">
-        <div class="card-body">
+    <div class="card shadow-sm border-0 bg-light rounded-4">
+        <div class="card-body px-4 py-4">
             <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate>
                 @csrf
 
-                <div class="row g-3">
+                <div class="row g-4">
                     {{-- Bidan: Pilih user --}}
                     @if(Auth::user()->role === 'bidan')
                     <div class="col-md-6">
-                        <label for="user_id" class="form-label">
+                        <label for="user_id" class="form-label fw-semibold">
                             Nama Ibu Hamil <span class="text-danger">*</span>
                         </label>
                         <select id="user_id" name="user_id" class="form-select" required>
                             <option value="">-- Pilih Ibu Hamil --</option>
                             @foreach($users as $user)
                                 @if($user->role === 'ibu_hamil')
-                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->nomor_telepon ?? '' }})</option>
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @endif
                             @endforeach
                         </select>
@@ -53,7 +53,7 @@
                     @endif
 
                     <div class="col-md-6">
-                        <label for="usia_ibu" class="form-label">
+                        <label for="usia_ibu" class="form-label fw-semibold">
                             Usia Ibu (tahun) <span class="text-danger">*</span>
                             <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Masukkan usia ibu antara 15 hingga 50 tahun."></i>
                         </label>
@@ -62,7 +62,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="tekanan_darah" class="form-label">
+                        <label for="tekanan_darah" class="form-label fw-semibold">
                             Tekanan Darah <span class="text-danger">*</span>
                             <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Pilih kategori tekanan darah saat pemeriksaan."></i>
                         </label>
@@ -76,7 +76,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="riwayat_persalinan" class="form-label">
+                        <label for="riwayat_persalinan" class="form-label fw-semibold">
                             Riwayat Persalinan <span class="text-danger">*</span>
                             <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Pilih metode persalinan yang pernah dialami sebelumnya."></i>
                         </label>
@@ -90,7 +90,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="posisi_janin" class="form-label">
+                        <label for="posisi_janin" class="form-label fw-semibold">
                             Posisi Janin <span class="text-danger">*</span>
                             <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Posisi janin terakhir berdasarkan pemeriksaan."></i>
                         </label>
@@ -104,7 +104,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="riwayat_kesehatan_ibu" class="form-label">
+                        <label for="riwayat_kesehatan_ibu" class="form-label fw-semibold">
                             Riwayat Kesehatan Ibu <span class="text-danger">*</span>
                             <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Contoh: diabetes, hipertensi, anemia. Wajib diisi."></i>
                         </label>
@@ -113,7 +113,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="kondisi_kesehatan_janin" class="form-label">
+                        <label for="kondisi_kesehatan_janin" class="form-label fw-semibold">
                             Kondisi Kesehatan Janin <span class="text-danger">*</span>
                             <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Contoh: normal, detak jantung lambat, kelainan. Wajib diisi."></i>
                         </label>

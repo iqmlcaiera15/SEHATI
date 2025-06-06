@@ -17,22 +17,35 @@ class PredictionDesktopController extends Controller
         // Jika bidan, lihat semua. Jika bukan, hanya data miliknya
         if ($user->role === 'bidan') {
             $query = Prediction::with(['user', 'hpl'])->latest();
-            if ($request->filled('method')) $query->where('metode_persalinan', $request->method);
-            if ($request->filled('date')) $query->whereDate('created_at', $request->date);
-            if ($request->filled('user_id')) $query->where('user_id', $request->user_id);
+
+            if ($request->filled('method')) {
+                $query->where('metode_persalinan', $request->method);
+            }
+            if ($request->filled('user_id')) {
+                $query->where('user_id', $request->user_id);
+            }
+            // FILTER HPL
+            if ($request->filled('hpl')) {
+                $query->whereHas('hpl', function ($q) use ($request) {
+                    $q->whereDate('hpl', $request->hpl);
+                });
+            }
+
             $predictions = $query->get();
         } else {
-            $predictions = Prediction::with(['user', 'hpl'])->where('user_id', $user->id)->latest()->get();
+            $predictions = Prediction::with(['user', 'hpl'])
+                ->where('user_id', $user->id)
+                ->when($request->filled('hpl'), function ($q) use ($request) {
+                    $q->whereHas('hpl', function ($sub) use ($request) {
+                        $sub->whereDate('hpl', $request->hpl);
+                    });
+                })
+                ->latest()
+                ->get();
         }
 
         $users = User::all();
         return view('prediksi.index', compact('predictions', 'users'));
-    }
-
-    public function create()
-    {
-        $users = User::all();
-        return view('prediksi.form', compact('users'));
     }
 
     public function show($id)

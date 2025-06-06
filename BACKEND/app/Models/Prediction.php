@@ -30,6 +30,15 @@ class Prediction extends Model
     }
 
     /**
+     * Relasi: Setiap prediksi punya satu data HPL terbaru (berdasarkan user_id)
+     */
+    public function hpl()
+    {
+        // Ganti \App\Models\PregnancyCalculator jika nama model HPL kamu berbeda
+        return $this->hasOne(\App\Models\PregnancyCalculator::class, 'user_id', 'user_id')->latestOfMany();
+    }
+
+    /**
      * Casting otomatis untuk kolom faktor jika disimpan dalam bentuk JSON
      */
     protected $casts = [
