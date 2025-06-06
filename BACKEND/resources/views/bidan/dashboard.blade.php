@@ -323,7 +323,7 @@
 
                         {{-- Footer --}}
                         <div class="card-footer bg-transparent border-top-0">
-                            <a href="{{ route('prediksi.result', $janin->id) }}"
+                            <a href="{{ route('prediksi.show', $janin->id) }}"
                                class="btn btn-sm {{ $buttonClass }} w-100">
                                 <i class="fas fa-eye me-1"></i> Lihat Detail
                             </a>
