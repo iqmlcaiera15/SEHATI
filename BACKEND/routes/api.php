@@ -19,6 +19,7 @@ use App\Http\Controllers\IconsController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/prediksidepresi', [PrediksiDepresiController::class, 'index']);
 
 // Auth routes - Pindahkan ke api.php jika menggunakan API
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
@@ -73,7 +74,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/home', [HomeProfileController::class, 'home']);
 
     // Prediksi Depresi
-    Route::get('/prediksidepresi', [PrediksiDepresiController::class, 'index']);
+   
     Route::post('/prediksidepresi/store', [PrediksiDepresiController::class, 'store']);
     Route::get('/prediksidepresi/{id}', [PrediksiDepresiController::class, 'show']);
     Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class, 'deletebyID']);
