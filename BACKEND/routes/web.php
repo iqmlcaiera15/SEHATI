@@ -8,7 +8,7 @@ use App\Http\Controllers\InsentifController;
 use App\Http\Controllers\DeteksiDesktopController;
 use App\Http\Controllers\PrediksiDepresiDesktopController;
 use App\Http\Controllers\IconsController;
-use App\Http\Controllers\PredictionController;
+use App\Http\Controllers\PredictionDesktopController;
 
 
 /*
@@ -54,15 +54,12 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show');
     Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.destroy');
 
-    Route::get('/prediksi', [PredictionController::class, 'index'])->name('bidan.prediksi.index');
-    Route::get('/prediksi/form', function () {
-        return view('prediksi.form');
-    })->name('bidan.prediksi.form');
-    Route::post('/prediksi', [PredictionController::class, 'store'])->name('bidan.prediksi.store');
-    Route::get('/prediksi/result/{id}', [PredictionController::class, 'result'])->name('bidan.prediksi.result');
-    Route::delete('/prediksi/{id}', [PredictionController::class, 'deletebyID'])->name('bidan.prediksi.delete');
-    Route::get('/bidan/prediksi/{id}/print', [PredictionController::class, 'print'])->name('bidan.prediksi.print');
-
+    Route::get('/prediksi', [PredictionDesktopController::class, 'index'])->name('prediksi.index');
+    Route::get('/prediksi/form', [PredictionDesktopController::class, 'create'])->name('prediksi.form');
+    Route::post('/prediksi', [PredictionDesktopController::class, 'store'])->name('prediksi.store');
+    Route::get('/prediksi/{id}', [PredictionDesktopController::class, 'show'])->name('prediksi.show');
+    Route::delete('/prediksi/{id}', [PredictionDesktopController::class, 'destroy'])->name('prediksi.delete');
+    Route::get('/prediksi/{id}/print', [PredictionDesktopController::class, 'print'])->name('prediksi.print');
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
     // Add more bidan routes here

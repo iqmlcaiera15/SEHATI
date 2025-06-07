@@ -52,7 +52,7 @@
                     Total Prediksi Persalinan
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ route('bidan.prediksi.index') }}">Lihat Detail</a>
+                    <a class="small text-white stretched-link" href="{{ route('prediksi.index') }}">Lihat Detail</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
@@ -323,7 +323,7 @@
 
                         {{-- Footer --}}
                         <div class="card-footer bg-transparent border-top-0">
-                            <a href="{{ route('bidan.prediksi.result', $janin->id) }}"
+                            <a href="{{ route('prediksi.show', $janin->id) }}"
                                class="btn btn-sm {{ $buttonClass }} w-100">
                                 <i class="fas fa-eye me-1"></i> Lihat Detail
                             </a>
