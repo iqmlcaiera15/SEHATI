@@ -435,7 +435,6 @@ class DetailPostpartum extends StatefulWidget {
 
 class _DetailPostpartumState extends State<DetailPostpartum> {
   late Future<PostpartumArticle> _articleFuture;
-  bool _isBookmarked = false; // For bookmark functionality
 
   @override
   void initState() {
@@ -503,35 +502,7 @@ class _DetailPostpartumState extends State<DetailPostpartum> {
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
-                actions: [
-                  IconButton(
-                    icon: Icon(
-                      _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isBookmarked = !_isBookmarked;
-                        // Here you would implement actual bookmark functionality
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(_isBookmarked 
-                              ? 'Artikel disimpan ke bookmarks' 
-                              : 'Artikel dihapus dari bookmarks'
-                            ),
-                            backgroundColor: const Color(0xFF4DBAFF),
-                          ),
-                        );
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.share, color: Colors.white),
-                    onPressed: () {
-                      // Implement share functionality
-                    },
-                  ),
-                ],
+               
                 flexibleSpace: FlexibleSpaceBar(
                   background: article.gambar != null && article.gambar!.isNotEmpty
                       ? Stack(
