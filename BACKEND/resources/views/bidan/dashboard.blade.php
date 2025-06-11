@@ -95,7 +95,7 @@
                         </div>
                         <div class="card-footer">
                             <div class="d-flex justify-content-between">
-                                <a href="{{ route('ibu_hamil.show', $ibu->id) }}" class="btn btn-sm btn-primary">Detail</a>
+                                <a href="{{ route('ibu_hamil.detail', $ibu->id) }}" class="btn btn-sm btn-primary">Detail</a>
                                 <a href="#" class="btn btn-sm btn-success">Riwayat Kesehatan</a>
                             </div>
                         </div>
