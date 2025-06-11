@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Sehati/services/api/api_service_hpl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:Sehati/view/homeprofile/home.dart';
@@ -8,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AddDataHPL extends StatefulWidget {
   const AddDataHPL({super.key});
-
   @override
   State<AddDataHPL> createState() => _AddDataHPLState();
 }
@@ -34,6 +32,47 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
     ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
+    _loadLatestHPL();
+  }
+
+  // Ambil HPL terbaru user dari backend
+  Future<void> _loadLatestHPL() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final dataList = await ApiServiceHPL.getDataHPL();
+      print('DATA BACKEND: $dataList');
+      if (dataList.isNotEmpty) {
+        final latest = dataList.first;
+        print('LATEST DATA: $latest');
+        setState(() {
+          // Pastikan field sesuai response backend
+          estimatedDate = latest['hpl']?.toString() ?? latest['due_date']?.toString();
+          week = latest['minggu_ke'] is int
+              ? latest['minggu_ke']
+              : int.tryParse(latest['minggu_ke']?.toString() ?? latest['pregnancy_week']?.toString() ?? '0');
+        });
+        _controller.forward();
+      } else {
+        setState(() {
+          estimatedDate = null;
+          week = null;
+        });
+      }
+    } catch (e) {
+      print('ERROR GET HPL: $e');
+      setState(() {
+        estimatedDate = null;
+        week = null;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _pickDate() async {
@@ -72,14 +111,12 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
 
     try {
       final response = await ApiServiceHPL.calculateHPL(selectedDate!);
+      print('RESPONSE HITUNG HPL: $response');
       final data = response['data'];
-      final hpl = data['hpl'] as String;
-      final mingguKe = (data['minggu_ke'] as num).round();
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('last_hpht', data['hpht']);
-      await prefs.setString('last_hpl', hpl);
-      await prefs.setInt('last_week', mingguKe);
+      final hpl = data['hpl']?.toString() ?? data['due_date']?.toString();
+      final mingguKe = (data['minggu_ke'] is int)
+          ? data['minggu_ke']
+          : int.tryParse(data['minggu_ke']?.toString() ?? data['pregnancy_week']?.toString() ?? '0');
 
       setState(() {
         estimatedDate = hpl;
@@ -141,6 +178,8 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
       );
     } finally {
       setState(() => isLoading = false);
+      // Refresh data HPL terbaru
+      _loadLatestHPL();
     }
   }
 
@@ -169,80 +208,79 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
     super.dispose();
   }
 
-Widget _buildFancyAppBar() {
-  return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.only(top: 44, left: 18, right: 18, bottom: 12),
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.72),
-      borderRadius: const BorderRadius.only(
-        bottomLeft: Radius.circular(30),
-        bottomRight: Radius.circular(30),
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.blue.withOpacity(0.07),
-          blurRadius: 20,
-          offset: const Offset(0, 7),
+  Widget _buildFancyAppBar() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 44, left: 18, right: 18, bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.72),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
         ),
-      ],
-      backgroundBlendMode: BlendMode.overlay,
-    ),
-    child: Row(
-      children: [
-        GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.10),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                )
-              ],
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Color(0xFF1E293B),
-                size: 18,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.07),
+            blurRadius: 20,
+            offset: const Offset(0, 7),
+          ),
+        ],
+        backgroundBlendMode: BlendMode.overlay,
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.withOpacity(0.10),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Color(0xFF1E293B),
+                  size: 18,
+                ),
               ),
             ),
           ),
-        ),
-        const Spacer(),
-        Text(
-          'Kalkulator HPL',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF1E293B),
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.14,
-            shadows: [
-              const Shadow(
-                blurRadius: 4,
-                color: Colors.white,
-                offset: Offset(1, 1),
-              )
-            ],
+          const Spacer(),
+          Text(
+            'Kalkulator HPL',
+            style: GoogleFonts.poppins(
+              color: const Color(0xFF1E293B),
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.14,
+              shadows: [
+                const Shadow(
+                  blurRadius: 4,
+                  color: Colors.white,
+                  offset: Offset(1, 1),
+                )
+              ],
+            ),
           ),
-        ),
-        const Spacer(),
-        Opacity(opacity: 0, child: Icon(Icons.refresh)),
-      ],
-    ),
-  );
-}
+          const Spacer(),
+          Opacity(opacity: 0, child: Icon(Icons.refresh)),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Latar belakang gradien modern
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -372,8 +410,7 @@ Widget _buildFancyAppBar() {
                                   child: Text(
                                     selectedDate == null
                                         ? 'Pilih Tanggal HPHT'
-                                        : DateFormat('dd MMM yyyy',
-                                                'id_ID')
+                                        : DateFormat('dd MMM yyyy', 'id_ID')
                                             .format(selectedDate!),
                                     style: TextStyle(
                                       fontSize: 16,
@@ -420,28 +457,26 @@ Widget _buildFancyAppBar() {
                                     ),
                                   )
                                 : ElevatedButton(
-                                    onPressed: _calculateHPL,
+                                    onPressed: isLoading ? null : _calculateHPL,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          const Color(0xFF4DBAFF),
-                                      padding:
-                                          const EdgeInsets.symmetric(
-                                              vertical: 16),
+                                      backgroundColor: const Color(0xFF4DBAFF),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16),
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(16),
                                       ),
                                       elevation: 2,
                                     ),
-                              child: Text(
-                                'Hitung HPL',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                  fontSize: 16.5,
-                                ),
-                              ),
-                            ),
+                                    child: Text(
+                                      'Hitung HPL',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        fontSize: 16.5,
+                                      ),
+                                    ),
+                                  ),
                           ),
                         ),
                       ],
@@ -449,146 +484,147 @@ Widget _buildFancyAppBar() {
                   ),
                   const SizedBox(height: 28),
                   if (estimatedDate != null && week != null)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          minHeight: 150,
-                          maxWidth: 370, // tetap compact di tablet/web
-                        ),
-                        child: SlideTransition(
-                          position: _slideAnimation,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(26),
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFDDF7FF),
-                                  Color(0xFFC4E0FF),
-                                  Color(0xFFF2F7FF),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minHeight: 150,
+                            maxWidth: 370,
+                          ),
+                          child: SlideTransition(
+                            position: _slideAnimation,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(26),
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFDDF7FF),
+                                    Color(0xFFC4E0FF),
+                                    Color(0xFFF2F7FF),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blueGrey.withOpacity(0.11),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 7),
+                                  ),
                                 ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blueGrey.withOpacity(0.11),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 7),
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 21, horizontal: 20),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // Ikon bayi dengan efek glass
-                                Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white.withOpacity(0.22),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.23),
-                                      width: 1.2,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.blue.withOpacity(0.12),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 3),
+                              padding: const EdgeInsets.symmetric(vertical: 21, horizontal: 20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Ikon bayi dengan efek glass
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withOpacity(0.22),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.23),
+                                        width: 1.2,
                                       ),
-                                    ],
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.blue.withOpacity(0.12),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    padding: const EdgeInsets.all(10),
+                                    child: Icon(
+                                      Icons.child_care_rounded,
+                                      size: 28,
+                                      color: Colors.blue[300],
+                                    ),
                                   ),
-                                  padding: const EdgeInsets.all(10),
-                                  child: Icon(
-                                    Icons.child_care_rounded,
-                                    size: 28,
-                                    color: Colors.blue[300],
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  "Hari Perkiraan Lahir",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 15.5,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.08,
-                                    color: Colors.blueGrey[900]?.withOpacity(0.92),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  formatDateHPL(estimatedDate),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.7,
-                                    color: const Color(0xFF2260A3),
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.21),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    "Usia Kehamilan: Minggu ke-${week.toString().padLeft(2, '0')}",
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "Hari Perkiraan Lahir",
                                     style: GoogleFonts.poppins(
-                                      fontSize: 13,
+                                      fontSize: 15.5,
                                       fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.08,
+                                      color: Colors.blueGrey[900]?.withOpacity(0.92),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    formatDateHPL(estimatedDate),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 21,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.7,
                                       color: const Color(0xFF2260A3),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 12),
-                                SizedBox(
-                                  width: 120,
-                                  height: 36,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.of(context).pushAndRemoveUntil(
-                                        MaterialPageRoute(builder: (context) => const HomePage()),
-                                        (route) => false,
-                                      );
-                                    },
-                                    icon: const Icon(
-                                      Icons.home_outlined,
-                                      size: 17,
-                                      color: Colors.white,
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.21),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    label: Text(
-                                      "Beranda",
+                                    child: Text(
+                                      "Usia Kehamilan: Minggu ke-${week.toString().padLeft(2, '0')}",
                                       style: GoogleFonts.poppins(
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                        letterSpacing: 0.1,
+                                        color: const Color(0xFF2260A3),
                                       ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF4DBAFF),
-                                      elevation: 4,
-                                      shadowColor: Colors.blue.withOpacity(0.15),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(13),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(vertical: 8),
-                                      minimumSize: const Size(40, 34),
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    width: 120,
+                                    height: 36,
+                                    child: ElevatedButton.icon(
+                                      onPressed: isLoading
+                                          ? null
+                                          : () {
+                                              Navigator.of(context).pushAndRemoveUntil(
+                                                MaterialPageRoute(builder: (context) => const HomePage()),
+                                                (route) => false,
+                                              );
+                                            },
+                                      icon: const Icon(
+                                        Icons.home_outlined,
+                                        size: 17,
+                                        color: Colors.white,
+                                      ),
+                                      label: Text(
+                                        "Beranda",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                          letterSpacing: 0.1,
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF4DBAFF),
+                                        elevation: 4,
+                                        shadowColor: Colors.blue.withOpacity(0.15),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(13),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(vertical: 8),
+                                        minimumSize: const Size(40, 34),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-
                 ],
               ),
             ),

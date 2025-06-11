@@ -2,173 +2,193 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Prediction;
 use Illuminate\Http\Request;
+use App\Models\PrediksiDepresi;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 
-class PredictionController extends Controller
+class PrediksiDepresiController extends Controller
 {
-    // GET /api/predictions
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user();
-        if (!$user) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-        }
-
-        $query = Prediction::latest();
-
-        // Filter prediksi hanya milik user login (user_id)
-        $query->where('user_id', $user->id);
-
-        // Optional filter
-        if ($request->filled('method')) {
-            $query->where('metode_persalinan', $request->method);
-        }
-        if ($request->filled('date')) {
-            $query->whereDate('created_at', $request->date);
-        }
-
-        $predictions = $query->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $predictions
-        ], 200);
+        return response()->json(PrediksiDepresi::all());
     }
 
-    // POST /api/predictions
-    public function store(Request $request)
+        public function store(Request $request)
     {
-        $user = $request->user();
-        if (!$user) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-        }
-
         $validator = Validator::make($request->all(), [
-            'usia_ibu' => 'required|integer|min:15|max:50',
-            'tekanan_darah' => 'required|in:normal,rendah,tinggi',
-            'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
-            'posisi_janin' => 'required|in:normal,lintang,sungsang',
-            'riwayat_kesehatan_ibu' => 'required|string',
-            'kondisi_kesehatan_janin' => 'required|string',
+            'umur' => 'required|integer|min:0|max:120',
+            'merasa_sedih' => 'required|in:Tidak,Kadang-kadang,Ya',
+            'mudah_tersinggung' => 'required|in:Tidak,Kadang-kadang,Ya',
+            'masalah_tidur' => 'required|in:Tidak,Dua hari dalam seminggu/lebih,Ya',
+            'masalah_fokus' => 'required|in:Tidak,Ya,Sering',
+            'pola_makan' => 'required|in:Tidak sama sekali,Kadang-kadang,Ya',
+            'merasa_bersalah' => 'required|in:Tidak,Mungkin,Ya',
+            'suicide_attempt' => 'required|in:Tidak,Ya,Tidak ingin menjawab',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first()
+                "status" => "error",
+                "errors" => $validator->errors()
             ], 422);
         }
 
         try {
-            $dataToSend = [
-                'usia_ibu' => (int) $request->usia_ibu,
-                'tekanan_darah' => strtolower($request->tekanan_darah),
-                'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
-                'posisi_janin' => strtolower($request->posisi_janin),
-                'riwayat_kesehatan_ibu' => strtolower($request->riwayat_kesehatan_ibu),
-                'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
+            $user = $request->user(); // user dari token
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            // Data yang dikirim ke Flask (tanpa user_id)
+            $dataKuisioner = [
+                'umur' => $this->categorizeUmur($request->umur),
+                'merasa_sedih' => $this->convertToNumber('merasa_sedih', $request->merasa_sedih),
+                'mudah_tersinggung' => $this->convertToNumber('mudah_tersinggung', $request->mudah_tersinggung),
+                'masalah_tidur' => $this->convertToNumber('masalah_tidur', $request->masalah_tidur),
+                'masalah_fokus' => $this->convertToNumber('masalah_fokus', $request->masalah_fokus),
+                'pola_makan' => $this->convertToNumber('pola_makan', $request->pola_makan),
+                'merasa_bersalah' => $this->convertToNumber('merasa_bersalah', $request->merasa_bersalah),
+                'suicide_attempt' => $this->convertToNumber('suicide_attempt', $request->suicide_attempt),
             ];
 
-            $flaskUrl = 'https://sehatimlprediksi-production.up.railway.app/predict';
-            $response = Http::post($flaskUrl, $dataToSend);
+            // Prediksi dari Flask
+            $hasilPrediksi = $this->predictDepresi($dataKuisioner);
 
-            if ($response->failed()) {
-                $msg = "Gagal memanggil Flask API. Status: {$response->status()}. Respons: {$response->body()}";
-                return response()->json([
-                    'success' => false,
-                    'message' => $msg
-                ], $response->status());
-            }
-
-            $result = $response->json();
-            $hasil = $result['hasil_prediksi'] ?? null;
-            $faktor = $result['faktor'] ?? '-';
-
-            if (!$hasil) {
-                $msg = "Respons Flask tidak lengkap: " . json_encode($result);
-                return response()->json([
-                    'success' => false,
-                    'message' => $msg
-                ], 500);
-            }
-
-            $prediction = Prediction::create([
-                'usia_ibu' => $dataToSend['usia_ibu'],
-                'tekanan_darah' => $dataToSend['tekanan_darah'],
-                'riwayat_persalinan' => $dataToSend['riwayat_persalinan'],
-                'posisi_janin' => $dataToSend['posisi_janin'],
-                'riwayat_kesehatan_ibu' => $dataToSend['riwayat_kesehatan_ibu'],
-                'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
-                'metode_persalinan' => $hasil,
-                'faktor' => $faktor,
-                'user_id' => $user->id,
-            ]);
+            // Simpan ke database dengan user_id
+            $prediksi = PrediksiDepresi::create(array_merge(
+                $dataKuisioner,
+                ['hasil_prediksi' => $hasilPrediksi, 'user_id' => $user->id]
+            ));
 
             return response()->json([
-                'success' => true,
-                'message' => 'Berhasil melakukan prediksi.',
-                'hasil_prediksi' => $hasil,
-                'faktor' => $faktor,
-                'data' => $prediction
+                "status" => "success",
+                "message" => "Prediksi berhasil disimpan",
+                "data" => $prediksi
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat prediksi: ' . $e->getMessage()
+                "status" => "error",
+                "message" => "Terjadi kesalahan saat memproses prediksi",
+                "error_detail" => $e->getMessage()
             ], 500);
         }
     }
 
-    // DELETE /api/predictions/{id}
-    public function deletebyID($id, Request $request)
+
+    public function show($id)
     {
-        $user = $request->user();
-        if (!$user) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        $prediksi = PrediksiDepresi::find($id);
+
+        if (!$prediksi) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Data tidak ditemukan"
+            ], 404);
         }
 
-        $prediction = Prediction::find($id);
-
-        if (!$prediction) {
-            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
-        }
-
-        // Pastikan hanya owner yang boleh hapus
-        if ($user->id !== $prediction->user_id) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $prediction->delete();
-
-        return response()->json(['success' => true, 'message' => 'Riwayat prediksi berhasil dihapus']);
-    }
-
-    // GET /api/predictions/{id}
-    public function result($id, Request $request)
-    {
-        $user = $request->user();
-        if (!$user) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-        }
-
-        $prediction = Prediction::find($id);
-
-        if (!$prediction) {
-            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
-        }
-
-        // Pastikan hanya owner yang boleh akses
-        if ($user->id !== $prediction->user_id) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+        // Konversi angka kembali ke teks
+        $rekapData = [
+            'umur' => $this->convertToText('umur', $prediksi->umur),
+            'merasa_sedih' => $this->convertToText('merasa_sedih', $prediksi->merasa_sedih),
+            'mudah_tersinggung' => $this->convertToText('mudah_tersinggung', $prediksi->mudah_tersinggung),
+            'masalah_tidur' => $this->convertToText('masalah_tidur', $prediksi->masalah_tidur),
+            'masalah_fokus' => $this->convertToText('masalah_fokus', $prediksi->masalah_fokus),
+            'pola_makan' => $this->convertToText('pola_makan', $prediksi->pola_makan),
+            'merasa_bersalah' => $this->convertToText('merasa_bersalah', $prediksi->merasa_bersalah),
+            'suicide_attempt' => $this->convertToText('suicide_attempt', $prediksi->suicide_attempt),
+            'hasil_prediksi' => $prediksi->hasil_prediksi ? "Terindikasi Depresi" : "Tidak Terindikasi Depresi"
+        ];
 
         return response()->json([
-            'success' => true,
-            'data' => $prediction
+            "status" => "success",
+            "data" => $rekapData
         ]);
     }
+
+    public function deletebyID($id)
+    {
+        $prediksi = PrediksiDepresi::find($id);
+
+        if (!$prediksi) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Data tidak ditemukan"
+            ], 404);
+        }
+
+        $prediksi->delete();
+
+        return response()->json([
+            "status" => "success",
+            "message" => "History prediksi berhasil dihapus"
+        ]);
+    }
+
+    private function categorizeUmur($umur)
+    {
+        if ($umur <= 30) return 0;
+        elseif ($umur >= 31 && $umur <= 35) return 1;
+        elseif ($umur >= 36 && $umur <= 40) return 2;
+        elseif ($umur >= 41 && $umur <= 45) return 3;
+        elseif ($umur >= 46 && $umur <= 50) return 4;
+        else return null; // umur di luar jangkauan
+    }
+
+    private function convertToNumber($field, $value)
+    {
+        $mapping = [
+            'merasa_sedih' => ['Tidak' => 0, 'Ya' => 1, 'Kadang-kadang' => 2],
+            'mudah_tersinggung' => ['Tidak' => 0, 'Ya' => 1, 'Kadang-kadang' => 2],
+            'masalah_tidur' => ['Tidak' => 0, 'Ya' => 1, 'Dua hari dalam seminggu/lebih' => 2],
+            'masalah_fokus' => ['Tidak' => 0, 'Ya' => 1, 'Sering' => 2],
+            'pola_makan' => ['Tidak sama sekali' => 2, 'Ya' => 1, 'Kadang-kadang' => 0],
+            'merasa_bersalah' => ['Tidak' => 0, 'Ya' => 1, 'Mungkin' => 2],
+            'suicide_attempt' => ['Tidak' => 0, 'Ya' => 1, 'Tidak ingin menjawab' => 2],
+        ];
+
+        return $mapping[$field][$value] ?? null;
+    }
+
+    private function convertToText($field, $value)
+    {
+        $reverseMapping = [
+            'umur' => [
+                0 => '0-30',
+                1 => '31-35',
+                2 => '36-40',
+                3 => '41-45',
+                4 => '46-50'
+            ],
+            'merasa_sedih' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
+            'mudah_tersinggung' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Kadang-kadang'],
+            'masalah_tidur' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Dua hari dalam seminggu/lebih'],
+            'masalah_fokus' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Sering'],
+            'pola_makan' => [2=> 'Tidak sama sekali', 1 => 'Ya', 0 => 'Kadang-kadang'],
+            'merasa_bersalah' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Mungkin'],
+            'suicide_attempt' => [0 => 'Tidak', 1 => 'Ya', 2 => 'Tidak ingin menjawab'],
+        ];
+
+        return $reverseMapping[$field][$value] ?? "Tidak diketahui";
+    }
+
+
+    private function predictDepresi($data)
+    {
+        $response = Http::post('https://sehatimldepresi-production.up.railway.app/predict', [
+            // $response = Http::post('http://127.0.0.1:5000/predict', [
+            'features' => array_values($data)
+        ]);
+
+        if ($response->failed()) {
+            $status = $response->status();
+            $body = $response->body();
+
+            throw new \Exception("Gagal memanggil Flask API. Status: $status. Respons: $body");
+        }
+
+        return $response->json()['prediction'] ?? null;
+    }
+
 }

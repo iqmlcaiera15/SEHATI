@@ -4,11 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Prediction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Exception;
 
 class PredictionController extends Controller
 {
+    private $flaskApiUrl;
+
+    public function __construct()
+    {
+        $this->flaskApiUrl = env('FLASK_API_URL', 'https://sehatimlprediksi-production.up.railway.app/predict');
+    }
+
     // GET /api/predictions
     public function index(Request $request)
     {
@@ -18,11 +27,8 @@ class PredictionController extends Controller
         }
 
         $query = Prediction::latest();
-
-        // Filter prediksi hanya milik user login (user_id)
         $query->where('user_id', $user->id);
 
-        // Optional filter
         if ($request->filled('method')) {
             $query->where('metode_persalinan', $request->method);
         }
@@ -51,8 +57,8 @@ class PredictionController extends Controller
             'tekanan_darah' => 'required|in:normal,rendah,tinggi',
             'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
             'posisi_janin' => 'required|in:normal,lintang,sungsang',
-            'riwayat_kesehatan_ibu' => 'required|string',
-            'kondisi_kesehatan_janin' => 'required|string',
+            'riwayat_kesehatan_ibu' => 'nullable|string',
+            'kondisi_kesehatan_janin' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -64,16 +70,18 @@ class PredictionController extends Controller
 
         try {
             $dataToSend = [
-                'usia_ibu' => (int) $request->usia_ibu,
-                'tekanan_darah' => strtolower($request->tekanan_darah),
-                'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
-                'posisi_janin' => strtolower($request->posisi_janin),
-                'riwayat_kesehatan_ibu' => strtolower($request->riwayat_kesehatan_ibu),
-                'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
+                'usia_ibu' => (int) $request->input('usia_ibu'),
+                'tekanan_darah' => strtolower($request->input('tekanan_darah')),
+                'riwayat_persalinan' => strtolower($request->input('riwayat_persalinan')),
+                'posisi_janin' => strtolower($request->input('posisi_janin')),
+                'riwayat_kesehatan_ibu' => strtolower($request->input('riwayat_kesehatan_ibu') ?? 'normal'),
+                'kondisi_kesehatan_janin' => strtolower($request->input('kondisi_kesehatan_janin') ?? 'normal'),
             ];
 
-            $flaskUrl = 'https://sehatimlprediksi-production.up.railway.app/predict';
-            $response = Http::post($flaskUrl, $dataToSend);
+            $response = Http::timeout(10)->withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->post($this->flaskApiUrl, $dataToSend);
 
             if ($response->failed()) {
                 $msg = "Gagal memanggil Flask API. Status: {$response->status()}. Respons: {$response->body()}";
@@ -84,16 +92,10 @@ class PredictionController extends Controller
             }
 
             $result = $response->json();
-            $hasil = $result['hasil_prediksi'] ?? null;
-            $faktor = $result['faktor'] ?? '-';
 
-            if (!$hasil) {
-                $msg = "Respons Flask tidak lengkap: " . json_encode($result);
-                return response()->json([
-                    'success' => false,
-                    'message' => $msg
-                ], 500);
-            }
+            $hasil = $result['hasil_prediksi'] ?? '-';
+            $faktor = !empty($result['faktor']) ? (is_array($result['faktor']) ? implode(', ', $result['faktor']) : $result['faktor']) : '-';
+            $confidence = !empty($result['confidence']) ? $result['confidence'] : 0;
 
             $prediction = Prediction::create([
                 'usia_ibu' => $dataToSend['usia_ibu'],
@@ -104,6 +106,7 @@ class PredictionController extends Controller
                 'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
                 'metode_persalinan' => $hasil,
                 'faktor' => $faktor,
+                'confidence' => $confidence,
                 'user_id' => $user->id,
             ]);
 
@@ -111,17 +114,19 @@ class PredictionController extends Controller
                 'success' => true,
                 'message' => 'Berhasil melakukan prediksi.',
                 'hasil_prediksi' => $hasil,
+                'confidence' => $confidence,
                 'faktor' => $faktor,
                 'data' => $prediction
             ], 201);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat prediksi: ' . $e->getMessage()
             ], 500);
         }
     }
+
 
     // DELETE /api/predictions/{id}
     public function deletebyID($id, Request $request)
@@ -137,7 +142,6 @@ class PredictionController extends Controller
             return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
         }
 
-        // Pastikan hanya owner yang boleh hapus
         if ($user->id !== $prediction->user_id) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
@@ -161,7 +165,6 @@ class PredictionController extends Controller
             return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
         }
 
-        // Pastikan hanya owner yang boleh akses
         if ($user->id !== $prediction->user_id) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }

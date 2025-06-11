@@ -43,7 +43,18 @@
             {{ $prediction->hpl && $prediction->hpl->hpl ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d F Y') : '-' }}
         </div>
     </div>
-    <div class="section-title">Hasil Prediksi Metode Persalinan : <span style="text-transform:capitalize">{{ $prediction->metode_persalinan }}</span></div>
+    <div class="section-title">
+        Hasil Prediksi Metode Persalinan :
+        <span style="text-transform:capitalize">{{ $prediction->metode_persalinan }}</span>
+    </div>
+    <div class="row" style="margin-bottom:6px;">
+        <span class="label">Faktor Penentu :</span>
+        {{ $prediction->faktor ?? '-' }}
+    </div>
+    <div class="row" style="margin-bottom:12px;">
+        <span class="label">Confidence :</span>
+        {{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}
+    </div>
     <div style="margin-bottom:6px; font-weight:bold;">Faktor :</div>
     <ul class="faktor-list">
         <li>Usia Ibu : {{ $prediction->usia_ibu }} tahun</li>
