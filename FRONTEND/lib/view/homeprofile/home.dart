@@ -317,6 +317,8 @@ String _formatHPL(String? hpl) {
 
                           // Bagian Kanan: Hanya Stat HPL
                           _buildStatItem('HPL', _formatHPL(_hpl)),
+                          _buildStatItem('Usia', '30 tahun'),
+                          _buildStatItem('BMI', '23.5'),
                         ],
                       ),
                     ),
