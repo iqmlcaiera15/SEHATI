@@ -295,18 +295,15 @@ String _formatHPL(String? hpl) {
                           ),
                         ],
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Column(
                         children: [
-                          // Bagian Kiri: Status Minggu Kehamilan yang menonjol
                           Row(
                             children: [
-                              const Icon(Icons.calendar_today, color: Colors.white, size: 20),
+                              Icon(Icons.calendar_today, color: Colors.white, size: 18),
                               const SizedBox(width: 8),
                               Text(
                                 _mingguKe != null ? 'Minggu ke-$_mingguKe' : 'Minggu belum dihitung',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -314,15 +311,18 @@ String _formatHPL(String? hpl) {
                               ),
                             ],
                           ),
-
-                          // Bagian Kanan: Hanya Stat HPL
-                          _buildStatItem('HPL', _formatHPL(_hpl)),
-                          _buildStatItem('Usia', '30 tahun'),
-                          _buildStatItem('BMI', '23.5'),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem('HPL', _formatHPL(_hpl)),
+                              _buildStatItem('Usia', '30 tahun'),
+                              _buildStatItem('BMI', '23.5'),
+                            ],
+                          ),
                         ],
                       ),
                     ),
-
                     // Services Section
                     Container(
                       width: double.infinity,
