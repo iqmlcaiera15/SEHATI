@@ -133,9 +133,7 @@
                         </div>
                         <div class="card-footer bg-light">
                             <div class="d-flex justify-content-between">
-                                <a href="{{ url('dinkes/saldo/' . $ibu->id) }}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye me-1"></i>Detail Lengkap
-                                </a>
+                                <a href="{{ route('ibu_hamil.detail', $ibu->id) }}" class="btn btn-sm btn-primary">Detail</a>
                                 <a href="#" class="btn btn-sm btn-success">
                                     <i class="fas fa-heartbeat me-1"></i>Riwayat Kesehatan
                                 </a>
