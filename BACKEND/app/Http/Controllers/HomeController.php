@@ -114,7 +114,7 @@ class HomeController extends Controller
             ->limit(5)
             ->get();
 
-        return view('ibu-hamil.show', compact(
+        return view('ibu-hamil.detail', compact(
             'ibuHamil', 
             'deteksiPenyakit', 
             'prediksiDepresi', 
