@@ -60,30 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 
-                // Back Button - matching register screen
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: IconButton(
-                    icon: Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(Icons.arrow_back, color: Color(0xFF4DBAFF)),
-                    ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
-                
                 // Main content
                 SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),

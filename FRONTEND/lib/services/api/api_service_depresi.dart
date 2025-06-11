@@ -7,6 +7,35 @@ class DepressionService {
   final String baseUrl = 'https://sehatiapp-production.up.railway.app/api';
 
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  // Helper method to parse error response from backend
+  String _parseErrorResponse(http.Response response) {
+    try {
+      final Map<String, dynamic> errorBody = jsonDecode(response.body);
+      
+      // Try different possible error message fields
+      if (errorBody.containsKey('message')) {
+        return errorBody['message'];
+      } else if (errorBody.containsKey('error')) {
+        return errorBody['error'];
+      } else if (errorBody.containsKey('errors')) {
+        // Handle validation errors
+        final errors = errorBody['errors'];
+        if (errors is Map) {
+          return errors.values.first.toString();
+        } else if (errors is List) {
+          return errors.first.toString();
+        }
+      }
+      
+      // If no specific error message found, return the raw response
+      return response.body;
+    } catch (e) {
+      // If JSON parsing fails, return status code and raw response
+      return 'HTTP ${response.statusCode}: ${response.body}';
+    }
+  }
+
   // Method to submit depression questionnaire data
   Future<Map<String, dynamic>> submitDepressionQuestionnaire(Map<String, dynamic> data) async {
     final token = await _storage.read(key: 'jwt_token');
@@ -19,19 +48,23 @@ class DepressionService {
       final response = await http.post(
         Uri.parse('$baseUrl/prediksidepresi/store'),
         headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
         body: jsonEncode(data),
       );
 
       if (response.statusCode == 201) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to submit questionnaire: ${response.body}');
+        final errorMessage = _parseErrorResponse(response);
+        throw Exception('Failed to submit questionnaire: $errorMessage');
       }
     } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Network error: $e');
     }
   }
@@ -40,7 +73,10 @@ class DepressionService {
     final token = await _storage.read(key: 'jwt_token');
 
     if (token == null || token.isEmpty) {
-      throw Exception('No token found. User might not be logged in.');
+      return {
+        'status': 'error',
+        'message': 'No token found. User might not be logged in.',
+      };
     }
 
     try {
@@ -84,12 +120,17 @@ class DepressionService {
           }
         };
       } else {
-        throw Exception(responseBody['error'] ?? 'Failed to submit EPDS questionnaire');
+        final errorMessage = _parseErrorResponse(response);
+        return {
+          'status': 'error',
+          'message': errorMessage,
+          'status_code': response.statusCode,
+        };
       }
     } catch (e) {
       return {
         'status': 'error',
-        'message': e.toString(),
+        'message': 'Network error: $e',
       };
     }
   }
@@ -114,9 +155,13 @@ class DepressionService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to get depression history: ${response.body}');
+        final errorMessage = _parseErrorResponse(response);
+        throw Exception('Failed to get depression history: $errorMessage');
       }
     } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Network error: $e');
     }
   }
@@ -141,9 +186,13 @@ class DepressionService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to get EPDS history: ${response.body}');
+        final errorMessage = _parseErrorResponse(response);
+        throw Exception('Failed to get EPDS history: $errorMessage');
       }
     } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Network error: $e');
     }
   }
@@ -168,9 +217,13 @@ class DepressionService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to get depression record: ${response.body}');
+        final errorMessage = _parseErrorResponse(response);
+        throw Exception('Failed to get depression record: $errorMessage');
       }
     } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Network error: $e');
     }
   }
@@ -195,10 +248,34 @@ class DepressionService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to get EPDS record: ${response.body}');
+        final errorMessage = _parseErrorResponse(response);
+        throw Exception('Failed to get EPDS record: $errorMessage');
       }
     } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Network error: $e');
+    }
+  }
+
+  // Additional helper method to handle common HTTP status codes
+  void _handleHttpError(http.Response response) {
+    switch (response.statusCode) {
+      case 400:
+        throw Exception('Bad Request: ${_parseErrorResponse(response)}');
+      case 401:
+        throw Exception('Unauthorized: ${_parseErrorResponse(response)}');
+      case 403:
+        throw Exception('Forbidden: ${_parseErrorResponse(response)}');
+      case 404:
+        throw Exception('Not Found: ${_parseErrorResponse(response)}');
+      case 422:
+        throw Exception('Validation Error: ${_parseErrorResponse(response)}');
+      case 500:
+        throw Exception('Server Error: ${_parseErrorResponse(response)}');
+      default:
+        throw Exception('HTTP ${response.statusCode}: ${_parseErrorResponse(response)}');
     }
   }
 }

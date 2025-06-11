@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 // Model class
 class PostpartumArticle {
@@ -396,11 +397,21 @@ class _IndexPostpartumState extends State<IndexPostpartum> {
     );
   }
 
-  String _getContentPreview(String content) {
-    // Strip HTML tags if present
-    final strippedContent = content.replaceAll(RegExp(r'<[^>]*>'), '');
-    return strippedContent;
+String _getContentPreview(String content) {
+  String strippedContent = content
+      .replaceAll(RegExp(r'<[^>]*>'), '')
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('&amp;', '&')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"')
+      .trim();
+  
+  if (strippedContent.length > 100) {
+    return strippedContent.substring(0, 100) + '...';
   }
+  return strippedContent;
+}
 
   String _formatDate(DateTime date) {
     // Simple date formatter
@@ -424,7 +435,6 @@ class DetailPostpartum extends StatefulWidget {
 
 class _DetailPostpartumState extends State<DetailPostpartum> {
   late Future<PostpartumArticle> _articleFuture;
-  bool _isBookmarked = false; // For bookmark functionality
 
   @override
   void initState() {
@@ -492,35 +502,7 @@ class _DetailPostpartumState extends State<DetailPostpartum> {
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
-                actions: [
-                  IconButton(
-                    icon: Icon(
-                      _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isBookmarked = !_isBookmarked;
-                        // Here you would implement actual bookmark functionality
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(_isBookmarked 
-                              ? 'Artikel disimpan ke bookmarks' 
-                              : 'Artikel dihapus dari bookmarks'
-                            ),
-                            backgroundColor: const Color(0xFF4DBAFF),
-                          ),
-                        );
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.share, color: Colors.white),
-                    onPressed: () {
-                      // Implement share functionality
-                    },
-                  ),
-                ],
+               
                 flexibleSpace: FlexibleSpaceBar(
                   background: article.gambar != null && article.gambar!.isNotEmpty
                       ? Stack(
@@ -646,39 +628,40 @@ class _DetailPostpartumState extends State<DetailPostpartum> {
                       const SizedBox(height: 24),
                       
                       // Content
-                      Text(
-                        article.konten,
-                        style: const TextStyle(
-                          color: Color(0xFF1E293B),
-                          fontSize: 16,
-                          height: 1.6,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      // Related Articles Section (Sample - would need data)
-                      const Text(
-                        'Artikel Terkait',
-                        style: TextStyle(
-                          color: Color(0xFF1E293B),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Related Articles List (Placeholder)
-                      Container(
-                        height: 150,
-                        child: const Center(
-                          child: Text(
-                            'Artikel terkait akan muncul di sini',
-                            style: TextStyle(color: Color(0xFF4C617F)),
+                      Html(
+                        data: article.konten,
+                        style: {
+                          "body": Style(
+                            color: const Color(0xFF1E293B),
+                            fontSize: FontSize(16),
+                            lineHeight: LineHeight.number(1.6),
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
                           ),
-                        ),
+                          "p": Style(
+                            margin: Margins.only(bottom: 16),
+                          ),
+                          "ul": Style(
+                            margin: Margins.only(bottom: 16),
+                            padding: HtmlPaddings.only(left: 20),
+                          ),
+                          "ol": Style(
+                            margin: Margins.only(bottom: 16),
+                            padding: HtmlPaddings.only(left: 20),
+                          ),
+                          "li": Style(
+                            margin: Margins.only(bottom: 8),
+                          ),
+                          "strong": Style(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          "em": Style(
+                            fontStyle: FontStyle.italic,
+                          ),
+                        },
                       ),
+                                            
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),

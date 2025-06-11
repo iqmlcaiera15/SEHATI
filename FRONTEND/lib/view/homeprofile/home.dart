@@ -295,11 +295,14 @@ String _formatHPL(String? hpl) {
                           ),
                         ],
                       ),
-                      child: Column(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          // Bagian Kiri: Status Minggu Kehamilan yang menonjol
                           Row(
                             children: [
-                              const Icon(Icons.calendar_today, color: Colors.white, size: 18),
+                              const Icon(Icons.calendar_today, color: Colors.white, size: 20),
                               const SizedBox(width: 8),
                               Text(
                                 _mingguKe != null ? 'Minggu ke-$_mingguKe' : 'Minggu belum dihitung',
@@ -311,15 +314,9 @@ String _formatHPL(String? hpl) {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _buildStatItem('HPL', _formatHPL(_hpl)),
-                              _buildStatItem('Usia', '30 tahun'), // Placeholder, ideally dynamic
-                              _buildStatItem('BMI', '23.5'), // Placeholder, ideally dynamic
-                            ],
-                          ),
+
+                          // Bagian Kanan: Hanya Stat HPL
+                          _buildStatItem('HPL', _formatHPL(_hpl)),
                         ],
                       ),
                     ),
