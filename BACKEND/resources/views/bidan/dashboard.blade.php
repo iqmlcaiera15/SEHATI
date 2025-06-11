@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Dashboard Dinas Kesehatan</h1>
+    <h1 class="mt-4">Dashboard Bidann</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item active">Dashboard</li>
     </ol>
@@ -153,6 +153,7 @@
         </div>
     </div>
 
+    <!-- Deteksi Penyakit -->
     <!-- Deteksi Penyakit -->
     <div class="card mb-4">
         <div class="card-header">
