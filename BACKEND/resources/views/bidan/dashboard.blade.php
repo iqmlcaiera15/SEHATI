@@ -154,7 +154,6 @@
     </div>
 
     <!-- Deteksi Penyakit -->
-    <!-- Deteksi Penyakit -->
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-heartbeat me-1"></i>

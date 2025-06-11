@@ -19,10 +19,12 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   final TextEditingController _pregnanciesController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _bmiController = TextEditingController();
-  final TextEditingController _bloodPressureController = TextEditingController(); // Rata-rata
+  // --- MODIFIKASI ---
+  // Controller ini sekarang akan diisi secara otomatis
+  final TextEditingController _bloodPressureController = TextEditingController();
   final TextEditingController _bsController = TextEditingController();
   final TextEditingController _skinThicknessController = TextEditingController();
-  final TextEditingController _sexController = TextEditingController(); // Tetap pakai controller krn disabled
+  final TextEditingController _sexController = TextEditingController();
   final TextEditingController _cigsPerDayController = TextEditingController();
   final TextEditingController _systolicBpController = TextEditingController();
   final TextEditingController _diastolicBpController = TextEditingController();
@@ -40,7 +42,8 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     'pregnancies': 'Jumlah kehamilan yang pernah dialami (angka, misal: 0, 1, 2)',
     'age': 'Usia Anda saat ini dalam tahun (angka, misal: 30)',
     'bmi': 'Body Mass Index (BMI) - indikator kegemukan. Dihitung dari berat (kg) / (tinggi (m))^2. Normal: 18.5-24.9',
-    'blood_pressure': 'Tekanan darah rata-rata keseluruhan (mmHg). Contoh: 80. Jika ragu, bisa dikosongkan jika sistolik & diastolik diisi.',
+    // --- MODIFIKASI --- Deskripsi diubah untuk mencerminkan perhitungan otomatis
+    'blood_pressure': 'Mean Arterial Pressure (MAP) dihitung secara otomatis dari tekanan sistolik dan diastolik Anda.',
     'bs': 'Kadar gula darah (mg/dL). Normal puasa: <100 mg/dL, 2 jam setelah makan: <140 mg/dL',
     'skin_thickness': 'Ketebalan lipatan kulit trisep (mm). Biasanya diukur oleh tenaga medis.',
     'sex': 'Jenis kelamin. Sistem ini secara default untuk perempuan (nilai 1).',
@@ -56,11 +59,38 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   @override
   void initState() {
     super.initState();
-    _sexController.text = "1"; // Default: Perempuan (disabled field)
-    _selectedCurrentSmoker = "Tidak"; // Default: Tidak merokok
-    _selectedBpMeds = "Tidak"; // Default: Tidak minum obat darah
-    _bodyTempController.text = "36.5"; // Default normal temperature
+    _sexController.text = "1";
+    _selectedCurrentSmoker = "Tidak";
+    _selectedBpMeds = "Tidak";
+    _bodyTempController.text = "36.5";
     _updateCigsPerDayField();
+
+    // --- MODIFIKASI BARU ---
+    // Tambahkan listener ke controller sistolik dan diastolik
+    _systolicBpController.addListener(_calculateAndSetMAP);
+    _diastolicBpController.addListener(_calculateAndSetMAP);
+  }
+
+  // --- MODIFIKASI BARU ---
+  // Fungsi untuk menghitung dan mengatur MAP (Mean Arterial Pressure)
+  void _calculateAndSetMAP() {
+    final double? systolic = double.tryParse(_systolicBpController.text);
+    final double? diastolic = double.tryParse(_diastolicBpController.text);
+
+    // Pastikan kedua nilai valid sebelum menghitung
+    if (systolic != null && diastolic != null && systolic > 0 && diastolic > 0) {
+      // Rumus MAP = (Sistolik + 2 * Diastolik) / 3
+      final double map = (systolic + (2 * diastolic)) / 3;
+      // Update controller dengan nilai yang sudah diformat ke 2 angka desimal
+      setState(() {
+          _bloodPressureController.text = map.toStringAsFixed(2);
+      });
+    } else {
+      // Kosongkan field jika salah satu input tidak valid
+      setState(() {
+          _bloodPressureController.text = "";
+      });
+    }
   }
 
   void _updateCigsPerDayField() {
@@ -71,14 +101,13 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
 
   Future<void> _submitData() async {
     if (!_formKey.currentState!.validate()) {
-       // Jika form tidak valid, tampilkan pesan atau arahkan ke step yang error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Harap periksa kembali semua input yang wajib diisi pada setiap langkah.'),
           backgroundColor: Colors.orange.shade700,
           behavior: SnackBarBehavior.floating,
-           margin: const EdgeInsets.all(16),
-           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       return;
@@ -91,15 +120,21 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
       _isLoading = true;
     });
 
+    // --- MODIFIKASI ---
+    // Perhitungan MAP tidak perlu dilakukan lagi di sini karena controller
+    // _bloodPressureController sudah berisi nilai yang benar dari listener.
+    // Kode di bawah ini akan mengambil nilai yang sudah dihitung secara otomatis.
+
     final formData = {
       "nama": _namaController.text,
       "pregnancies": int.tryParse(_pregnanciesController.text) ?? 0,
       "age": double.tryParse(_ageController.text) ?? 0.0,
       "bmi": double.tryParse(_bmiController.text) ?? 0.0,
-      "blood_pressure": double.tryParse(_bloodPressureController.text), // Bisa null jika tidak diisi
+      // Nilai ini diambil dari controller yang sudah di-update otomatis
+      "blood_pressure": double.tryParse(_bloodPressureController.text),
       "bs": double.tryParse(_bsController.text) ?? 0.0,
-      "skin_thickness": double.tryParse(_skinThicknessController.text), // Bisa null jika tidak diisi
-      "sex": int.tryParse(_sexController.text) ?? 1, // Default perempuan
+      "skin_thickness": double.tryParse(_skinThicknessController.text),
+      "sex": int.tryParse(_sexController.text) ?? 1,
       "current_smoker": _selectedCurrentSmoker == "Ya" ? 1 : 0,
       "cigs_per_day": _selectedCurrentSmoker == "Ya" ? (int.tryParse(_cigsPerDayController.text) ?? 0) : 0,
       "bp_meds": _selectedBpMeds == "Ya" ? 1 : 0,
@@ -109,7 +144,6 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
       "body_temp": double.tryParse(_bodyTempController.text) ?? 36.5,
     };
 
-    // Menghapus field yang null dari formData agar tidak dikirim ke API jika tidak diisi
     formData.removeWhere((key, value) => value == null);
 
     try {
@@ -142,6 +176,10 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   }
 
   Future<bool> _showConfirmationDialog() async {
+     // --- MODIFIKASI BARU ---
+     // Pastikan nilai MAP terupdate di dialog konfirmasi
+     _calculateAndSetMAP();
+
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -176,6 +214,8 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                         _buildConfirmationRow('Usia', '${_ageController.text} tahun'),
                         _buildConfirmationRow('BMI', _bmiController.text),
                         _buildConfirmationRow('Tekanan Darah', '${_systolicBpController.text}/${_diastolicBpController.text} mmHg'),
+                        // --- MODIFIKASI --- Menampilkan MAP yang dihitung
+                        _buildConfirmationRow('MAP (Rata-rata)', '${_bloodPressureController.text} mmHg'),
                         _buildConfirmationRow('Status Perokok', _selectedCurrentSmoker ?? 'Tidak'),
                         if (_selectedCurrentSmoker == "Ya")
                            _buildConfirmationRow('Rokok/Hari', _cigsPerDayController.text),
@@ -223,9 +263,13 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     );
   }
 
-
   @override
   void dispose() {
+    // --- MODIFIKASI BARU ---
+    // Hapus listener untuk mencegah memory leak
+    _systolicBpController.removeListener(_calculateAndSetMAP);
+    _diastolicBpController.removeListener(_calculateAndSetMAP);
+
     _namaController.dispose();
     _pregnanciesController.dispose();
     _ageController.dispose();
@@ -242,6 +286,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     super.dispose();
   }
 
+  // Widget _buildTextField tidak perlu diubah
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -253,7 +298,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     String? hintText,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18), // Sedikit tambah padding
+      padding: const EdgeInsets.only(bottom: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -271,7 +316,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                 const Text(
                   ' *',
                   style: TextStyle(
-                    color: Colors.redAccent, // Lebih soft dari Colors.red
+                    color: Colors.redAccent,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -279,7 +324,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               if (fieldKey != null && _fieldInfo.containsKey(fieldKey))
                 Padding(
                   padding: const EdgeInsets.only(left: 4.0),
-                  child: InkWell( // InkWell agar area tap lebih besar
+                  child: InkWell(
                     onTap: () => _showInfoPopup(context, label, _fieldInfo[fieldKey]!),
                     borderRadius: BorderRadius.circular(12),
                     child: const Icon(Icons.info_outline, size: 18, color: Color(0xFF4DBAFF)),
@@ -298,9 +343,9 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               hintText: hintText,
               hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
               fillColor: enabled ? Colors.white : Colors.grey.shade100,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14), // Sesuaikan padding
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10), // Border radius lebih besar
+                borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0),
               ),
               enabledBorder: OutlineInputBorder(
@@ -311,11 +356,11 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Color(0xFF4DBAFF), width: 1.5),
               ),
-              disabledBorder: OutlineInputBorder( // Style untuk disabled field
+              disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(color: Colors.grey.shade200, width: 1.0),
               ),
-              suffixIcon: suffix, // Menggunakan suffixIcon agar paddingnya pas
+              suffixIcon: suffix,
             ),
             validator: isRequired
                 ? (value) {
@@ -336,7 +381,10 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     );
   }
 
-  Widget _buildYesNoDropdownField({
+  // Widget-widget lain tidak perlu diubah...
+  // ... (_buildYesNoDropdownField, _showInfoPopup, _buildInfoBox)
+
+   Widget _buildYesNoDropdownField({
     required String currentValue,
     required String label,
     required ValueChanged<String?> onChanged,
@@ -405,7 +453,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Color(0xFF4DBAFF), width: 1.5),
               ),
-               disabledBorder: OutlineInputBorder(
+                disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(color: Colors.grey.shade200, width: 1.0),
               ),
@@ -457,13 +505,13 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   }
 
   Widget _buildInfoBox(String title, String content) {
-     return Container(
-      margin: const EdgeInsets.only(bottom: 20), // Margin antar info box dan field pertama
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFE9F7FF), // Warna biru muda yang sudah ada
+        color: const Color(0xFFE9F7FF),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFBDEBFF), width: 1) // Border yang lebih soft
+        border: Border.all(color: const Color(0xFFBDEBFF), width: 1)
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -478,14 +526,14 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                   title,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14.5, // Sedikit lebih besar
-                    color: Color(0xFF005A8C) // Warna biru tua untuk kontras
+                    fontSize: 14.5,
+                    color: Color(0xFF005A8C)
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   content,
-                  style: const TextStyle(fontSize: 12.5, color: Color(0xFF27709B), height: 1.4), // Kontras
+                  style: const TextStyle(fontSize: 12.5, color: Color(0xFF27709B), height: 1.4),
                 ),
               ],
             ),
@@ -494,7 +542,6 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
       ),
     );
   }
-
 
   List<Step> _buildSteps() {
     return [
@@ -524,7 +571,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               label: 'Jenis Kelamin',
               keyboardType: TextInputType.number,
               fieldKey: 'sex',
-              enabled: false, // Field ini tidak bisa diubah, default Perempuan
+              enabled: false,
               suffix: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                 child: Text('Perempuan', style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
@@ -602,7 +649,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
           children: [
              _buildInfoBox(
               'Tekanan Darah & Jantung',
-              'Tekanan darah yang sehat selama kehamilan sangat penting. Jika Anda memiliki alat ukur pribadi, masukkan datanya. Jika tidak, data ini bisa didapatkan dari pemeriksaan rutin.'
+              'Tekanan darah yang sehat selama kehamilan sangat penting. Cukup isi tekanan Sistolik dan Diastolik, nilai rata-rata akan dihitung otomatis.'
             ),
             Row(
               children: [
@@ -610,7 +657,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                   child: _buildTextField(
                     controller: _systolicBpController,
                     label: 'Sistolik',
-                    hintText: 'Atas, cth: 110',
+                    hintText: 'Atas, cth: 120',
                     keyboardType: TextInputType.number,
                     fieldKey: 'systolic_bp',
                     suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mmHg', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
@@ -621,7 +668,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                   child: _buildTextField(
                     controller: _diastolicBpController,
                     label: 'Diastolik',
-                    hintText: 'Bawah, cth: 70',
+                    hintText: 'Bawah, cth: 80',
                     keyboardType: TextInputType.number,
                     fieldKey: 'diastolic_bp',
                     suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mmHg', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
@@ -629,13 +676,16 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                 ),
               ],
             ),
+            // --- MODIFIKASI UI ---
+            // Field ini sekarang dinonaktifkan dan label/hintnya diubah
             _buildTextField(
               controller: _bloodPressureController,
-              label: 'Tekanan Darah Rata-rata (Opsional)',
-              hintText: 'Contoh: 80 (Jika ada)',
+              label: 'Tekanan Darah Rata-rata (MAP)',
+              hintText: 'Dihitung otomatis',
               keyboardType: TextInputType.number,
               fieldKey: 'blood_pressure',
               isRequired: false,
+              enabled: false, // <-- PENTING: Field tidak bisa diisi manual
               suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mmHg', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
             ),
             _buildTextField(
@@ -676,7 +726,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               hintText: 'Contoh: 90',
               keyboardType: TextInputType.number,
               fieldKey: 'bs',
-               suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mg/dL', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
+                suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mg/dL', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
             ),
             _buildYesNoDropdownField(
               currentValue: _selectedCurrentSmoker!,
@@ -684,7 +734,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               onChanged: (value) {
                 setState(() {
                   _selectedCurrentSmoker = value;
-                  _updateCigsPerDayField(); // Update field rokok/hari
+                  _updateCigsPerDayField();
                 });
               },
               fieldKey: 'current_smoker',
@@ -695,8 +745,8 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               hintText: 'Jika perokok, contoh: 5',
               keyboardType: TextInputType.number,
               fieldKey: 'cigs_per_day',
-              isRequired: _selectedCurrentSmoker == "Ya", // Wajib jika perokok
-              enabled: _selectedCurrentSmoker == "Ya", // Hanya enable jika perokok
+              isRequired: _selectedCurrentSmoker == "Ya",
+              enabled: _selectedCurrentSmoker == "Ya",
             ),
           ],
         ),
@@ -706,15 +756,17 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     ];
   }
 
+
+  // Seluruh widget build() di bawah ini tidak perlu diubah.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Background utama putih
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Deteksi Risiko Kesehatan Ibu'),
         backgroundColor: const Color(0xFF4DBAFF),
         foregroundColor: Colors.white,
-        elevation: 1, // Sedikit shadow
+        elevation: 1,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.of(context).pop(),
@@ -728,10 +780,6 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
             currentStep: _currentStep,
             onStepTapped: (step) => setState(() => _currentStep = step),
             onStepContinue: () {
-              // Validasi form untuk step saat ini sebelum melanjutkan
-              // Ini memerlukan cara untuk memvalidasi per step jika diinginkan,
-              // atau validasi keseluruhan saat submit.
-              // Untuk sekarang, validasi keseluruhan saat submit.
               if (_currentStep < _buildSteps().length - 1) {
                 setState(() {
                   _currentStep += 1;
@@ -750,7 +798,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
             steps: _buildSteps(),
             controlsBuilder: (context, details) {
               return Container(
-                margin: const EdgeInsets.only(top: 24, bottom: 8), // Margin lebih
+                margin: const EdgeInsets.only(top: 24, bottom: 8),
                 child: Row(
                   children: [
                     Expanded(
@@ -759,11 +807,11 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4DBAFF),
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14), // Padding lebih
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10), // Border radius lebih
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          elevation: 2, // Sedikit shadow
+                          elevation: 2,
                         ),
                         child: _isLoading
                             ? const SizedBox(
@@ -771,25 +819,25 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   color: Colors.white,
-                                  strokeWidth: 2.5, // Stroke lebih tebal
+                                  strokeWidth: 2.5,
                                 ),
                               )
                             : Text(
                                 _currentStep < _buildSteps().length - 1
-                                    ? 'Lanjut' // Diubah dari 'Lanjutkan'
+                                    ? 'Lanjut'
                                     : 'Kirim Data',
-                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600), // Font lebih tebal
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                               ),
                       ),
                     ),
-                    if (_currentStep > 0 && !_isLoading) ...[ // Hanya tampil jika bukan step pertama & tidak loading
+                    if (_currentStep > 0 && !_isLoading) ...[
                       const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
                           onPressed: details.onStepCancel,
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.grey.shade700, // Warna teks
-                            side: BorderSide(color: Colors.grey.shade400, width: 1.0), // Border lebih jelas
+                            foregroundColor: Colors.grey.shade700,
+                            side: BorderSide(color: Colors.grey.shade400, width: 1.0),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -810,10 +858,10 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               decoration: BoxDecoration(
-                 color: Colors.white, // Atau Color(0xFFF9F9F9)
-                 border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1.0))
+                  color: Colors.white,
+                  border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1.0))
               ),
-              child: Row( // Menggunakan Row agar ikon dan teks sejajar
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.shield_outlined, color: Color(0xFF4DBAFF), size: 22),
