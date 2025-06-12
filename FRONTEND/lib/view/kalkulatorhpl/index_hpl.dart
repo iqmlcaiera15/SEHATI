@@ -12,7 +12,9 @@ class AddDataHPL extends StatefulWidget {
 }
 
 class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateMixin {
-  DateTime? selectedDate;
+  bool isManualInput = false;         // ⬅️ Tambahan: toggle untuk input manual
+  DateTime? selectedDate;             // Untuk input HPHT
+  DateTime? selectedHPLDate;          // Untuk input manual HPL
   String? estimatedDate;
   int? week;
   bool isLoading = false;
@@ -35,19 +37,14 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
     _loadLatestHPL();
   }
 
-  // Ambil HPL terbaru user dari backend
+  // Ambil data HPL terbaru user dari backend
   Future<void> _loadLatestHPL() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() { isLoading = true; });
     try {
       final dataList = await ApiServiceHPL.getDataHPL();
-      print('DATA BACKEND: $dataList');
       if (dataList.isNotEmpty) {
         final latest = dataList.first;
-        print('LATEST DATA: $latest');
         setState(() {
-          // Pastikan field sesuai response backend
           estimatedDate = latest['hpl']?.toString() ?? latest['due_date']?.toString();
           week = latest['minggu_ke'] is int
               ? latest['minggu_ke']
@@ -61,17 +58,12 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
         });
       }
     } catch (e) {
-      print('ERROR GET HPL: $e');
       setState(() {
         estimatedDate = null;
         week = null;
       });
     } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() { isLoading = false; });
     }
   }
 
@@ -101,30 +93,63 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
       },
     );
     if (picked != null) {
-      setState(() => selectedDate = picked);
+      setState(() {
+        if (isManualInput) {
+          selectedHPLDate = picked;
+        } else {
+          selectedDate = picked;
+        }
+      });
     }
   }
 
-  Future<void> _calculateHPL() async {
-    if (selectedDate == null) return;
+  // Fungsi submit
+  Future<void> _onSubmit() async {
     setState(() => isLoading = true);
 
     try {
-      final response = await ApiServiceHPL.calculateHPL(selectedDate!);
-      print('RESPONSE HITUNG HPL: $response');
-      final data = response['data'];
-      final hpl = data['hpl']?.toString() ?? data['due_date']?.toString();
-      final mingguKe = (data['minggu_ke'] is int)
-          ? data['minggu_ke']
-          : int.tryParse(data['minggu_ke']?.toString() ?? data['pregnancy_week']?.toString() ?? '0');
+      if (!isManualInput) {
+        // Hitung HPL dari HPHT
+        if (selectedDate == null) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text("Pilih tanggal HPHT terlebih dahulu!"),
+            backgroundColor: Colors.redAccent,
+          ));
+          setState(() => isLoading = false);
+          return;
+        }
+        final response = await ApiServiceHPL.calculateHPL(selectedDate!);
+        final data = response['data'];
+        final hpl = data['hpl']?.toString() ?? data['due_date']?.toString();
+        final mingguKe = (data['minggu_ke'] is int)
+            ? data['minggu_ke']
+            : int.tryParse(data['minggu_ke']?.toString() ?? data['pregnancy_week']?.toString() ?? '0');
 
-      setState(() {
-        estimatedDate = hpl;
-        week = mingguKe;
-      });
+        setState(() {
+          estimatedDate = hpl;
+          week = mingguKe;
+        });
+      } else {
+        // Input HPL manual
+        if (selectedHPLDate == null) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text("Pilih tanggal HPL terlebih dahulu!"),
+            backgroundColor: Colors.redAccent,
+          ));
+          setState(() => isLoading = false);
+          return;
+        }
+        final response = await ApiServiceHPL.inputManualHPL(selectedHPLDate!);
+        final data = response['data'];
+        setState(() {
+          estimatedDate = data['hpl']?.toString() ?? data['due_date']?.toString();
+          week = data['minggu_ke'] is int
+              ? data['minggu_ke']
+              : int.tryParse(data['minggu_ke']?.toString() ?? data['pregnancy_week']?.toString() ?? '0');
+        });
+      }
 
       _controller.forward();
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
@@ -138,7 +163,7 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
               SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'HPL berhasil dihitung!',
+                  'Data HPL berhasil disimpan!',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -164,7 +189,7 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Gagal menghitung HPL: $e',
+                  'Gagal menyimpan data: $e',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -178,7 +203,6 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
       );
     } finally {
       setState(() => isLoading = false);
-      // Refresh data HPL terbaru
       _loadLatestHPL();
     }
   }
@@ -298,9 +322,31 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
                 children: [
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 10),
+                  // Toggle Input Mode
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Hitung dari HPHT", style: GoogleFonts.poppins(fontSize: 13.7, color: isManualInput ? Colors.grey[500] : Color(0xFF1A87E3))),
+                        Switch(
+                          value: isManualInput,
+                          onChanged: (val) {
+                            setState(() {
+                              isManualInput = val;
+                              selectedDate = null;
+                              selectedHPLDate = null;
+                            });
+                          },
+                          activeColor: const Color(0xFF4DBAFF),
+                        ),
+                        Text("Input HPL Langsung", style: GoogleFonts.poppins(fontSize: 13.7, color: isManualInput ? Color(0xFF1A87E3) : Colors.grey[500])),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
 
-                  // Kartu Input HPHT
+                  // Input Card
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 20),
                     margin: const EdgeInsets.only(bottom: 22, top: 10),
@@ -348,7 +394,7 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Hari Perkiraan Lahir (HPL)',
+                          isManualInput ? 'Input Hari Perkiraan Lahir (HPL)' : 'Hari Perkiraan Lahir (HPL)',
                           style: GoogleFonts.poppins(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
@@ -357,10 +403,11 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
                           ),
                           textAlign: TextAlign.center,
                         ),
-
                         const SizedBox(height: 7),
                         Text(
-                          'Masukkan tanggal HPHT untuk estimasi HPL.',
+                          isManualInput
+                              ? 'Masukkan tanggal HPL jika sudah diketahui dari dokter.'
+                              : 'Masukkan tanggal HPHT untuk estimasi HPL.',
                           style: GoogleFonts.poppins(
                             fontSize: 14.5,
                             color: Colors.blueGrey[400]!,
@@ -373,24 +420,22 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
                           onTap: _pickDate,
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 350),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
                             decoration: BoxDecoration(
-                              color: selectedDate != null
+                              color: (isManualInput ? selectedHPLDate : selectedDate) != null
                                   ? const Color(0xFFDEF7FF)
                                   : const Color(0xFFF4F9FE),
                               border: Border.all(
-                                color: selectedDate == null
+                                color: (isManualInput ? selectedHPLDate : selectedDate) == null
                                     ? const Color(0xFFE3E8F0)
                                     : const Color(0xFF4DBAFF),
-                                width: selectedDate == null ? 1 : 1.5,
+                                width: (isManualInput ? selectedHPLDate : selectedDate) == null ? 1 : 1.5,
                               ),
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
-                                if (selectedDate != null)
+                                if ((isManualInput ? selectedHPLDate : selectedDate) != null)
                                   BoxShadow(
-                                    color: const Color(0xFF4DBAFF)
-                                        .withOpacity(0.07),
+                                    color: const Color(0xFF4DBAFF).withOpacity(0.07),
                                     blurRadius: 18,
                                     offset: const Offset(0, 6),
                                   ),
@@ -401,20 +446,19 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
                                 Icon(
                                   Icons.date_range,
                                   size: 26,
-                                  color: selectedDate == null
+                                  color: (isManualInput ? selectedHPLDate : selectedDate) == null
                                       ? const Color(0xFFA0AEC0)
                                       : const Color(0xFF1A87E3),
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Text(
-                                    selectedDate == null
-                                        ? 'Pilih Tanggal HPHT'
-                                        : DateFormat('dd MMM yyyy', 'id_ID')
-                                            .format(selectedDate!),
+                                    (isManualInput
+                                            ? (selectedHPLDate == null ? 'Pilih Tanggal HPL' : DateFormat('dd MMM yyyy', 'id_ID').format(selectedHPLDate!))
+                                            : (selectedDate == null ? 'Pilih Tanggal HPHT' : DateFormat('dd MMM yyyy', 'id_ID').format(selectedDate!))),
                                     style: TextStyle(
                                       fontSize: 16,
-                                      color: selectedDate == null
+                                      color: (isManualInput ? selectedHPLDate : selectedDate) == null
                                           ? Colors.grey[500]
                                           : const Color(0xFF1A87E3),
                                       fontWeight: FontWeight.w600,
@@ -423,14 +467,10 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
                                   ),
                                 ),
                                 AnimatedOpacity(
-                                  opacity: selectedDate != null ? 1.0 : 0.0,
+                                  opacity: (isManualInput ? selectedHPLDate : selectedDate) != null ? 1.0 : 0.0,
                                   duration: const Duration(milliseconds: 220),
-                                  child: selectedDate != null
-                                      ? const Icon(
-                                          Icons.check_circle,
-                                          color: Color(0xFF4DBAFF),
-                                          size: 22,
-                                        )
+                                  child: (isManualInput ? selectedHPLDate : selectedDate) != null
+                                      ? const Icon(Icons.check_circle, color: Color(0xFF4DBAFF), size: 22)
                                       : const SizedBox.shrink(),
                                 ),
                               ],
@@ -457,19 +497,17 @@ class _AddDataHPLState extends State<AddDataHPL> with SingleTickerProviderStateM
                                     ),
                                   )
                                 : ElevatedButton(
-                                    onPressed: isLoading ? null : _calculateHPL,
+                                    onPressed: isLoading ? null : _onSubmit,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF4DBAFF),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 16),
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(16),
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
                                       elevation: 2,
                                     ),
                                     child: Text(
-                                      'Hitung HPL',
+                                      isManualInput ? 'Simpan HPL' : 'Hitung HPL',
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,

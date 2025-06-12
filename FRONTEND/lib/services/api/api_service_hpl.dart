@@ -24,10 +24,9 @@ class ApiServiceHPL {
     );
 
     if (response.statusCode == 201) {
-      // Kembalikan data yang sudah diparse
       return jsonDecode(response.body);
     } else {
-      throw Exception('Gagal menghitung HPL (${response.statusCode})');
+      throw Exception('Gagal menghitung HPL (${response.statusCode}): ${response.body}');
     }
   }
 
@@ -59,7 +58,31 @@ class ApiServiceHPL {
         throw Exception('Struktur response tidak sesuai, data HPL tidak ditemukan.');
       }
     } else {
-      throw Exception('Gagal mengambil data HPL (${response.statusCode})');
+      throw Exception('Gagal mengambil data HPL (${response.statusCode}): ${response.body}');
+    }
+  }
+
+  /// 🔹 Simpan HPL manual (POST)
+  static Future<Map<String, dynamic>> inputManualHPL(DateTime hpl) async {
+    final token = await _storage.read(key: 'jwt_token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Token tidak ditemukan. Pengguna mungkin belum login.');
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/pregnancy-calculators/manual'),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'hpl': hpl.toIso8601String().split('T')[0]}),
+    );
+
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Gagal input HPL manual (${response.statusCode}): ${response.body}');
     }
   }
 }
