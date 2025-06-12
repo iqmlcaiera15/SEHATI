@@ -2,63 +2,62 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Dashboard Bidann</h1>
+    <h1 class="mt-4">Dashboard Bidan</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item active">Dashboard</li>
     </ol>
 
     <!-- Summary Cards Row -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">
-                    <h4>{{ $ibuHamil->count() }}</h4>
-                    Total Daftar Ibu Hamil Sehati
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+                <h4>{{ $ibuHamil->count() }}</h4>
+                Total Daftar Ibu Hamil Sehati
             </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning text-white mb-4">
-                <div class="card-body">
-                    <h4>{{ $deteksiPenyakit->count() }}</h4>
-                    Total Deteksi Penyakit
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-success text-white mb-4">
-                <div class="card-body">
-                    <h4>{{ $prediksiDepresi->count() }}</h4>
-                    Total Prediksi Depresi
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-danger text-white mb-4">
-                <div class="card-body">
-                    <h4>{{ $prediksiJanin->count() }}</h4>
-                    Total Prediksi Persalinan
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="{{ route('bidan.dashboard') }}">Lihat Detail</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
             </div>
         </div>
     </div>
-
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-warning text-white mb-4">
+            <div class="card-body">
+                <h4>{{ $deteksiPenyakit->count() }}</h4>
+                Total Deteksi Penyakit
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="{{ route('deteksi.index') }}">Lihat Detail</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                <h4>{{ $prediksiDepresi->count() }}</h4>
+                Total Prediksi Depresi
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="{{ route('depresi.index') }}">Lihat Detail</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-danger text-white mb-4">
+            <div class="card-body">
+                <h4>{{ $prediksiJanin->count() }}</h4>
+                Total Prediksi Persalinan
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="{{ route('prediksi.index') }}">Lihat Detail</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Daftar Ibu Hamil -->
     <div class="card mb-4">
         <div class="card-header">
@@ -73,7 +72,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="d-flex align-items-center">
-                                    <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                    <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center"
                                          style="width: 50px; height: 50px;">
                                         <i class="fas fa-user text-white"></i>
                                     </div>
@@ -84,9 +83,9 @@
                                 </div>
                                 <span class="badge bg-primary">Ibu Hamil</span>
                             </div>
-                            
+
                             <hr class="my-3">
-                            
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold text-muted small">Nama Lengkap</label>
@@ -387,39 +386,39 @@
         border-radius: 0.75rem;
         transition: transform 0.2s ease-in-out;
     }
-    
+
     .card:hover {
         transform: translateY(-2px);
     }
-    
+
     .card-header {
         border-radius: 0.75rem 0.75rem 0 0 !important;
         border-bottom: 2px solid rgba(0,0,0,0.1);
     }
-    
+
     .form-label {
         font-size: 0.875rem;
         margin-bottom: 0.25rem;
     }
-    
+
     .badge {
         font-size: 0.75rem;
         padding: 0.5em 0.75em;
     }
-    
+
     .alert {
         border-radius: 0.5rem;
         border: none;
     }
-    
+
     .border-left-primary {
         border-left: 4px solid #007bff !important;
     }
-    
+
     .small {
         font-size: 0.875rem;
     }
-    
+
     .shadow {
         box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
     }
