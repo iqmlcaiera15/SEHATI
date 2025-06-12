@@ -5,7 +5,6 @@
     $method = strtolower($prediction->metode_persalinan);
     $isCaesar = $method === 'caesar';
     $badgeClass = $isCaesar ? 'bg-danger bg-opacity-10 text-danger border-danger' : 'bg-primary bg-opacity-10 text-primary border-primary';
-    $icon = $isCaesar ? 'fa-scissors' : 'fa-baby';
     $hpl = $prediction->hpl && $prediction->hpl->hpl
         ? \Carbon\Carbon::parse($prediction->hpl->hpl)->translatedFormat('d F Y')
         : '-';
@@ -19,7 +18,6 @@
                 <!-- Badge Prediksi -->
                 <div class="text-center pt-5 pb-1" style="background: #fff;">
                     <span class="badge px-4 py-2 fw-bold rounded-pill border {{ $badgeClass }}" style="font-size: 1.15rem; box-shadow: 0 2px 12px rgba(34,139,230,0.07); letter-spacing: 1px;">
-                        <i class="fas {{ $icon }} me-2"></i>
                         {{ ucfirst($prediction->metode_persalinan) }}
                     </span>
                 </div>
@@ -28,71 +26,56 @@
                         Hasil Prediksi Persalinan
                     </h2>
                     <div class="small text-muted mb-2">
-                        <i class="fas fa-calendar-alt me-1"></i>
                         {{ $prediction->created_at->format('d M Y, H:i') }}
                         &nbsp;|&nbsp;
-                        <i class="fas fa-calendar me-1"></i>
                         <b>HPL:</b> {{ $hpl }}
                     </div>
-                    <span class="text-secondary fw-semibold d-block mb-2">
-                        <i class="fas fa-lightbulb me-1 text-warning"></i>
-                        Faktor Penentu:
-                        {{ is_array($prediction->faktor) ? implode(', ', $prediction->faktor) : ($prediction->faktor ?? 'Tidak tersedia') }}
-                    </span>
+                    <div class="mb-2">
+                        <span class="fw-semibold text-secondary">Faktor Penentu:</span>
+                        <span class="fw-normal">{{ $prediction->faktor ?? 'Tidak tersedia' }}</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="fw-semibold text-secondary">Confidence:</span>
+                        <span class="fw-normal">{{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}</span>
+                    </div>
                 </div>
                 <!-- Konten Detail -->
                 <div class="card-body p-4 pb-0">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="icon-box bg-primary bg-opacity-10 text-primary me-2">
-                                    <i class="fas fa-user-circle fa-lg"></i>
-                                </div>
-                                <span class="fw-semibold">Nama Ibu:</span>&nbsp; {{ $prediction->user->name ?? '-' }}
+                            <div class="mb-3">
+                                <span class="fw-semibold text-secondary">Nama Ibu:</span>
+                                <span class="fw-normal">{{ $prediction->user->name ?? '-' }}</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="icon-box bg-warning bg-opacity-10 text-warning me-2">
-                                    <i class="fas fa-birthday-cake fa-lg"></i>
-                                </div>
-                                <span class="fw-semibold">Usia Ibu:</span>&nbsp; {{ $prediction->usia_ibu }} tahun
+                            <div class="mb-2">
+                                <span class="fw-semibold text-secondary">Usia Ibu:</span>
+                                <span class="fw-normal">{{ $prediction->usia_ibu }} tahun</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="icon-box bg-info bg-opacity-10 text-info me-2">
-                                    <i class="fas fa-tachometer-alt fa-lg"></i>
-                                </div>
-                                <span class="fw-semibold">Tekanan Darah:</span>&nbsp; {{ ucfirst($prediction->tekanan_darah) }}
+                            <div class="mb-2">
+                                <span class="fw-semibold text-secondary">Tekanan Darah:</span>
+                                <span class="fw-normal">{{ ucfirst($prediction->tekanan_darah) }}</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="icon-box bg-success bg-opacity-10 text-success me-2">
-                                    <i class="fas fa-history fa-lg"></i>
-                                </div>
-                                <span class="fw-semibold">Riwayat Persalinan:</span>&nbsp; {{ ucfirst($prediction->riwayat_persalinan) }}
+                            <div class="mb-2">
+                                <span class="fw-semibold text-secondary">Riwayat Persalinan:</span>
+                                <span class="fw-normal">{{ ucfirst($prediction->riwayat_persalinan) }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="icon-box bg-danger bg-opacity-10 text-danger me-2">
-                                    <i class="fas fa-baby-carriage fa-lg"></i>
-                                </div>
-                                <span class="fw-semibold">Posisi Janin:</span>&nbsp; {{ ucfirst($prediction->posisi_janin) }}
+                            <div class="mb-2">
+                                <span class="fw-semibold text-secondary">Posisi Janin:</span>
+                                <span class="fw-normal">{{ ucfirst($prediction->posisi_janin) }}</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="icon-box bg-pink bg-opacity-10 text-pink me-2">
-                                    <i class="fas fa-heartbeat fa-lg"></i>
-                                </div>
-                                <span class="fw-semibold">Kondisi Janin:</span>&nbsp; {{ ucfirst($prediction->kondisi_kesehatan_janin) }}
+                            <div class="mb-2">
+                                <span class="fw-semibold text-secondary">Kondisi Janin:</span>
+                                <span class="fw-normal">{{ ucfirst($prediction->kondisi_kesehatan_janin) }}</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="icon-box bg-secondary bg-opacity-10 text-secondary me-2">
-                                    <i class="fas fa-notes-medical fa-lg"></i>
-                                </div>
-                                <span class="fw-semibold">Riwayat Kesehatan Ibu:</span>&nbsp; {{ ucfirst($prediction->riwayat_kesehatan_ibu) }}
+                            <div class="mb-2">
+                                <span class="fw-semibold text-secondary">Riwayat Kesehatan Ibu:</span>
+                                <span class="fw-normal">{{ ucfirst($prediction->riwayat_kesehatan_ibu) }}</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2 d-md-none">
-                                <div class="icon-box bg-info bg-opacity-10 text-info me-2">
-                                    <i class="fas fa-calendar fa-lg"></i>
-                                </div>
-                                <span class="fw-semibold">HPL:</span>&nbsp; {{ $hpl }}
+                            <div class="mb-2 d-md-none">
+                                <span class="fw-semibold text-secondary">HPL:</span>
+                                <span class="fw-normal">{{ $hpl }}</span>
                             </div>
                         </div>
                     </div>
@@ -100,11 +83,11 @@
                 <!-- Tombol Aksi -->
                 <div class="px-4 pb-4 pt-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2" style="background: #fff;">
                     <a href="{{ route('prediksi.index') }}" class="btn btn-light border fw-semibold px-4">
-                        <i class="fas fa-arrow-left me-1"></i> Kembali ke Riwayat
+                        Kembali ke Riwayat
                     </a>
                     @if(Route::has('prediksi.print'))
                     <a href="{{ route('prediksi.print', $prediction->id) }}" target="_blank" class="btn btn-primary fw-semibold px-4">
-                        <i class="fas fa-print me-1"></i> Cetak Hasil
+                        Cetak Hasil
                     </a>
                     @endif
                 </div>
@@ -112,20 +95,4 @@
         </div>
     </div>
 </div>
-<!-- Tambahan style untuk icon box agar modern dan konsisten -->
-<style>
-    .icon-box {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        font-size: 1.35rem;
-        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-    }
-    /* Pink support untuk heartbeat */
-    .text-pink { color: #e83e8c !important; }
-    .bg-pink { background-color: #fce4ec !important; }
-</style>
 @endsection

@@ -180,15 +180,15 @@ class PrediksiDepresiController extends Controller
             // $response = Http::post('http://127.0.0.1:5000/predict', [
             'features' => array_values($data)
         ]);
-    
+
         if ($response->failed()) {
             $status = $response->status();
             $body = $response->body();
-    
+
             throw new \Exception("Gagal memanggil Flask API. Status: $status. Respons: $body");
         }
-    
+
         return $response->json()['prediction'] ?? null;
     }
-    
+
 }

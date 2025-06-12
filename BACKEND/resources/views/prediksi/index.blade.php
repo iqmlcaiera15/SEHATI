@@ -52,6 +52,8 @@
                         <tr>
                             <th>Nama Ibu Hamil</th>
                             <th>Metode</th>
+                            <th>Faktor</th>
+                            <th>Confidence</th>
                             <th>HPL</th>
                             <th>Aksi</th>
                         </tr>
@@ -70,6 +72,12 @@
                                         };
                                     @endphp
                                     <span class="{{ $metodeClass }}">{{ ucfirst($metode) }}</span>
+                                </td>
+                                <td>
+                                    {{ $prediction->faktor ?? '-' }}
+                                </td>
+                                <td>
+                                    {{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}
                                 </td>
                                 <td>
                                     {{ $prediction->hpl && $prediction->hpl->hpl
@@ -104,7 +112,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">Belum ada data prediksi.</td>
+                                <td colspan="6" class="text-center text-muted py-4">Belum ada data prediksi.</td>
                             </tr>
                         @endforelse
                     </tbody>

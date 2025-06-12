@@ -27,6 +27,8 @@ return new class extends Migration {
             $table->string('metode_persalinan');          // Ex: normal / caesar
             $table->text('faktor')->nullable();           // Bisa berisi penjelasan atau JSON
 
+            $table->float('confidence')->default(0);      // Tambahkan confidence, default 0, tidak nullable
+
             $table->timestamps(); // created_at dan updated_at
         });
     }

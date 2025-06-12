@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ResultPrediksi extends StatelessWidget {
   final Map<String, dynamic> result;
@@ -9,6 +10,9 @@ class ResultPrediksi extends StatelessWidget {
   Widget build(BuildContext context) {
     final String hasil = (result['hasil_prediksi'] ?? 'Tidak tersedia').toString();
     final String faktor = (result['faktor'] ?? '').toString();
+    final double? confidence = result['confidence'] is num
+        ? (result['confidence'] as num).toDouble()
+        : double.tryParse(result['confidence']?.toString() ?? '');
 
     final bool isCaesar = hasil.toLowerCase() == 'caesar';
     final Color primaryColor = isCaesar ? const Color(0xFFFC5C9C) : const Color(0xFF4DAEFF);
@@ -35,104 +39,160 @@ Persalinan Normal adalah proses melahirkan secara alami melalui vagina. Umumnya 
 ''';
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: 0.5,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1E293B), size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Prediksi Persalinan',
-          style: TextStyle(
-            color: Color(0xFF1E293B),
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
+      backgroundColor: const Color(0xFFF6FAFD),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(28),
+              bottomRight: Radius.circular(28),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x2034aaf4),
+                blurRadius: 18,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF2277b6)),
+                ),
+              ),
+              Center(
+                child: Text(
+                  'Hasil Prediksi',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              // Kosong di kanan, jika perlu nanti tambahkan
+            ],
           ),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 26),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              width: double.infinity,
               decoration: BoxDecoration(
                 color: bgColor,
-                border: Border.all(color: primaryColor),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: primaryColor.withOpacity(0.13)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blueAccent.withOpacity(0.09),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
+              padding: const EdgeInsets.all(22),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Hasil Prediksi',
-                    style: TextStyle(
-                      fontSize: 16,
+                  Text(
+                    hasil[0].toUpperCase() + hasil.substring(1).toLowerCase(),
+                    style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
-                      color: Color(0xFF1E293B),
+                      fontSize: 22,
+                      color: primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: primaryColor),
-                    ),
-                    child: Text(
-                      hasil[0].toUpperCase() + hasil.substring(1).toLowerCase(),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: primaryColor,
-                        fontFamily: 'Poppins',
+                  const SizedBox(height: 6),
+                  if (confidence != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: primaryColor),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.bar_chart, size: 18, color: Color(0xFF4DAEFF)),
+                          const SizedBox(width: 6),
+                          Text(
+                            "${confidence.toStringAsFixed(0)}%", // HANYA PERSEN
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
                   if (faktor.trim().isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      'Faktor utama: $faktor',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Poppins',
-                      ),
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: Color(0xFF4DAEFF), size: 18),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            "Faktor utama: $faktor",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                  const SizedBox(height: 16),
-                  Text(
-                    rekomendasi,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      height: 1.6,
-                      color: Color(0xFF334155),
-                      fontFamily: 'Poppins',
+                  const SizedBox(height: 15),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: primaryColor.withOpacity(0.09)),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 15),
+                    child: Text(
+                      rekomendasi,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: const Color(0xFF334155),
+                        height: 1.55,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerRight,
+            const SizedBox(height: 26),
+            SizedBox(
+              width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[200],
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  backgroundColor: const Color(0xFF4DAEFF),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   elevation: 0,
                 ),
-                child: const Text(
+                child: Text(
                   'Selesai',
-                  style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: Colors.black),
+                  style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
               ),
             ),
