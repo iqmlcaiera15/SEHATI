@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PrediksiDepresi;
 
-class DepresiController extends Controller
+class DepresiDesktopontroller extends Controller
 {
     public function index(Request $request)
     {
