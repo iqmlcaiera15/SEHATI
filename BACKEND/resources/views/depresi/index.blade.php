@@ -12,8 +12,8 @@
             <label>Filter Hasil</label>
             <select name="hasil" class="form-control">
                 <option value="">-- Semua --</option>
-                <option value="bergejala" {{ request('hasil_prediksi') == '1' ? 'selected' : '' }}>Bergejala Depresi</option>
-                <option value="tidak_bergejala" {{ request('hasil_prediksi') == '0' ? 'selected' : '' }}>Tidak Bergejala Depresi</option>
+                <option value="bergejala" {{ request('hasil') == 'bergejala' ? 'selected' : '' }}>Bergejala Depresi</option>
+                <option value="tidak_bergejala" {{ request('hasil') == 'tidak_bergejala' ? 'selected' : '' }}>Tidak Bergejala Depresi</option>
             </select>
         </div>
         <div class="col-md-4 align-self-end">
@@ -45,22 +45,25 @@
                     <td>{{ $data->created_at->format('d M Y H:i') }}</td>
                     <td>
                         @php
-                            // Logika sesuai kondisi yang diminta
-                            $hasilText = '';
-                            $badgeClass = '';
+                            $finalResult = false;
+                            $hasilText = 'Tidak Bergejala Depresi';
+                            $badgeClass = 'bg-success';
                             
                             if ($data->hasil_prediksi == 1) {
-                                // Kondisi 4: Jika hasil prediksi = 1 maka akan muncul 'Bergejala Depresi'
+                                // Kondisi: Jika hasil prediksi = 1 maka bergejala depresi
+                                $finalResult = true;
                                 $hasilText = 'Bergejala Depresi';
                                 $badgeClass = 'bg-danger';
-                            } else if ($data->hasil_prediksi == 0) {
+                            } elseif ($data->hasil_prediksi == 0) {
                                 if ($data->epds && $data->epds->score >= 12) {
-                                    // Kondisi 3: Jika hasil prediksi = 0 tapi ada skor epds dengan skor >= 12 maka hasil prediksi akan muncul 'Bergejala Depresi'
+                                    // Kondisi: Jika hasil prediksi = 0 tapi skor EPDS >= 12 maka bergejala depresi
+                                    $finalResult = true;
                                     $hasilText = 'Bergejala Depresi';
                                     $badgeClass = 'bg-danger';
                                 } else {
-                                    // Kondisi 1 & 2: Jika hasil prediksi = 0 tapi ada skor epds dengan skor <12 atau tidak ada skor epds = 'Tidak bergejala depresi'
-                                    $hasilText = 'Tidak bergejala depresi';
+                                    // Kondisi: Jika hasil prediksi = 0 dan (tidak ada EPDS atau skor EPDS < 12) maka tidak bergejala
+                                    $finalResult = false;
+                                    $hasilText = 'Tidak Bergejala Depresi';
                                     $badgeClass = 'bg-success';
                                 }
                             }

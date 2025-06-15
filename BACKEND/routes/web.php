@@ -52,7 +52,7 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::get('/detail/{id}', [HomeController::class, 'show'])->name('ibu_hamil.show');
     Route::get('/depresi', [PrediksiDepresiDesktopController::class, 'index'])->name('depresi.index');
     Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show');
-    Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'deletebyID'])->name('depresi.destroy');
+    Route::delete('/depresi/{id}', [PrediksiDepresiDesktopController::class, 'destroy'])->name('depresi.destroy');
 
     Route::get('/prediksi', [PredictionDesktopController::class, 'index'])->name('prediksi.index');
     Route::get('/prediksi/form', [PredictionDesktopController::class, 'create'])->name('prediksi.form');
