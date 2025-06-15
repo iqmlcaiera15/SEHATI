@@ -10,6 +10,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -26,24 +30,36 @@ class _AsupanAirPageState extends State<AsupanAirPage> {
   List<DateTime> oneWeekDates = [];
   int gelasHariIni = 0;
   bool isReminderOn = true;
-  late Reminder reminder;
+  late Reminder reminder = Reminder(reminderTimes: [], onReminder: () {});
 
   List<Map<String, int>> reminderTimes = [];
 
-  @override
-  void initState() {
-    super.initState();
-    initializeDateFormatting('id_ID', null).then((_) {
-      generateOneWeekDates();
-      loadFromLocal();
-      fetchData();
-      loadCustomReminders();
-      loadReminderPreference();
-      syncPendingMinum();
-      _initializeNotifications();
-    });
-  }
+@override
+void initState() {
+  super.initState();
+  initializeDateFormatting('id_ID', null).then((_) async {
+    generateOneWeekDates();
+    await loadFromLocal();
+    await fetchData();
+    await loadCustomReminders();
+    await loadReminderPreference();
+    await syncPendingMinum();
+    await _setupNotificationsAndPermission(); // ← Tambahkan ini!
+  });
+}
 
+Future<void> _setupNotificationsAndPermission() async {
+  await _initializeNotifications();
+  await requestNotificationPermission();
+  // ...kalau mau: bisa tambahkan scheduleReminders dsb. di sini
+}
+
+
+Future<void> requestNotificationPermission() async {
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
+}
   Future<void> _initializeNotifications() async {
     tz.initializeTimeZones();
 
@@ -104,6 +120,8 @@ class _AsupanAirPageState extends State<AsupanAirPage> {
     }
   }
 
+  
+
   Future<void> _scheduleReminders() async {
     await flutterLocalNotificationsPlugin.cancelAll();
 
@@ -133,10 +151,10 @@ class _AsupanAirPageState extends State<AsupanAirPage> {
             channelDescription: 'Pengingat untuk minum air secara teratur',
             importance: Importance.high,
             priority: Priority.high,
-            sound: RawResourceAndroidNotificationSound('slow_spring_board'),
+            // sound: RawResourceAndroidNotificationSound('slow_spring_board'), // HAPUS baris ini
           ),
         ),
-        androidAllowWhileIdle: true,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
@@ -642,8 +660,20 @@ class _AsupanAirPageState extends State<AsupanAirPage> {
                               Switch(
                                 value: isReminderOn,
                                 activeColor: Colors.blueAccent,
-                                onChanged: (val) {
+                                onChanged: (val) async {
                                   setState(() => isReminderOn = val);
+                                  await saveReminderPreference(val);
+                                  if (val) {
+                                    reminder = Reminder(
+                                      reminderTimes: reminderTimes,
+                                      onReminder: () => NotificationAsupanAir.showReminderSnackbar(context),
+                                    );
+                                    reminder.start();
+                                    _scheduleReminders();
+                                  } else {
+                                    reminder.stop();
+                                    await flutterLocalNotificationsPlugin.cancelAll();
+                                  }
                                 },
                               ),
                             ],

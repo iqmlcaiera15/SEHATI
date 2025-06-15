@@ -16,10 +16,10 @@ import 'package:Sehati/view/asupanair/index_asupanair.dart';
 import 'package:Sehati/view/kalkulatorhpl/index_hpl.dart';
 import 'package:Sehati/view/kalkulatorhpl/kalkulator_hpl_intro.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Sehati/view/prediksidepresi/index_depresi.dart'; 
 import 'package:Sehati/view/kickcounter/index_kickcounter.dart'; 
 import 'package:Sehati/view/postpartum/postpartum.dart'; 
+import 'package:Sehati/services/api/api_service_hpl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -42,8 +42,15 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _loadRecentData();
     _fetchProtectedData(); // From first file (called once)
-    _loadHPLData();
+    _loadHPLFromApi();
   }
+
+  @override
+  void didChangeDependencies() {
+  super.didChangeDependencies();
+  _loadHPLFromApi();
+}
+
 
   void _loadRecentData() {
     setState(() {
@@ -53,6 +60,33 @@ class _HomePageState extends State<HomePage> {
       });
     });
   }
+
+  // Tambahkan ini di dalam class _HomePageState, ganti _loadHPLData()
+Future<void> _loadHPLFromApi() async {
+  try {
+    final dataList = await ApiServiceHPL.getDataHPL();
+    if (dataList.isNotEmpty) {
+      final latest = dataList.first;
+      setState(() {
+        _hpl = latest['hpl']?.toString() ?? latest['due_date']?.toString();
+        _mingguKe = latest['minggu_ke'] is int
+            ? latest['minggu_ke']
+            : int.tryParse(latest['minggu_ke']?.toString() ?? latest['pregnancy_week']?.toString() ?? '0');
+      });
+    } else {
+      setState(() {
+        _hpl = null;
+        _mingguKe = null;
+      });
+    }
+  } catch (e) {
+    setState(() {
+      _hpl = null;
+      _mingguKe = null;
+    });
+  }
+}
+
 
   // From first file
   Future<void> _fetchProtectedData() async {
@@ -72,14 +106,6 @@ class _HomePageState extends State<HomePage> {
         _isLoading = false;
       });
     }
-  }
-
-  Future<void> _loadHPLData() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _hpl = prefs.getString('last_hpl');
-      _mingguKe = prefs.getInt('last_week');
-    });
   }
 
 String _formatHPL(String? hpl) {
@@ -269,18 +295,15 @@ String _formatHPL(String? hpl) {
                           ),
                         ],
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Column(
                         children: [
-                          // Bagian Kiri: Status Minggu Kehamilan yang menonjol
                           Row(
                             children: [
-                              const Icon(Icons.calendar_today, color: Colors.white, size: 20),
+                              Icon(Icons.calendar_today, color: Colors.white, size: 18),
                               const SizedBox(width: 8),
                               Text(
                                 _mingguKe != null ? 'Minggu ke-$_mingguKe' : 'Minggu belum dihitung',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -288,13 +311,18 @@ String _formatHPL(String? hpl) {
                               ),
                             ],
                           ),
-
-                          // Bagian Kanan: Hanya Stat HPL
-                          _buildStatItem('HPL', _formatHPL(_hpl)),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem('HPL', _formatHPL(_hpl)),
+                              _buildStatItem('Usia', '30 tahun'),
+                              _buildStatItem('BMI', '23.5'),
+                            ],
+                          ),
                         ],
                       ),
                     ),
-
                     // Services Section
                     Container(
                       width: double.infinity,

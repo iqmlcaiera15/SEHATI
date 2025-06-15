@@ -74,7 +74,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/home', [HomeProfileController::class, 'home']);
 
     // Prediksi Depresi
-   
+
     Route::post('/prediksidepresi/store', [PrediksiDepresiController::class, 'store']);
     Route::get('/prediksidepresi/{id}', [PrediksiDepresiController::class, 'show']);
     Route::delete('/prediksidepresi/delete/{id}', [PrediksiDepresiController::class, 'deletebyID']);
@@ -112,6 +112,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'show']);
     Route::put('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'update']);
     Route::delete('pregnancy-calculators/{id}', [PregnancyCalculatorController::class, 'destroy']);
+    Route::post('/pregnancy-calculators/manual', [PregnancyCalculatorController::class, 'storeManual']);
+
 
     // PostPartum Article
     Route::get('/postpartum', [PostpartumArticleController::class, 'index']);

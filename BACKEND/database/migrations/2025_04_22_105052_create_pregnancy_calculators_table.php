@@ -10,13 +10,12 @@ return new class extends Migration
     {
         Schema::create('pregnancy_calculators', function (Blueprint $table) {
             $table->id();
-
             // 🔹 Relasi ke user
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
 
             // 🔹 Data kehamilan
-            $table->date('hpht'); // Hari Pertama Haid Terakhir
-            $table->date('hpl');  // Hari Perkiraan Lahir
+            $table->date('hpht')->nullable(); // Hari Pertama Haid Terakhir (nullable)
+            $table->date('hpl')->nullable();  // Hari Perkiraan Lahir (nullable)
 
             $table->timestamps();
         });

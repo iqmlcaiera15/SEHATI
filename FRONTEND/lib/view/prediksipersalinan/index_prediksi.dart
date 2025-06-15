@@ -1,69 +1,84 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:Sehati/services/api/api_service_prediksi.dart';
-import 'package:Sehati/view/homeprofile/home.dart';
-import 'package:Sehati/view/prediksipersalinan/add_data_prediksi.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
-import 'package:file_saver/file_saver.dart';
-import 'dart:typed_data';
-import 'package:pdf/pdf.dart' as pw;
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:Sehati/services/api/api_service_hpl.dart';
+  import 'package:flutter/material.dart';
+  import 'package:google_fonts/google_fonts.dart';
+  import 'package:intl/intl.dart';
+  import 'package:Sehati/services/api/api_service_prediksi.dart';
+  import 'package:Sehati/view/homeprofile/home.dart';
+  import 'package:Sehati/view/prediksipersalinan/add_data_prediksi.dart';
+  import 'package:pdf/widgets.dart' as pw;
+  import 'package:printing/printing.dart';
+  import 'package:file_saver/file_saver.dart';
+  import 'dart:typed_data';
+  import 'package:pdf/pdf.dart' as pw;
+  import 'package:intl/date_symbol_data_local.dart';
+  import 'package:Sehati/services/api/api_service_hpl.dart';
+  import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+  import 'package:http/http.dart' as http;
+  import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+  class IndexPrediksi extends StatefulWidget {
+    const IndexPrediksi({super.key}); 
+    
 
-class IndexPrediksi extends StatefulWidget {
-  const IndexPrediksi({super.key});
-
-  @override
-  State<IndexPrediksi> createState() => _IndexPrediksiState();
-}
-
-class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProviderStateMixin {
-  String selectedMetode = 'Semua';
-  bool _refreshing = false;
-  bool _hasPredictionData = false;
-  final ScrollController _scrollController = ScrollController();
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _fadeAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeIn);
-    _animationController.forward();
+    @override
+    State<IndexPrediksi> createState() => _IndexPrediksiState();
+    
   }
 
-  @override
-  void dispose() {
+
+  class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProviderStateMixin {
+    late AnimationController _animationController;
+    late Animation<double> _fadeAnimation;
+
+    @override
+    void initState() {
+      super.initState();
+      _animationController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 600),
+      );
+      _fadeAnimation = CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn,
+      );
+      _animationController.forward();
+    }
+    @override
+    void dispose() {
     _animationController.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
-  Future<void> _refreshData() async {
-    setState(() => _refreshing = true);
-    await Future.delayed(const Duration(milliseconds: 600));
-    setState(() => _refreshing = false);
-  }
+    String selectedMetode = 'Semua';
+    bool _refreshing = false;
+    bool _hasPredictionData = false;
+    final ScrollController _scrollController = ScrollController();
 
-  void _scrollToTop() {
-    _scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-  }
+    Future<void> _refreshData() async {
+      setState(() => _refreshing = true);
+      await Future.delayed(const Duration(milliseconds: 600));
+      setState(() => _refreshing = false);
+    }
 
+    void _scrollToTop() {
+      _scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    }
+
+    double _parseConfidence(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) {
+        return double.tryParse(value.replaceAll(',', '.')) ?? 0.0;
+      }
+      return 0.0;
+    }
+
+  @override
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      extendBody: true,
       backgroundColor: const Color.fromARGB(255, 235, 240, 243),
       body: Stack(
         children: [
@@ -84,8 +99,10 @@ class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProvider
               ],
             ),
           ),
+          // FLOATING BUTTON HANYA MUNCUL JIKA ADA DATA!
           if (_hasPredictionData)
             ...[
+              // Floating "Mulai Prediksi" Button
               Positioned(
                 bottom: 25,
                 left: screenWidth * 0.08,
@@ -110,12 +127,16 @@ class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProvider
                           backgroundColor: const Color.fromARGB(255, 77, 174, 255),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         ),
-                        child: const Text("Mulai Prediksi", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+                        child: const Text(
+                          "Mulai Prediksi",
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
+              // FAB for scroll to top
               Positioned(
                 bottom: 110,
                 right: 45,
@@ -129,147 +150,135 @@ class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProvider
                 ),
               ),
             ],
+          // TIDAK ADA TOMBOL FLOATING JIKA DATA KOSONG, hanya tombol di card kosong!
         ],
       ),
     );
   }
+
+
 
   Widget _buildAppBar() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+      decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE0E0E0), width: 1)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-              (route) => false,
-            ),
-            child: _buildBackButton(),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x2034aaf4),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
-          const Spacer(),
-          const Text('Prediksi Persalinan', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18, fontWeight: FontWeight.bold)),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF1E293B)),
-            onPressed: _refreshData,
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Back button (left)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: GestureDetector(
+              onTap: () => Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+                (route) => false,
+              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF2277b6)),
+            ),
+          ),
+          // Title (center)
+          Center(
+            child: Text(
+              'Prediksi Persalinan',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 17, // ukuran lebih kecil (mirip hidrasi)
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          // Refresh (right)
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              icon: const Icon(Icons.refresh, color: Color(0xFF2277b6)),
+              onPressed: _refreshData,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBackButton() {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2, offset: const Offset(0, 1))],
-      ),
-      child: const Center(
-        child: Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1E293B), size: 16),
-      ),
-    );
-  }
 
   Widget _buildFilterButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final buttonWidth = (constraints.maxWidth - 16) / 3;
-          return Row(
-            children: [
-              SizedBox(width: buttonWidth, child: _buildStyledFilterButton('Normal', const Color(0xFFAEE0FF))),
-              const SizedBox(width: 8),
-              SizedBox(width: buttonWidth, child: _buildStyledFilterButton('Caesar', const Color(0xFFFFC0D9))),
-              const SizedBox(width: 8),
-              SizedBox(width: buttonWidth, child: _buildStyledFilterButton('Semua', Colors.grey)),
-            ],
-          );
-        },
+      padding: const EdgeInsets.symmetric(horizontal: 35), // Sesuaikan dengan container putih utama
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildStyledFilterButton('Normal', const Color(0xFFD1EAFB)),
+          const SizedBox(width: 8),
+          _buildStyledFilterButton('Caesar', const Color(0xFFFFC0D9)),
+          const SizedBox(width: 8),
+          _buildStyledFilterButton('Semua', Colors.grey.shade300),
+        ],
       ),
     );
   }
 
-  Widget _buildBadge(String metode) {
-    final isCaesar = metode == 'caesar';
-    final Color textColor = isCaesar ? const Color(0xFFFC5C9C) : const Color(0xFF4DAEFF);
-    final Color bgColor = isCaesar ? const Color(0xFFFFCCE2) : const Color(0xFFD9F1FF);
-    final String label = isCaesar ? 'Caesar' : 'Normal';
+    Widget _buildStyledFilterButton(String label, Color color) {
+      final bool isSelected = selectedMetode == label;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: bgColor,
-        border: Border.all(color: textColor),
-        borderRadius: BorderRadius.circular(50),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
+      Color borderColor;
+      Color pastelBackground;
 
-  Widget _buildStyledFilterButton(String label, Color color) {
-    final bool isSelected = selectedMetode == label;
+      if (label == 'Caesar') {
+        borderColor = const Color(0xFFFF69B4);
+        pastelBackground = const Color.fromARGB(255, 255, 208, 222);
+      } else if (label == 'Normal') {
+        borderColor = const Color(0xFF4DAEFF);
+        pastelBackground = const Color(0xFFD1EAFB);
+      } else {
+        borderColor = const Color(0xFF515151);
+        pastelBackground = const Color(0xFFD8D8D8);
+      }
 
-    Color borderColor;
-    Color pastelBackground;
-
-    if (label == 'Caesar') {
-      borderColor = const Color(0xFFFF69B4);
-      pastelBackground = const Color.fromARGB(255, 255, 208, 222);
-    } else if (label == 'Normal') {
-      borderColor = const Color(0xFF4DAEFF);
-      pastelBackground = const Color(0xFFD1EAFB);
-    } else {
-      borderColor = const Color(0xFF515151);
-      pastelBackground = const Color(0xFFD8D8D8);
-    }
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      height: 38,
-      decoration: BoxDecoration(
-        color: isSelected ? pastelBackground : Colors.white,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: TextButton(
-        onPressed: () => setState(() => selectedMetode = label),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Poppins',
-            color: borderColor,
+      return Expanded(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 38,
+          decoration: BoxDecoration(
+            color: isSelected ? pastelBackground : Colors.white,
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: TextButton(
+            onPressed: () => setState(() => selectedMetode = label),
+            child: Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w500,
+                color: borderColor,
+              ),
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
   Widget _buildWhiteContainer({required Widget child}) {
-    const double containerWidth = 800;
-    const double containerHeight = 800;
-
     return Center(
       child: Container(
-        width: containerWidth,
-        height: containerHeight,
+        width: double.infinity, // ini untuk ngisi selebar parent padding
+        constraints: const BoxConstraints(
+          maxWidth: 700,
+          minHeight: 800, // biar selalu tinggi minimal
+        ),
         margin: const EdgeInsets.only(top: 12, bottom: 100),
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         decoration: BoxDecoration(
@@ -333,27 +342,39 @@ class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProvider
     );
   }
 
-  String _formatDate(String? rawDate) {
-    try {
-      final parsed = DateTime.parse(rawDate ?? "");
-      return DateFormat("dd-MM-yyyy").format(parsed);
-    } catch (_) {
-      return "-";
+
+
+    String _formatDate(String? rawDate) {
+      try {
+        final parsed = DateTime.parse(rawDate ?? "");
+        return DateFormat("dd-MM-yyyy").format(parsed);
+      } catch (_) {
+        return "-";
+      }
     }
-  }
 
   Widget buildPredictionList() {
     return FutureBuilder<List<dynamic>>(
       future: ApiServicePrediksi.getRiwayatPrediksi(),
       builder: (context, snapshot) {
         if (_refreshing || snapshot.connectionState == ConnectionState.waiting) {
+          // Loading state
           return const Center(child: CircularProgressIndicator());
         }
 
+        // Data tidak ada atau error
         if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          // Hanya update _hasPredictionData jika sebelumnya true
+          if (_hasPredictionData) {
+            // Update di luar build setelah selesai
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() => _hasPredictionData = false);
+            });
+          }
           return _buildEmptyState();
         }
 
+        // Data tersedia
         final dataOriginal = snapshot.data!;
         final dataFiltered = selectedMetode == 'Semua'
             ? dataOriginal
@@ -363,13 +384,10 @@ class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProvider
 
         final hasDataToShow = dataFiltered.isNotEmpty;
 
+        // Update flag hanya jika berubah saja (menghindari flicker!)
         if (_hasPredictionData != hasDataToShow) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {
-                _hasPredictionData = hasDataToShow;
-              });
-            }
+            if (mounted) setState(() => _hasPredictionData = hasDataToShow);
           });
         }
 
@@ -377,6 +395,7 @@ class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProvider
 
         return _buildWhiteContainer(
           child: ListView.builder(
+            shrinkWrap: true,
             controller: _scrollController,
             itemCount: dataFiltered.length,
             itemBuilder: (context, index) => _buildPredictionCard(dataFiltered[index]),
@@ -386,172 +405,322 @@ class _IndexPrediksiState extends State<IndexPrediksi> with SingleTickerProvider
     );
   }
 
-  Widget _buildPredictionCard(Map<String, dynamic> item) {
-    final metode = item['metode_persalinan']?.toString().toLowerCase();
-    final isCaesar = metode == 'caesar';
-    final tanggal = _formatDate(item['created_at']);
-    final warna = isCaesar ? const Color(0xFFFFE4EC) : const Color(0xFFE0F4FF);
-    final border = isCaesar ? const Color(0xFFFC5C9C) : const Color(0xFF4DBAFF);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: warna,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Hasil Prediksi",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
-              Text(tanggal, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Faktor: ${item['faktor'] ?? '-'}",
-            style: const TextStyle(fontSize: 14),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildBadge(metode ?? '-'),
-              TextButton(
-                onPressed: () => _showDetailDialog(item, tanggal),
-                child: const Text("Detail", style: TextStyle(color: Colors.black)),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+Widget _buildPredictionCard(Map<String, dynamic> item) {
+  final metode = item['metode_persalinan']?.toString().toLowerCase();
+  final isCaesar = metode == 'caesar';
+  final tanggal = _formatDate(item['created_at']);
+  final warna = isCaesar ? const Color(0xFFFFF1F5) : const Color(0xFFF0F9FF);
+  final border = isCaesar ? const Color(0xFFFC5C9C) : const Color(0xFF4DAEFF);
+  final confidence = _parseConfidence(item['confidence']).round();
+
+  dynamic faktorRaw = item['faktor'];
+  List faktorList = [];
+  if (faktorRaw != null) {
+    if (faktorRaw is String && faktorRaw.trim().isNotEmpty && faktorRaw.trim() != "-") {
+      try {
+        final decoded = json.decode(faktorRaw);
+        if (decoded is List) faktorList = decoded;
+      } catch (_) {
+        faktorList = [faktorRaw];
+      }
+    } else if (faktorRaw is List) {
+      faktorList = faktorRaw;
+    }
+  }
+  List<String> faktorLabelList = [];
+  if (faktorList.isNotEmpty) {
+    for (var f in faktorList) {
+      if (f is List && f.isNotEmpty) {
+        faktorLabelList.add(f[0].toString().split(' <= ')[0]);
+      } else if (f is String) {
+        faktorLabelList.add(f);
+      } else {
+        faktorLabelList.add(f.toString());
+      }
+    }
   }
 
-  void _showDetailDialog(Map<String, dynamic> item, String tanggal) {
-    final isCaesar = (item['metode_persalinan']?.toString().toLowerCase() == 'caesar');
-    final Color badgeText = isCaesar ? const Color(0xFFFC5C9C) : const Color(0xFF4DAEFF);
-    final Color badgeBg = isCaesar ? const Color(0xFFFFCCE2) : const Color(0xFFD9F1FF);
-    final String label = isCaesar ? "Caesar" : "Normal";
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-          side: const BorderSide(color: Colors.black, width: 1.5),
+  return Container(
+    margin: const EdgeInsets.only(bottom: 13),
+    decoration: BoxDecoration(
+      color: warna,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: border.withOpacity(0.55), width: 1.0),
+      boxShadow: [
+        BoxShadow(
+          color: border.withOpacity(0.07),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
         ),
-        backgroundColor: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Main Content
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Baris 1: Badge & Confidence
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
-                      "Detail Prediksi",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    // Badge metode
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: border,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        metode == null ? "-" : metode[0].toUpperCase() + metode.substring(1),
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    // CONFIDENCE MODERN (hanya angka dan ikon, tanpa oval)
+                    Icon(Icons.bar_chart_rounded, size: 17, color: border),
+                    const SizedBox(width: 3),
                     Text(
-                      tanggal,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: badgeBg,
-                    border: Border.all(color: badgeText),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: badgeText,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  "Faktor: ${item['faktor'] ?? '-'}",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("• Usia : ${item['usia_ibu']} Tahun"),
-                      Text("• Tekanan Darah : ${item['tekanan_darah']}"),
-                      Text("• Riwayat Persalinan : ${item['riwayat_persalinan']}"),
-                      Text("• Riwayat Kesehatan : ${item['riwayat_kesehatan_ibu']}"),
-                      Text("• Posisi Janin : ${item['posisi_janin']}"),
-                      Text("• Kondisi Janin : ${item['kondisi_kesehatan_janin']}"),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text("Rekomendasi", style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
-                Text(
-                  isCaesar
-                      ? "Bunda, segera konsultasikan dengan dokter untuk persiapan persalinan Caesar yang aman. Tetap tenang dan jaga kondisi tubuh dengan baik."
-                      : "Bunda, kondisi Anda mendukung untuk persalinan normal. Terus jaga kesehatan dan kontrol rutin ke dokter.",
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF334155)),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () => _downloadPredictionPdf(item, tanggal),
-                      icon: const Icon(Icons.download, size: 12),
-                      label: const Text("Unduh Hasil"),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color(0xFF4D9EFF),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        textStyle: const TextStyle(fontWeight: FontWeight.w500),
+                      "$confidence%",
+                      style: GoogleFonts.poppins(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: border,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Tutup", style: TextStyle(color: Colors.black)),
-                    ),
                   ],
+                ),
+                const SizedBox(height: 7),
+                // Faktor utama (Chip)
+                faktorLabelList.isNotEmpty
+                    ? Wrap(
+                        spacing: 4,
+                        runSpacing: -8,
+                        children: faktorLabelList
+                            .map(
+                              (label) => Chip(
+                                label: Text(label, style: GoogleFonts.poppins(fontSize: 11)),
+                                backgroundColor: border.withOpacity(0.09),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(7),
+                                  side: BorderSide(color: border.withOpacity(0.4)),
+                                ),
+                                labelPadding: const EdgeInsets.symmetric(horizontal: 7),
+                                padding: EdgeInsets.zero,
+                              ),
+                            )
+                            .toList(),
+                      )
+                    : Text(
+                        "-",
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700]),
+                      ),
+                // Tanggal
+                Padding(
+                  padding: const EdgeInsets.only(top: 7),
+                  child: Text(
+                    tanggal,
+                    style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
+                  ),
                 ),
               ],
             ),
           ),
-        ),
+          // Tombol Detail (kanan atas)
+          Padding(
+            padding: const EdgeInsets.only(left: 6, top: 2),
+            child: SizedBox(
+              height: 34,
+              child: TextButton(
+                onPressed: () => _showDetailDialog(item, tanggal, faktorList, confidence),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(54, 34),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  "Detail",
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFF2277b6),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
-Future<void> _downloadPredictionPdf(Map<String, dynamic> item, String tanggalStr) async {
+
+    void _showDetailDialog(Map<String, dynamic> item, String tanggal, List faktorList, int confidence) {
+      final metode = item['metode_persalinan']?.toString().toLowerCase();
+      final isCaesar = metode == 'caesar';
+      final Color badgeText = isCaesar ? const Color(0xFFFC5C9C) : const Color(0xFF4DAEFF);
+      final Color badgeBg = isCaesar ? const Color(0xFFFFCCE2) : const Color(0xFFD9F1FF);
+      final String label = isCaesar ? "Caesar" : "Normal";
+
+      List<String> faktorLabelList = [];
+      if (faktorList.isNotEmpty) {
+        for (var f in faktorList) {
+          if (f is List && f.isNotEmpty) {
+            faktorLabelList.add(f[0].toString().split(' <= ')[0]);
+          } else if (f is String) {
+            faktorLabelList.add(f);
+          } else {
+            faktorLabelList.add(f.toString());
+          }
+        }
+      }
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: const BorderSide(color: Colors.black12, width: 1.5),
+          ),
+          backgroundColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Detail Prediksi",
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: badgeText,
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: badgeBg,
+                          border: Border.all(color: badgeText),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                        child: Text(
+                          label,
+                          style: GoogleFonts.poppins(
+                            color: badgeText,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 22, color: Colors.black12),
+                  if (confidence > 0)
+                    Row(
+                      children: [
+                        const Icon(Icons.star_rounded, color: Color(0xFF4DAEFF), size: 20),
+                        const SizedBox(width: 4),
+                        Text(
+                          "$confidence%",
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  const SizedBox(height: 12),
+                  if (faktorLabelList.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Faktor Utama:", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                        ...faktorLabelList.map((label) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text("• $label", style: GoogleFonts.poppins(fontSize: 13)),
+                        )),
+                      ],
+                    ),
+                  const SizedBox(height: 10),
+                  Text("Data Input:", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("• Usia : ${item['usia_ibu']} Tahun", style: GoogleFonts.poppins(fontSize: 13)),
+                        Text("• Tekanan Darah : ${item['tekanan_darah']}", style: GoogleFonts.poppins(fontSize: 13)),
+                        Text("• Riwayat Persalinan : ${item['riwayat_persalinan']}", style: GoogleFonts.poppins(fontSize: 13)),
+                        Text("• Riwayat Kesehatan : ${item['riwayat_kesehatan_ibu']}", style: GoogleFonts.poppins(fontSize: 13)),
+                        Text("• Posisi Janin : ${item['posisi_janin']}", style: GoogleFonts.poppins(fontSize: 13)),
+                        Text("• Kondisi Janin : ${item['kondisi_kesehatan_janin']}", style: GoogleFonts.poppins(fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text("Rekomendasi", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Text(
+                    isCaesar
+                        ? "Bunda, segera konsultasikan dengan dokter untuk persiapan persalinan Caesar yang aman. Tetap tenang dan jaga kondisi tubuh dengan baik."
+                        : "Bunda, kondisi Anda mendukung untuk persalinan normal. Terus jaga kesehatan dan kontrol rutin ke dokter.",
+                    style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF334155)),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("Tutup", style: GoogleFonts.poppins(color: Colors.black)),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: badgeText,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                        ),
+                        icon: const Icon(Icons.download_rounded, size: 18),
+                        label: const Text("Unduh Hasil"),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _downloadPredictionPdf(item, tanggal, faktorList);
+                        }
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Fungsi PDF Export (tidak berubah, bisa tambah tombol di detail dialog jika ingin)
+Future<void> _downloadPredictionPdf(Map<String, dynamic> item, String tanggalStr, List faktorList) async {
   await initializeDateFormatting('id_ID', null);
 
-  // Ambil data user dari endpoint /user-data
+  // 1. Ambil data user
   Map<String, dynamic> userData = {};
   try {
     final storage = const FlutterSecureStorage();
@@ -572,18 +741,16 @@ Future<void> _downloadPredictionPdf(Map<String, dynamic> item, String tanggalStr
     userData = {};
   }
 
-  // Ambil HPL user
+  // 2. Ambil HPL user
   String hpl = '-';
   try {
     final hplList = await ApiServiceHPL.getDataHPL();
     final userId = userData['id']?.toString();
-    // Pastikan semua id dibandingkan sebagai String!
     final myHPL = hplList.cast<Map<String, dynamic>>().firstWhere(
       (hplItem) => hplItem['user_id'].toString() == userId,
       orElse: () => {},
     );
     if (myHPL.isNotEmpty && myHPL['hpl'] != null) {
-      // Ubah format HPL jadi dd MMMM yyyy biar konsisten dengan tanggal
       try {
         final hplDate = DateTime.parse(myHPL['hpl']);
         hpl = DateFormat("dd MMMM yyyy", "id_ID").format(hplDate);
@@ -595,14 +762,12 @@ Future<void> _downloadPredictionPdf(Map<String, dynamic> item, String tanggalStr
     hpl = '-';
   }
 
-  // ... Lanjutkan mapping field seperti sebelumnya ...
-
   final nama = userData['name'] ?? '-';
   final telp = userData['nomor_telepon'] ?? '-';
   final userId = userData['id']?.toString() ?? 'user';
-
   final metode = (item['metode_persalinan'] ?? '-').toString();
 
+  // 3. Format tanggal
   DateTime? parsedTanggal;
   try {
     parsedTanggal = DateFormat("dd-MM-yyyy").parseStrict(tanggalStr);
@@ -617,89 +782,115 @@ Future<void> _downloadPredictionPdf(Map<String, dynamic> item, String tanggalStr
       ? "Bunda, segera konsultasikan dengan dokter untuk persiapan persalinan Caesar yang aman. Tetap tenang dan jaga kondisi tubuh dengan baik."
       : "Bunda, kondisi Anda mendukung untuk persalinan normal. Terus jaga kesehatan dan kontrol rutin ke dokter.";
 
-  final pdf = pw.Document();
-  pdf.addPage(
-    pw.Page(
-      pageFormat: pw.PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.all(32),
-      build: (context) => pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text('Hasil', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Prediksi', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                ],
-              ),
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.end,
-                children: [
-                  pw.Text('SEHATI', style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Sehat Bersama Buah Hati', style: pw.TextStyle(fontSize: 12)),
-                ],
-              ),
-            ],
-          ),
-          pw.SizedBox(height: 12),
-          pw.Divider(),
-          pw.SizedBox(height: 8),
-          pw.Align(
-            alignment: pw.Alignment.centerRight,
-            child: pw.Text(
-              formattedTanggal,
-              style: pw.TextStyle(fontSize: 12),
+  // 4. Siapkan faktor utama untuk PDF
+  List<String> faktorLabelList = [];
+  if (faktorList.isNotEmpty) {
+    for (var f in faktorList) {
+      if (f is List && f.isNotEmpty) {
+        faktorLabelList.add(f[0].toString().split(' <= ')[0]);
+      } else if (f is String) {
+        faktorLabelList.add(f);
+      } else {
+        faktorLabelList.add(f.toString());
+      }
+    }
+  }
+
+  // 5. Generate PDF
+final pdf = pw.Document();
+pdf.addPage(
+  pw.Page(
+    pageFormat: pw.PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.all(32),
+    build: (context) => pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        // --- HEADER Judul Hasil Prediksi ---
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Hasil Prediksi', style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 8),
+                pw.Text(
+                  metode,
+                  style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold, color: pw.PdfColors.blue),
+                ),
+              ],
             ),
-          ),
-          pw.SizedBox(height: 20),
-          pw.Text("Nama : $nama"),
-          pw.SizedBox(height: 8),
-          pw.Text("Nomor Telp : $telp"),
-          pw.SizedBox(height: 8),
-          pw.Text("Hari Perkiraan Lahir : $hpl"),
-          pw.SizedBox(height: 24),
-          pw.Text("Hasil Prediksi Metode Persalinan : $metode", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-          pw.SizedBox(height: 12),
-          pw.Text("Faktor :", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-          pw.SizedBox(height: 8),
-          pw.Bullet(text: 'Usia Ibu : ${item['usia_ibu']} tahun'),
-          pw.SizedBox(height: 8),
-          pw.Bullet(text: 'Tekanan Darah : ${item['tekanan_darah']}'),
-          pw.SizedBox(height: 8),
-          pw.Bullet(text: 'Riwayat Persalinan : ${item['riwayat_persalinan']}'),
-          pw.SizedBox(height: 8),
-          pw.Bullet(text: 'Riwayat Kesehatan Ibu : ${item['riwayat_kesehatan_ibu']}'),
-          pw.SizedBox(height: 8),
-          pw.Bullet(text: 'Posisi Janin : ${item['posisi_janin']}'),
-          pw.SizedBox(height: 8),
-          pw.Bullet(text: 'Kondisi Kesehatan Janin : ${item['kondisi_kesehatan_janin']}'),
-          pw.SizedBox(height: 24),
-          pw.Text("Rekomendasi :", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-          pw.SizedBox(height: 8),
-          pw.Text(rekomendasi, style: const pw.TextStyle(fontSize: 12)),
-          pw.SizedBox(height: 24),
-          pw.Text("Catatan :", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-          pw.SizedBox(height: 8),
-          pw.Text(
-            "Hasil prediksi ini hanya bersifat informatif dan tidak menggantikan konsultasi medis langsung dengan dokter.",
-            style: const pw.TextStyle(fontSize: 12),
-          ),
-          pw.Spacer(),
-          pw.Divider(),
-          pw.Center(
-            child: pw.Text(
-              "© 2025 SEHATI | www.sehati.id | Kontak Bantuan: 0800-123-456",
-              style: const pw.TextStyle(fontSize: 10),
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text('SEHATI', style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Sehat Bersama Buah Hati', style: pw.TextStyle(fontSize: 12)),
+              ],
             ),
+          ],
+        ),
+        pw.SizedBox(height: 18),
+        pw.Divider(),
+        pw.SizedBox(height: 12),
+        pw.Align(
+          alignment: pw.Alignment.centerRight,
+          child: pw.Text(
+            formattedTanggal,
+            style: pw.TextStyle(fontSize: 12),
           ),
-        ],
-      ),
+        ),
+        
+        pw.Text("Nama : $nama", style: pw.TextStyle(fontSize: 13)),
+        pw.SizedBox(height: 3),
+        pw.Text("Nomor Telp : $telp", style: pw.TextStyle(fontSize: 13)),
+        pw.SizedBox(height: 3),
+        pw.Text("Hari Perkiraan Lahir : $hpl", style: pw.TextStyle(fontSize: 13)),
+
+        // --- Faktor Utama (hasil model)
+        pw.SizedBox(height: 22),
+        pw.Text("Faktor", style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 8),
+        if (faktorLabelList.isNotEmpty)
+          ...faktorLabelList.map((f) => pw.Bullet(text: f)).toList(),
+
+        // --- Data Kehamilan
+        pw.SizedBox(height: 22),
+        pw.Text("Data Kehamilan", style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 8),
+        pw.Bullet(text: 'Usia Ibu : ${item['usia_ibu']} tahun'),
+        pw.Bullet(text: 'Tekanan Darah : ${item['tekanan_darah']}'),
+        pw.Bullet(text: 'Riwayat Persalinan : ${item['riwayat_persalinan']}'),
+        pw.Bullet(text: 'Riwayat Kesehatan Ibu : ${item['riwayat_kesehatan_ibu']}'),
+        pw.Bullet(text: 'Posisi Janin : ${item['posisi_janin']}'),
+        pw.Bullet(text: 'Kondisi Kesehatan Janin : ${item['kondisi_kesehatan_janin']}'),
+
+        // --- Rekomendasi dan Catatan
+        pw.SizedBox(height: 24),
+        pw.Text("Rekomendasi :", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 8),
+        pw.Text(rekomendasi, style: const pw.TextStyle(fontSize: 12)),
+        pw.SizedBox(height: 24),
+        pw.Text("Catatan :", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 8),
+        pw.Text(
+          "Hasil prediksi ini hanya bersifat informatif dan tidak menggantikan konsultasi medis langsung dengan dokter.",
+          style: const pw.TextStyle(fontSize: 12),
+        ),
+        pw.Spacer(),
+        pw.Divider(),
+        pw.Center(
+          child: pw.Text(
+            "© 2025 SEHATI | www.sehati.id | Kontak Bantuan: 0800-123-456",
+            style: const pw.TextStyle(fontSize: 10),
+          ),
+        ),
+      ],
     ),
-  );
+  ),
+);
+
+
 
   final Uint8List bytes = await pdf.save();
 
@@ -720,4 +911,4 @@ Future<void> _downloadPredictionPdf(Map<String, dynamic> item, String tanggalStr
     );
   }
 }
-}
+  }

@@ -36,6 +36,7 @@ class ApiServicePrediksi {
         return {
           'hasil_prediksi': decoded['hasil_prediksi'] ?? 'Tidak tersedia',
           'faktor': decoded['faktor'] ?? '-',
+          'confidence': decoded['confidence'] ?? 0,
           'message': decoded['message'] ?? '',
           'data': decoded['data'] ?? {},
         };

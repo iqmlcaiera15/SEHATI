@@ -8,57 +8,56 @@
     </ol>
 
     <!-- Summary Cards Row -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">
-                    <h4>{{ $ibuHamil->count() }}</h4>
-                    Total Ibu Hamil
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">Lihat Detail</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+                <h4>{{ $ibuHamil->count() }}</h4>
+                Total Daftar Ibu Hamil Sehati
             </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning text-white mb-4">
-                <div class="card-body">
-                    <h4>{{ $deteksiPenyakit->count() }}</h4>
-                    Total Deteksi Penyakit
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ route('deteksi.index') }}">Lihat Detail</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-success text-white mb-4">
-                <div class="card-body">
-                    <h4>{{ $prediksiDepresi->count() }}</h4>
-                    Total Prediksi Depresi
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ route('depresi.index') }}">Lihat Detail</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-danger text-white mb-4">
-                <div class="card-body">
-                    <h4>{{ $prediksiJanin->count() }}</h4>
-                    Total Prediksi Persalinan
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ route('prediksi.index') }}">Lihat Detail</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="{{ route('bidan.dashboard') }}">Lihat Detail</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
             </div>
         </div>
     </div>
-
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-warning text-white mb-4">
+            <div class="card-body">
+                <h4>{{ $deteksiPenyakit->count() }}</h4>
+                Total Deteksi Penyakit
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="{{ route('deteksi.index') }}">Lihat Detail</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                <h4>{{ $prediksiDepresi->count() }}</h4>
+                Total Prediksi Depresi
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="{{ route('depresi.index') }}">Lihat Detail</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-danger text-white mb-4">
+            <div class="card-body">
+                <h4>{{ $prediksiJanin->count() }}</h4>
+                Total Prediksi Persalinan
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a class="small text-white stretched-link" href="{{ route('prediksi.index') }}">Lihat Detail</a>
+                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Daftar Ibu Hamil -->
     <div class="card mb-4">
         <div class="card-header">
@@ -68,35 +67,75 @@
         <div class="card-body">
             <div class="row">
                 @forelse($ibuHamil as $ibu)
-                <div class="col-xl-4 col-md-6 mb-4">
-                    <div class="card border-left-primary h-100">
+                <div class="col-xl-6 col-lg-6 mb-4">
+                    <div class="card border-left-primary h-100 shadow">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <h5 class="card-title">{{ $ibu->name ?? 'Nama tidak tersedia' }}</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center"
+                                         style="width: 50px; height: 50px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0">{{ $ibu->name ?? 'Nama tidak tersedia' }}</h5>
+                                        <small class="text-muted">{{ $ibu->usia ?? '-' }} tahun</small>
+                                    </div>
+                                </div>
                                 <span class="badge bg-primary">Ibu Hamil</span>
                             </div>
-                            <hr>
-                            <div class="row mb-2">
-                                <div class="col-md-4 fw-bold">NIK</div>
-                                <div class="col-md-8">{{ $ibu->nik ?? '-' }}</div>
+
+                            <hr class="my-3">
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold text-muted small">Nama Lengkap</label>
+                                    <p class="mb-0 small">{{ $ibu->name ?? 'Nama tidak tersedia' }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold text-muted small">Tanggal Lahir</label>
+                                    <p class="mb-0 small">
+                                        @if($ibu->tanggal_lahir)
+                                            {{ \Carbon\Carbon::parse($ibu->tanggal_lahir)->format('d F Y') }}
+                                        @else
+                                            -
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold text-muted small">Usia</label>
+                                    <p class="mb-0 small">{{ $ibu->usia ?? '-' }} tahun</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold text-muted small">Nomor Telepon</label>
+                                    <p class="mb-0 small">
+                                        @if($ibu->nomor_telepon)
+                                            <a href="tel:{{ $ibu->nomor_telepon }}" class="text-decoration-none">
+                                                <i class="fas fa-phone me-1"></i>{{ $ibu->nomor_telepon }}
+                                            </a>
+                                        @else
+                                            -
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label fw-bold text-muted small">Alamat</label>
+                                    <p class="mb-0 small">{{ $ibu->alamat ?? '-' }}</p>
+                                </div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-md-4 fw-bold">Email</div>
-                                <div class="col-md-8">{{ $ibu->email ?? '-' }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-md-4 fw-bold">Alamat</div>
-                                <div class="col-md-8">{{ $ibu->alamat ?? '-' }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-md-4 fw-bold">No. HP</div>
-                                <div class="col-md-8">{{ $ibu->no_hp ?? '-' }}</div>
-                            </div>
+
+                            @if($ibu->usia_kehamilan)
+                                <div class="alert alert-info py-2 mb-3">
+                                    <i class="fas fa-baby me-2"></i>
+                                    <small><strong>Usia Kehamilan:</strong> {{ $ibu->usia_kehamilan }} minggu</small>
+                                </div>
+                            @endif
                         </div>
-                        <div class="card-footer">
+                        <div class="card-footer bg-light">
                             <div class="d-flex justify-content-between">
-                                <a href="{{ route('ibu_hamil.show', $ibu->id) }}" class="btn btn-sm btn-primary">Detail</a>
-                                <a href="#" class="btn btn-sm btn-success">Riwayat Kesehatan</a>
+                                <a href="{{ route('ibu_hamil.detail', $ibu->id) }}" class="btn btn-sm btn-primary">Detail</a>
+                                <a href="#" class="btn btn-sm btn-success">
+                                    <i class="fas fa-heartbeat me-1"></i>Riwayat Kesehatan
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -104,6 +143,7 @@
                 @empty
                 <div class="col-12">
                     <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
                         Belum ada data ibu hamil yang terdaftar.
                     </div>
                 </div>
@@ -338,4 +378,50 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .card-header {
+        border-radius: 0.75rem 0.75rem 0 0 !important;
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+
+    .form-label {
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.5em 0.75em;
+    }
+
+    .alert {
+        border-radius: 0.5rem;
+        border: none;
+    }
+
+    .border-left-primary {
+        border-left: 4px solid #007bff !important;
+    }
+
+    .small {
+        font-size: 0.875rem;
+    }
+
+    .shadow {
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+    }
+</style>
+@endpush
 @endsection
