@@ -18,32 +18,49 @@ class PrediksiDepresiDesktopController extends Controller
             $query->whereDate('created_at', $tanggal);
         }
 
-        // Filter berdasarkan hasil
+        // Filter berdasarkan hasil - konsisten dengan logika di view
         if ($request->filled('hasil')) {
             if ($request->hasil == 'bergejala') {
-                // Filter untuk yang bergejala depresi
+                // Filter untuk yang bergejala depresi (Resiko Tinggi + Kemungkinan Gejala)
                 $query->where(function($q) {
-                    // Kondisi 1: hasil_prediksi = 1
-                    $q->where('hasil_prediksi', 1)
-                      // Kondisi 2: hasil_prediksi = 0 tapi skor EPDS >= 12
-                      ->orWhere(function($subQuery) {
-                          $subQuery->where('hasil_prediksi', 0)
-                                   ->whereHas('epds', function($epdsQuery) {
-                                       $epdsQuery->where('score', '>=', 12);
-                                   });
-                      });
+                    // Kondisi 1: hasil_prediksi = 1 AND (EPDS >= 12 OR tidak ada EPDS)
+                    $q->where(function($subQuery1) {
+                        $subQuery1->where('hasil_prediksi', 1)
+                                  ->where(function($epdsCheck) {
+                                      $epdsCheck->whereHas('epds', function($epdsQuery) {
+                                          $epdsQuery->where('score', '>=', 12);
+                                      })
+                                      ->orWhereDoesntHave('epds');
+                                  });
+                    })
+                    // Kondisi 2: hasil_prediksi = 0 BUT skor EPDS >= 12
+                    ->orWhere(function($subQuery2) {
+                        $subQuery2->where('hasil_prediksi', 0)
+                                  ->whereHas('epds', function($epdsQuery) {
+                                      $epdsQuery->where('score', '>=', 12);
+                                  });
+                    });
                 });
             } elseif ($request->hasil == 'tidak_bergejala') {
                 // Filter untuk yang tidak bergejala depresi
                 $query->where(function($q) {
-                    // hasil_prediksi = 0 dan (tidak ada EPDS atau skor EPDS < 12)
-                    $q->where('hasil_prediksi', 0)
-                      ->where(function($subQuery) {
-                          $subQuery->whereDoesntHave('epds')
-                                   ->orWhereHas('epds', function($epdsQuery) {
-                                       $epdsQuery->where('score', '<', 12);
-                                   });
-                      });
+                    // Kondisi 1: hasil_prediksi = 1 BUT skor EPDS < 12
+                    $q->where(function($subQuery1) {
+                        $subQuery1->where('hasil_prediksi', 1)
+                                  ->whereHas('epds', function($epdsQuery) {
+                                      $epdsQuery->where('score', '<', 12);
+                                  });
+                    })
+                    // Kondisi 2: hasil_prediksi = 0 AND (tidak ada EPDS OR skor EPDS < 12)
+                    ->orWhere(function($subQuery2) {
+                        $subQuery2->where('hasil_prediksi', 0)
+                                  ->where(function($epdsCheck) {
+                                      $epdsCheck->whereDoesntHave('epds')
+                                                ->orWhereHas('epds', function($epdsQuery) {
+                                                    $epdsQuery->where('score', '<', 12);
+                                                });
+                                  });
+                    });
                 });
             }
         }
@@ -62,7 +79,7 @@ class PrediksiDepresiDesktopController extends Controller
     public function destroy($id)
     {
         $prediksi = PrediksiDepresi::find($id);
-        
+                
         if (!$prediksi) {
             return redirect()->route('depresi.index')
                              ->with('error', 'Data tidak ditemukan');
