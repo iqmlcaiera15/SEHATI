@@ -49,19 +49,31 @@
                             $hasilText = 'Tidak Bergejala Depresi';
                             $badgeClass = 'bg-success';
                             
+                            // Logika berdasarkan hasil prediksi dan skor EPDS
                             if ($data->hasil_prediksi == 1) {
-                                // Kondisi: Jika hasil prediksi = 1 maka bergejala depresi
-                                $finalResult = true;
-                                $hasilText = 'Bergejala Depresi';
-                                $badgeClass = 'bg-danger';
-                            } elseif ($data->hasil_prediksi == 0) {
-                                if ($data->epds && $data->epds->score >= 12) {
-                                    // Kondisi: Jika hasil prediksi = 0 tapi skor EPDS >= 12 maka bergejala depresi
+                                if ($data->epds && $data->epds->score >= 14) {
                                     $finalResult = true;
-                                    $hasilText = 'Bergejala Depresi';
+                                    $hasilText = 'Resiko Tinggi Depresi';
                                     $badgeClass = 'bg-danger';
+                                } elseif ($data->epds && $data->epds->score >= 12) {
+                                    $finalResult = true;
+                                    $hasilText = 'Kemungkinan Gejala Depresi';
+                                    $badgeClass = 'bg-warning';
                                 } else {
-                                    // Kondisi: Jika hasil prediksi = 0 dan (tidak ada EPDS atau skor EPDS < 12) maka tidak bergejala
+                                    $finalResult = false;
+                                    $hasilText = 'Tidak Bergejala Depresi';
+                                    $badgeClass = 'bg-success';
+                                }
+                            } elseif ($data->hasil_prediksi == 0) {
+                                if ($data->epds && $data->epds->score >= 14) {
+                                    $finalResult = true;
+                                    $hasilText = 'Resiko Tinggi Depresi';
+                                    $badgeClass = 'bg-danger';
+                                } elseif ($data->epds && $data->epds->score >= 12) {
+                                    $finalResult = true;
+                                    $hasilText = 'Kemungkinan Gejala Depresi';
+                                    $badgeClass = 'bg-warning';
+                                } else {
                                     $finalResult = false;
                                     $hasilText = 'Tidak Bergejala Depresi';
                                     $badgeClass = 'bg-success';

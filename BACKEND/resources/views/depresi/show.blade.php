@@ -48,16 +48,47 @@
                 $finalResult = false;
                 $resultText = 'Tidak Bergejala Depresi';
                 $resultDescription = 'Tidak menunjukkan indikasi depresi berdasarkan analisis gejala dan skor EPDS.';
+                $badgeClass = 'bg-success';
+                $headerClass = 'bg-success';
                 
+                // Logika berdasarkan hasil prediksi dan skor EPDS (konsisten dengan index)
                 if ($prediksi->hasil_prediksi == 1) {
-                    $finalResult = true;
-                    $resultText = 'Bergejala Depresi';
-                    $resultDescription = 'Menunjukkan indikasi depresi berdasarkan gejala yang dilaporkan.';
-                } elseif ($prediksi->hasil_prediksi == 0) {
-                    if ($prediksi->epds && $prediksi->epds->score >= 12) {
+                    if ($prediksi->epds && $prediksi->epds->score >= 14) {
                         $finalResult = true;
-                        $resultText = 'Bergejala Depresi';
-                        $resultDescription = 'Meskipun gejala awal tidak menunjukkan depresi, skor EPDS menunjukkan indikasi depresi (skor: ' . $prediksi->epds->score . ').';
+                        $resultText = 'Resiko Tinggi Depresi';
+                        $resultDescription = 'Menunjukkan gejala depresi dengan skor EPDS tinggi (skor: ' . $prediksi->epds->score . '). Memerlukan evaluasi medis segera.';
+                        $badgeClass = 'bg-danger';
+                        $headerClass = 'bg-danger';
+                    } elseif ($prediksi->epds && $prediksi->epds->score >= 12) {
+                        $finalResult = true;
+                        $resultText = 'Kemungkinan Gejala Depresi';
+                        $resultDescription = 'Menunjukkan gejala depresi dengan skor EPDS sedang (skor: ' . $prediksi->epds->score . '). Disarankan untuk konsultasi lebih lanjut.';
+                        $badgeClass = 'bg-warning';
+                        $headerClass = 'bg-warning';
+                    } else {
+                        $finalResult = false;
+                        $resultText = 'Tidak Bergejala Depresi';
+                        if ($prediksi->epds) {
+                            $resultDescription = 'Meskipun ada gejala awal, skor EPDS rendah menunjukkan risiko depresi rendah (skor: ' . $prediksi->epds->score . ').';
+                        } else {
+                            $resultDescription = 'Gejala awal terdeteksi namun tidak ada data EPDS untuk konfirmasi lebih lanjut.';
+                        }
+                        $badgeClass = 'bg-success';
+                        $headerClass = 'bg-success';
+                    }
+                } elseif ($prediksi->hasil_prediksi == 0) {
+                    if ($prediksi->epds && $prediksi->epds->score >= 14) {
+                        $finalResult = true;
+                        $resultText = 'Resiko Tinggi Depresi';
+                        $resultDescription = 'Meskipun gejala awal tidak terdeteksi, skor EPDS tinggi menunjukkan risiko depresi (skor: ' . $prediksi->epds->score . '). Memerlukan evaluasi medis segera.';
+                        $badgeClass = 'bg-danger';
+                        $headerClass = 'bg-danger';
+                    } elseif ($prediksi->epds && $prediksi->epds->score >= 12) {
+                        $finalResult = true;
+                        $resultText = 'Kemungkinan Gejala Depresi';
+                        $resultDescription = 'Meskipun gejala awal tidak terdeteksi, skor EPDS menunjukkan kemungkinan depresi (skor: ' . $prediksi->epds->score . '). Disarankan untuk konsultasi lebih lanjut.';
+                        $badgeClass = 'bg-warning';
+                        $headerClass = 'bg-warning';
                     } else {
                         $finalResult = false;
                         $resultText = 'Tidak Bergejala Depresi';
@@ -66,16 +97,18 @@
                         } else {
                             $resultDescription = 'Tidak menunjukkan indikasi depresi berdasarkan gejala yang dilaporkan.';
                         }
+                        $badgeClass = 'bg-success';
+                        $headerClass = 'bg-success';
                     }
                 }
             @endphp
             
-            <div class="card-header {{ $finalResult ? 'bg-danger' : 'bg-success' }} text-white">
+            <div class="card-header {{ $headerClass }} text-white">
                 <h5 class="mb-0"><i class="fas fa-diagnoses"></i> Hasil Prediksi</h5>
             </div>
             <div class="card-body text-center">
                 <div class="mb-3">
-                    <span class="badge {{ $finalResult ? 'bg-danger' : 'bg-success' }} fs-5 p-3">
+                    <span class="badge {{ $badgeClass }} fs-5 p-3">
                         {{ $resultText }}
                     </span>
                 </div>
@@ -204,9 +237,9 @@
                             @else bg-success
                             @endif fs-6 p-2">
                             @if($prediksi->epds->score >= 14)
-                                Risiko Tinggi Depresi
+                                Resiko Tinggi Depresi
                             @elseif($prediksi->epds->score >= 12)
-                                Kemungkinan Depresi
+                                Kemungkinan Gejala Depresi
                             @else
                                 Gejala Ringan
                             @endif
