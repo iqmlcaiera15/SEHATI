@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\DeteksiPenyakit;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DeteksiDesktopController extends Controller
 {
@@ -48,6 +49,16 @@ class DeteksiDesktopController extends Controller
     
     public function store(Request $request)
     {
+        // Log request data untuk debugging
+        Log::info('DeteksiPenyakit store request received', [
+            'user_id' => Auth::id(),
+            'request_data' => $request->except(['_token']),
+            'url' => $request->url(),
+            'method' => $request->method(),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
         try {
             // --- MODIFIED VALIDATION ---
             // Validasi input baru: tinggi_badan dan berat_badan
@@ -80,8 +91,11 @@ class DeteksiDesktopController extends Controller
                 'diastolic_bp.required' => 'Tekanan diastolik wajib diisi',
             ]);
 
+            Log::info('Validation passed successfully', ['validated_data' => $validated]);
+
             $user = Auth::user();
             if (!$user) {
+                Log::warning('User not authenticated during store operation');
                 return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu');
             }
 
@@ -108,8 +122,14 @@ class DeteksiDesktopController extends Controller
             $cigsPerDay = ($currentSmoker == 1) ? ($request->cigs_per_day ?? 0) : 0;
             $bpMeds = $request->bp_meds ?? 0;
 
+            Log::info('Calculated values', [
+                'bmi' => $bmi,
+                'map' => $map,
+                'bs_mgdl' => $bs_mgdl,
+                'bs_mmol' => $bs_mmol
+            ]);
+
             // Simpan ke database
-            // Nilai BMI dihitung otomatis dan BS disimpan dalam format mmol/L
             $deteksi = DeteksiPenyakit::create([
                 'user_id' => $user->id,
                 'bidan_id' => $user->id,
@@ -120,8 +140,7 @@ class DeteksiDesktopController extends Controller
                 'berat_badan' => $request->berat_badan,
                 'bmi' => $bmi, // BMI hasil perhitungan otomatis
                 'blood_pressure' => round($map, 2),
-                'bs' => $bs_mmol, // Simpan sebagai mmol/L
-                'bs_mgdl' => $bs_mgdl, // Simpan juga nilai asli mg/dL untuk referensi
+                'bs' => $bs_mgdl, // Simpan sebagai mmol/L
                 'skin_thickness' => $skinThickness,
                 'sex' => 0,
                 'current_smoker' => $currentSmoker,
@@ -132,6 +151,8 @@ class DeteksiDesktopController extends Controller
                 'heart_rate' => $heartRate,
                 'body_temp' => $bodyTemp,
             ]);
+
+            Log::info('DeteksiPenyakit created successfully', ['deteksi_id' => $deteksi->id]);
 
             // --- FORMAT DATA UNTUK API ML ---
             $requestData = [
@@ -166,19 +187,21 @@ class DeteksiDesktopController extends Controller
                 ]
             ];
             
-            \Log::info('Sending request to ML API:', [
+            Log::info('Sending request to ML API:', [
                 'user_id' => $user->id,
                 'deteksi_id' => $deteksi->id,
-                'bmi_calculated' => $bmi,
-                'bs_mgdl' => $bs_mgdl,
-                'bs_mmol' => $bs_mmol,
+                'api_url' => 'https://sehatiml-production.up.railway.app/predictdeteksi',
                 'request_data' => $requestData
             ]);
 
             $response = Http::timeout(30)->post('https://sehatiml-production.up.railway.app/predictdeteksi', $requestData);
 
-            \Log::info('API Response Status: ' . $response->status());
-            \Log::info('API Response Body: ' . $response->body());
+            Log::info('ML API Response received', [
+                'status' => $response->status(),
+                'headers' => $response->headers(),
+                'body' => $response->body(),
+                'successful' => $response->successful()
+            ]);
 
             if ($response->successful()) {
                 $prediction = $response->json();
@@ -190,28 +213,47 @@ class DeteksiDesktopController extends Controller
                         'maternal_health_prediction' => $prediction['maternal_health_prediction'],
                     ]);
 
+                    Log::info('Predictions updated successfully', [
+                        'deteksi_id' => $deteksi->id,
+                        'predictions' => $prediction
+                    ]);
+
                     return redirect()->route('deteksi.show', $deteksi->id)
                         ->with('success', 'Data berhasil disimpan dan prediksi telah diterima.');
                 } else {
-                    \Log::error('Unexpected response format from ML API: ' . json_encode($prediction));
+                    Log::error('Unexpected response format from ML API', [
+                        'response' => $prediction,
+                        'expected_keys' => ['diabetes_prediction', 'hypertension_prediction', 'maternal_health_prediction']
+                    ]);
                     return redirect()->route('deteksi.show', $deteksi->id)
                         ->with('warning', 'Data disimpan tetapi format respon prediksi tidak sesuai. Silakan hubungi administrator.');
                 }
             } else {
-                \Log::error('HTTP Error from ML API: ' . $response->status() . ' - ' . $response->body());
+                Log::error('HTTP Error from ML API', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'headers' => $response->headers()
+                ]);
                 return redirect()->route('deteksi.show', $deteksi->id)
                     ->with('warning', 'Data disimpan tetapi layanan prediksi tidak dapat diakses. Status: ' . $response->status());
             }
 
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Validation failed', [
+                'errors' => $e->errors(),
+                'input' => $request->except(['_token'])
+            ]);
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput()
                 ->with('error', 'Mohon periksa kembali data yang dimasukkan');
         } catch (\Exception $e) {
-            \Log::error('Error in DeteksiPenyakit store: ' . $e->getMessage(), [
+            Log::error('Unexpected error in DeteksiPenyakit store', [
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
                 'user_id' => Auth::id(),
-                'request_data' => $request->all(),
+                'request_data' => $request->except(['_token']),
                 'trace' => $e->getTraceAsString()
             ]);
             return redirect()->back()
@@ -222,21 +264,78 @@ class DeteksiDesktopController extends Controller
     
     public function deleteAll()
     {
-        DeteksiPenyakit::where('user_id', Auth::id())->delete(); 
-        return redirect()->route('deteksi.index')
-            ->with('success', 'Semua data berhasil dihapus');
+        try {
+            $userId = Auth::id();
+            $deletedCount = DeteksiPenyakit::where('user_id', $userId)->count();
+            
+            Log::info('DeleteAll operation initiated', [
+                'user_id' => $userId,
+                'records_to_delete' => $deletedCount
+            ]);
+            
+            DeteksiPenyakit::where('user_id', $userId)->delete();
+            
+            Log::info('DeleteAll operation completed successfully', [
+                'user_id' => $userId,
+                'deleted_count' => $deletedCount
+            ]);
+            
+            return redirect()->route('deteksi.index')
+                ->with('success', "Berhasil menghapus {$deletedCount} data deteksi");
+                
+        } catch (\Exception $e) {
+            Log::error('Error in deleteAll operation', [
+                'user_id' => Auth::id(),
+                'error_message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('deteksi.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.');
+        }
     }
 
     public function destroy($id)
     {
-        $deteksi = DeteksiPenyakit::find($id);
-        if (!$deteksi) {
-            return redirect()->route('deteksi.index')->with('error', 'Data tidak ditemukan');
+        try {
+            $deteksi = DeteksiPenyakit::find($id);
+            
+            if (!$deteksi) {
+                Log::warning('Attempt to delete non-existent DeteksiPenyakit', [
+                    'id' => $id,
+                    'user_id' => Auth::id()
+                ]);
+                return redirect()->route('deteksi.index')->with('error', 'Data tidak ditemukan');
+            }
+            
+            if (Auth::id() !== $deteksi->user_id) {
+                Log::warning('Unauthorized delete attempt', [
+                    'deteksi_id' => $id,
+                    'deteksi_user_id' => $deteksi->user_id,
+                    'current_user_id' => Auth::id()
+                ]);
+                return redirect()->route('deteksi.index')->with('error', 'Anda tidak memiliki akses untuk menghapus data ini');
+            }
+            
+            $deteksi->delete();
+            
+            Log::info('DeteksiPenyakit deleted successfully', [
+                'deteksi_id' => $id,
+                'user_id' => Auth::id()
+            ]);
+            
+            return redirect()->route('deteksi.index')->with('success', 'Data berhasil dihapus');
+            
+        } catch (\Exception $e) {
+            Log::error('Error in destroy operation', [
+                'deteksi_id' => $id,
+                'user_id' => Auth::id(),
+                'error_message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('deteksi.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.');
         }
-        if (Auth::id() !== $deteksi->user_id) {
-            return redirect()->route('deteksi.index')->with('error', 'Anda tidak memiliki akses untuk menghapus data ini');
-        }
-        $deteksi->delete();
-        return redirect()->route('deteksi.index')->with('success', 'Data berhasil dihapus');
     }
 }
