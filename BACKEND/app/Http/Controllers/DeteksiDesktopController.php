@@ -175,7 +175,7 @@ class DeteksiDesktopController extends Controller
                     'DiastolicBP' => (float)$request->diastolic_bp,
                     'BMI' => $bmi,
                     'Heartrate' => (float)$heartRate,
-                    'BS' => $bs_mmol // Kirim mmol/L untuk hypertension
+                    'BS' => $bs_mgdl // Kirim mmol/L untuk hypertension
                 ],
                 'maternal_health' => [ // Menggunakan mmol/L untuk maternal health
                     'Age' => (int)$request->age,
@@ -186,6 +186,7 @@ class DeteksiDesktopController extends Controller
                     'HeartRate' => (float)$heartRate
                 ]
             ];
+            dd($requestData);
             
             Log::info('Sending request to ML API:', [
                 'user_id' => $user->id,
