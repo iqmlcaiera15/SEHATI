@@ -257,7 +257,7 @@ class DeteksiDesktopController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi atau hubungi administrator.')
+                ->with('error', 'Error: ' . $e->getMessage()) // tampilkan error detail
                 ->withInput();
         }
     }
