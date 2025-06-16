@@ -46,14 +46,19 @@ class DeteksiDesktopController extends Controller
         return redirect()->route('deteksi.show', ['id' => $deteksiPenyakit->id]);
     }
     
-    public function store(Request $request)
+      public function store(Request $request)
     {
         try {
+            // --- MODIFIED VALIDATION ---
+            // Validasi input baru: tinggi_badan dan berat_badan
+            // Validasi BMI tetap ada karena dihitung oleh JS dan dikirim via hidden input
             $validated = $request->validate([
                 'nama' => 'required|string|max:255',
                 'pregnancies' => 'required|integer|min:0|max:20',
                 'age' => 'required|integer|min:15|max:100',
-                'bmi' => 'required|numeric|min:10|max:50',
+                'tinggi_badan' => 'required|numeric|min:100|max:250', // Validasi tinggi badan (cm)
+                'berat_badan' => 'required|numeric|min:30|max:200',  // Validasi berat badan (kg)
+                'bmi' => 'required|numeric|min:10|max:50', // Validasi hasil kalkulasi BMI
                 'bs' => 'required|numeric|min:50|max:500',
                 'skin_thickness' => 'nullable|numeric|min:0|max:100',
                 'current_smoker' => 'nullable|integer|in:0,1',
@@ -66,35 +71,30 @@ class DeteksiDesktopController extends Controller
             ], [
                 'nama.required' => 'Nama lengkap wajib diisi',
                 'pregnancies.required' => 'Jumlah kehamilan wajib diisi',
-                'pregnancies.min' => 'Jumlah kehamilan tidak boleh kurang dari 0',
-                'pregnancies.max' => 'Jumlah kehamilan tidak boleh lebih dari 20',
                 'age.required' => 'Umur wajib diisi',
                 'age.min' => 'Umur minimal 15 tahun',
-                'age.max' => 'Umur maksimal 100 tahun',
-                'bmi.required' => 'BMI wajib diisi',
-                'bmi.min' => 'BMI tidak boleh kurang dari 10',
-                'bmi.max' => 'BMI tidak boleh lebih dari 50',
+                'tinggi_badan.required' => 'Tinggi badan wajib diisi.',
+                'berat_badan.required' => 'Berat badan wajib diisi.',
+                'bmi.required' => 'BMI tidak dapat dihitung. Pastikan tinggi dan berat badan terisi.',
                 'bs.required' => 'Gula darah wajib diisi',
                 'bs.min' => 'Nilai gula darah tidak valid',
-                'bs.max' => 'Nilai gula darah terlalu tinggi',
                 'systolic_bp.required' => 'Tekanan sistolik wajib diisi',
-                'systolic_bp.min' => 'Tekanan sistolik minimal 80 mmHg',
-                'systolic_bp.max' => 'Tekanan sistolik maksimal 250 mmHg',
                 'diastolic_bp.required' => 'Tekanan diastolik wajib diisi',
-                'diastolic_bp.min' => 'Tekanan diastolik minimal 50 mmHg',
-                'diastolic_bp.max' => 'Tekanan diastolik maksimal 150 mmHg',
             ]);
 
-            // Dapatkan user dari auth
             $user = Auth::user();
             if (!$user) {
                 return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu');
             }
 
-            // Hitung MAP (Mean Arterial Pressure) dari tekanan sistolik dan diastolik
+            // Hitung MAP (Mean Arterial Pressure)
             $systolic = (float)$request->systolic_bp;
             $diastolic = (float)$request->diastolic_bp;
             $map = ($systolic + (2 * $diastolic)) / 3;
+
+            // --- NEW: Konversi Gula Darah dari mg/dL ke mmol/L ---
+            $bs_mgdl = (float)$request->bs;
+            $bs_mmol = $bs_mgdl / 18.0182; // Faktor konversi
 
             // Set default values untuk field opsional
             $skinThickness = $request->skin_thickness ?? 0;
@@ -105,17 +105,19 @@ class DeteksiDesktopController extends Controller
             $bpMeds = $request->bp_meds ?? 0;
 
             // Simpan ke database
+            // Nilai BMI sudah dihitung di frontend dan dikirim melalui $request->bmi
+            // Nilai BS disimpan dalam format asli (mg/dL)
             $deteksi = DeteksiPenyakit::create([
                 'user_id' => $user->id,
                 'bidan_id' => $user->id,
                 'nama' => $request->nama,
                 'pregnancies' => $request->pregnancies,
                 'age' => $request->age,
-                'bmi' => $request->bmi,
-                'blood_pressure' => round($map, 2), // MAP yang sudah dihitung
-                'bs' => $request->bs,
+                'bmi' => $request->bmi, // BMI dari hidden input
+                'blood_pressure' => round($map, 2),
+                'bs' => $request->bs, // Simpan sebagai mg/dL
                 'skin_thickness' => $skinThickness,
-                'sex' => 0, // Hardcoded sebagai perempuan
+                'sex' => 0,
                 'current_smoker' => $currentSmoker,
                 'cigs_per_day' => $cigsPerDay,
                 'bp_meds' => $bpMeds,
@@ -125,150 +127,108 @@ class DeteksiDesktopController extends Controller
                 'body_temp' => $bodyTemp,
             ]);
 
-            // Format data sesuai dengan API ML
+            // --- MODIFIED: Format data sesuai dengan API ML ---
             $requestData = [
-                'diabetes' => [
+                'diabetes' => [ // Menggunakan mg/dL
                     'Pregnancies' => (int)$request->pregnancies,
-                    'BS' => (float)$request->bs,
-                    'BloodPressure' => round($map, 2), // Menggunakan MAP yang dihitung
+                    'BS' => $bs_mgdl,
+                    'BloodPressure' => round($map, 2),
                     'SkinThickness' => (float)$skinThickness,
                     'BMI' => (float)$request->bmi,
                     'Age' => (int)$request->age
                 ],
-                'hypertension' => [
-                    'sex' => 0, // Hardcoded sebagai perempuan
+                'hypertension' => [ // Menggunakan mmol/L
+                    'sex' => 0,
                     'Age' => (int)$request->age,
                     'currentSmoker' => (int)$currentSmoker,
                     'cigsPerDay' => (int)$cigsPerDay,
                     'BPMeds' => (int)$bpMeds,
-                    'diabetes' => (int)($request->bs > 140 ? 1 : 0), // Auto-detect diabetes dari gula darah
+                    'diabetes' => (int)($bs_mgdl > 140 ? 1 : 0),
                     'SystolicBP' => (float)$request->systolic_bp,
                     'DiastolicBP' => (float)$request->diastolic_bp,
                     'BMI' => (float)$request->bmi,
                     'Heartrate' => (float)$heartRate,
-                    'BS' => (float)$request->bs
+                    'BS' => round($bs_mmol, 2) // --- Kirim dalam format mmol/L ---
                 ],
-                'maternal_health' => [
+                'maternal_health' => [ // Menggunakan mg/dL
                     'Age' => (int)$request->age,
                     'SystolicBP' => (float)$request->systolic_bp,
                     'DiastolicBP' => (float)$request->diastolic_bp,
-                    'BS' => (float)$request->bs,
+                    'BS' => $bs_mgdl,
                     'BodyTemp' => (float)$bodyTemp,
                     'HeartRate' => (float)$heartRate
                 ]
             ];
-
-            // Log the request for debugging
+            
             \Log::info('Sending request to ML API:', [
                 'user_id' => $user->id,
-                'deteksi_id' => $deteksi->deteksi_id,
-                'calculated_map' => round($map, 2),
+                'deteksi_id' => $deteksi->id, // Menggunakan id yang benar
                 'request_data' => $requestData
             ]);
 
-            // Kirim ke model ML
             $response = Http::timeout(30)->post('https://sehatiml-production.up.railway.app/predictdeteksi', $requestData);
 
-            // Debug response
             \Log::info('API Response Status: ' . $response->status());
             \Log::info('API Response Body: ' . $response->body());
 
-            // Parse response
             if ($response->successful()) {
                 $prediction = $response->json();
                 
-                // Check if we have valid prediction results
-                if (isset($prediction['diabetes_prediction']) && 
-                    isset($prediction['hypertension_prediction']) && 
-                    isset($prediction['maternal_health_prediction'])) {
-                    
-                    // Update hasil prediksi
+                if (isset($prediction['diabetes_prediction']) && isset($prediction['hypertension_prediction']) && isset($prediction['maternal_health_prediction'])) {
                     $deteksi->update([
                         'diabetes_prediction' => $prediction['diabetes_prediction'],
                         'hypertension_prediction' => $prediction['hypertension_prediction'],
                         'maternal_health_prediction' => $prediction['maternal_health_prediction'],
                     ]);
 
-                    // Success message dengan informasi tambahan
-                    $successMessage = 'Data berhasil disimpan dan prediksi telah diterima. ';
-                    $successMessage .= 'MAP (Mean Arterial Pressure) dihitung: ' . round($map, 1) . ' mmHg';
-
-                    return redirect()->route('deteksi.show', $deteksi->deteksi_id)
-                        ->with('success', $successMessage);
-                } 
-                // Check if we have error messages
-                else if (isset($prediction['diabetes_error']) || 
-                        isset($prediction['hypertension_error']) || 
-                        isset($prediction['maternal_health_error'])) {
-                    
-                    \Log::error('ML API returned errors: ' . json_encode($prediction));
-                    
-                    return redirect()->route('deteksi.show', $deteksi->deteksi_id)
-                        ->with('warning', 'Data disimpan tetapi layanan prediksi mengalami masalah teknis. Silakan coba lagi nanti.');
-                }
-                // Unexpected response format
-                else {
+                    return redirect()->route('deteksi.show', $deteksi->id) // Menggunakan id yang benar
+                        ->with('success', 'Data berhasil disimpan dan prediksi telah diterima.');
+                } else {
                     \Log::error('Unexpected response format from ML API: ' . json_encode($prediction));
-                    
-                    return redirect()->route('deteksi.show', $deteksi->deteksi_id)
+                    return redirect()->route('deteksi.show', $deteksi->id)
                         ->with('warning', 'Data disimpan tetapi format respon prediksi tidak sesuai. Silakan hubungi administrator.');
                 }
             } else {
-                // HTTP error
                 \Log::error('HTTP Error from ML API: ' . $response->status() . ' - ' . $response->body());
-                
-                return redirect()->route('deteksi.show', $deteksi->deteksi_id)
+                return redirect()->route('deteksi.show', $deteksi->id)
                     ->with('warning', 'Data disimpan tetapi layanan prediksi tidak dapat diakses. Status: ' . $response->status());
             }
-                        
+
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Validation errors
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput()
                 ->with('error', 'Mohon periksa kembali data yang dimasukkan');
-                
         } catch (\Exception $e) {
             \Log::error('Error in DeteksiPenyakit store: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi atau hubungi administrator.')
                 ->withInput();
         }
     }
     
-    
+    // ... (deleteAll and destroy methods remain the same) ...
     public function deleteAll()
     {
-        // Hanya hapus data milik user yang login
-        DeteksiPenyakit::where('user_id', Auth::id())->delete(); 
-        
+    DeteksiPenyakit::where('user_id', Auth::id())->delete(); 
         return redirect()->route('deteksi.index')
-            ->with('success', 'Semua data berhasil dihapus');
+        ->with('success', 'Semua data berhasil dihapus');
     }
-   
+
     public function destroy($id)
     {
-        $deteksi = DeteksiPenyakit::find($id);
-
-        if (!$deteksi) {
-            return redirect()->route('deteksi.index')
-                ->with('error', 'Data tidak ditemukan');
+    $deteksi = DeteksiPenyakit::find($id);
+    if (!$deteksi) {
+        return redirect()->route('deteksi.index')->with('error', 'Data tidak ditemukan');
         }
-        
-        // Pastikan yang menghapus adalah pemilik data
-        if (Auth::id() !== $deteksi->user_id) {
-            return redirect()->route('deteksi.index')
-                ->with('error', 'Anda tidak memiliki akses untuk menghapus data ini');
+    if (Auth::id() !== $deteksi->user_id) {
+        return redirect()->route('deteksi.index')->with('error', 'Anda tidak memiliki akses untuk menghapus data ini');
         }
-
         $deteksi->delete();
-
-        return redirect()->route('deteksi.index')
-            ->with('success', 'Data berhasil dihapus');
+        return redirect()->route('deteksi.index')->with('success', 'Data berhasil dihapus');
     }
 }

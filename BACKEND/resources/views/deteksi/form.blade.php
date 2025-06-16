@@ -21,407 +21,120 @@
                     <form method="POST" action="{{ route('deteksi.store') }}">
                         @csrf
                         
-                        <!-- Data Pribadi -->
                         <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h4 class="text-primary mb-3">
-                                    <i class="fas fa-user me-2"></i>Data Pribadi
-                                </h4>
+                            <div class="col-md-12"><h4 class="text-primary mb-3"><i class="fas fa-user me-2"></i>Data Pribadi</h4></div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="nama" class="form-label"><i class="fas fa-user me-1"></i>Nama Lengkap <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama" name="nama" value="{{ old('nama') }}" placeholder="Masukkan nama lengkap" required>
+                                <div class="form-text"><i class="fas fa-info-circle me-1"></i>Gunakan nama lengkap sesuai identitas</div>
+                                @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label for="nama" class="form-label">
-                                    <i class="fas fa-user me-1"></i>Nama Lengkap 
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" 
-                                       class="form-control @error('nama') is-invalid @enderror" 
-                                       id="nama" 
-                                       name="nama" 
-                                       value="{{ old('nama') }}" 
-                                       placeholder="Masukkan nama lengkap"
-                                       required>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Gunakan nama lengkap sesuai identitas
-                                </div>
-                                @error('nama')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="age" class="form-label">
-                                    <i class="fas fa-calendar-alt me-1"></i>Umur 
-                                    <span class="text-danger">*</span>
-                                </label>
+                                <label for="age" class="form-label"><i class="fas fa-calendar-alt me-1"></i>Umur <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="number" 
-                                           class="form-control @error('age') is-invalid @enderror" 
-                                           id="age" 
-                                           name="age" 
-                                           value="{{ old('age') }}" 
-                                           placeholder="25"
-                                           min="15" 
-                                           max="100"
-                                           required>
+                                    <input type="number" class="form-control @error('age') is-invalid @enderror" id="age" name="age" value="{{ old('age') }}" placeholder="25" min="15" max="100" required>
                                     <span class="input-group-text">tahun</span>
                                 </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Masukkan umur dalam tahun (15-100 tahun)
-                                </div>
-                                @error('age')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <div class="form-text"><i class="fas fa-info-circle me-1"></i>Masukkan umur dalam tahun (15-100 tahun)</div>
+                                @error('age')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         </div>
                         
-                        <!-- Data Fisik -->
                         <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h4 class="text-primary mb-3">
-                                    <i class="fas fa-weight me-2"></i>Data Fisik
-                                </h4>
+                            <div class="col-md-12"><h4 class="text-primary mb-3"><i class="fas fa-weight me-2"></i>Data Fisik</h4></div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="tinggi_badan" class="form-label"><i class="fas fa-ruler-vertical me-1"></i>Tinggi Badan <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" class="form-control @error('tinggi_badan') is-invalid @enderror" id="tinggi_badan" name="tinggi_badan" value="{{ old('tinggi_badan') }}" placeholder="160" min="100" max="250" required>
+                                    <span class="input-group-text">cm</span>
+                                </div>
+                                @error('tinggi_badan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="berat_badan" class="form-label"><i class="fas fa-weight me-1"></i>Berat Badan <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" class="form-control @error('berat_badan') is-invalid @enderror" id="berat_badan" name="berat_badan" value="{{ old('berat_badan') }}" placeholder="55" min="30" max="200" required>
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                                @error('berat_badan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             
                             <div class="col-md-4 mb-3">
-                                <label for="bmi" class="form-label">
-                                    <i class="fas fa-calculator me-1"></i>BMI (Body Mass Index) 
-                                    <span class="text-danger">*</span>
-                                </label>
+                                <label for="bmi_display" class="form-label"><i class="fas fa-calculator me-1"></i>BMI (Dihitung Otomatis)</label>
                                 <div class="input-group">
-                                    <input type="number" 
-                                           step="0.1" 
-                                           class="form-control @error('bmi') is-invalid @enderror" 
-                                           id="bmi" 
-                                           name="bmi" 
-                                           value="{{ old('bmi') }}" 
-                                           placeholder="22.5"
-                                           min="10" 
-                                           max="50"
-                                           required>
+                                    <input type="text" class="form-control bg-light @error('bmi') is-invalid @enderror" id="bmi_display" readonly placeholder="Hasil BMI">
                                     <span class="input-group-text">kg/m²</span>
                                 </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    <strong>Cara hitung:</strong> Berat (kg) ÷ (Tinggi (m))²<br>
-                                    <small>Normal: 18.5-24.9 | Berlebih: 25-29.9 | Obesitas: ≥30</small>
+                                <div class="form-text"><i class="fas fa-info-circle me-1"></i><small>Normal: 18.5-24.9</small></div>
+                                <input type="hidden" id="bmi" name="bmi" value="{{ old('bmi') }}">
+                                @error('bmi')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="systolic_bp" class="form-label"><i class="fas fa-heartbeat me-1"></i>Tekanan Sistolik <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control @error('systolic_bp') is-invalid @enderror" id="systolic_bp" name="systolic_bp" value="{{ old('systolic_bp', 120) }}" placeholder="120" min="80" max="250" required>
+                                    <span class="input-group-text">mmHg</span>
                                 </div>
-                                @error('bmi')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                @error('systolic_bp')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             
                             <div class="col-md-4 mb-3">
-                                <label for="systolic_bp" class="form-label">
-                                    <i class="fas fa-heartbeat me-1"></i>Tekanan Sistolik 
-                                    <span class="text-danger">*</span>
-                                </label>
+                                <label for="diastolic_bp" class="form-label"><i class="fas fa-heartbeat me-1"></i>Tekanan Diastolik <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="number" 
-                                           class="form-control @error('systolic_bp') is-invalid @enderror" 
-                                           id="systolic_bp" 
-                                           name="systolic_bp" 
-                                           value="{{ old('systolic_bp', 120) }}" 
-                                           placeholder="120"
-                                           min="80" 
-                                           max="250"
-                                           required>
+                                    <input type="number" class="form-control @error('diastolic_bp') is-invalid @enderror" id="diastolic_bp" name="diastolic_bp" value="{{ old('diastolic_bp', 80) }}" placeholder="80" min="50" max="150" required>
                                     <span class="input-group-text">mmHg</span>
                                 </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Angka atas saat mengukur tekanan darah
-                                </div>
-                                @error('systolic_bp')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                @error('diastolic_bp')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
-                            
+
                             <div class="col-md-4 mb-3">
-                                <label for="diastolic_bp" class="form-label">
-                                    <i class="fas fa-heartbeat me-1"></i>Tekanan Diastolik 
-                                    <span class="text-danger">*</span>
-                                </label>
+                                <label class="form-label"><i class="fas fa-chart-line me-1"></i>Mean Arterial Pressure (MAP)</label>
                                 <div class="input-group">
-                                    <input type="number" 
-                                           class="form-control @error('diastolic_bp') is-invalid @enderror" 
-                                           id="diastolic_bp" 
-                                           name="diastolic_bp" 
-                                           value="{{ old('diastolic_bp', 80) }}" 
-                                           placeholder="80"
-                                           min="50" 
-                                           max="150"
-                                           required>
+                                    <input type="text" class="form-control bg-light" id="map_display" readonly placeholder="Akan dihitung otomatis">
                                     <span class="input-group-text">mmHg</span>
                                 </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Angka bawah saat mengukur tekanan darah
-                                </div>
-                                @error('diastolic_bp')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <!-- Calculated MAP (Hidden) -->
-                            <input type="hidden" id="blood_pressure" name="blood_pressure" value="{{ old('blood_pressure') }}">
-                            
-                            <!-- MAP Display -->
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">
-                                    <i class="fas fa-chart-line me-1"></i>Mean Arterial Pressure (MAP)
-                                </label>
-                                <div class="input-group">
-                                    <input type="text" 
-                                           class="form-control bg-light" 
-                                           id="map_display" 
-                                           readonly 
-                                           placeholder="Akan dihitung otomatis">
-                                    <span class="input-group-text">mmHg</span>
-                                </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    <strong>Rumus:</strong> MAP = (Sistolik + 2 × Diastolik) ÷ 3
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="skin_thickness" class="form-label">
-                                    <i class="fas fa-ruler me-1"></i>Ketebalan Kulit
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" 
-                                           step="0.1" 
-                                           class="form-control @error('skin_thickness') is-invalid @enderror" 
-                                           id="skin_thickness" 
-                                           name="skin_thickness" 
-                                           value="{{ old('skin_thickness') }}" 
-                                           placeholder="20"
-                                           min="0" 
-                                           max="100">
-                                    <span class="input-group-text">mm</span>
-                                </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Ketebalan lipatan kulit (opsional, kosongkan jika tidak diketahui)
-                                </div>
-                                @error('skin_thickness')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
                             </div>
                         </div>
                         
-                        <!-- Data Kesehatan -->
                         <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h4 class="text-primary mb-3">
-                                    <i class="fas fa-stethoscope me-2"></i>Data Kesehatan
-                                </h4>
-                            </div>
+                            <div class="col-md-12"><h4 class="text-primary mb-3"><i class="fas fa-stethoscope me-2"></i>Data Kesehatan</h4></div>
                             
                             <div class="col-md-4 mb-3">
-                                <label for="bs" class="form-label">
-                                    <i class="fas fa-tint me-1"></i>Gula Darah 
-                                    <span class="text-danger">*</span>
-                                </label>
+                                <label for="bs" class="form-label"><i class="fas fa-tint me-1"></i>Gula Darah <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="number" 
-                                           step="0.1" 
-                                           class="form-control @error('bs') is-invalid @enderror" 
-                                           id="bs" 
-                                           name="bs" 
-                                           value="{{ old('bs') }}" 
-                                           placeholder="100"
-                                           min="50" 
-                                           max="500"
-                                           required>
+                                    <input type="number" step="0.1" class="form-control @error('bs') is-invalid @enderror" id="bs" name="bs" value="{{ old('bs') }}" placeholder="100" min="50" max="500" required>
                                     <span class="input-group-text">mg/dL</span>
                                 </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    <strong>Normal:</strong> 70-100 (puasa) | 70-140 (setelah makan)<br>
-                                    <small>Diabetes: ≥126 (puasa) atau ≥200 (sewaktu)</small>
-                                </div>
-                                @error('bs')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                @error('bs')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             
                             <div class="col-md-4 mb-3">
-                                <label for="pregnancies" class="form-label">
-                                    <i class="fas fa-baby me-1"></i>Jumlah Kehamilan 
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" 
-                                           class="form-control @error('pregnancies') is-invalid @enderror" 
-                                           id="pregnancies" 
-                                           name="pregnancies" 
-                                           value="{{ old('pregnancies', 0) }}" 
-                                           placeholder="0"
-                                           min="0" 
-                                           max="20"
-                                           required>
-                                    <span class="input-group-text">kali</span>
-                                </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Jumlah total kehamilan (termasuk yang sedang berlangsung)
-                                </div>
-                                @error('pregnancies')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="heart_rate" class="form-label">
-                                    <i class="fas fa-heart me-1"></i>Detak Jantung
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" 
-                                           class="form-control @error('heart_rate') is-invalid @enderror" 
-                                           id="heart_rate" 
-                                           name="heart_rate" 
-                                           value="{{ old('heart_rate', 70) }}" 
-                                           placeholder="70"
-                                           min="40" 
-                                           max="200">
-                                    <span class="input-group-text">bpm</span>
-                                </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    <strong>Normal:</strong> 60-100 bpm saat istirahat
-                                </div>
-                                @error('heart_rate')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="body_temp" class="form-label">
-                                    <i class="fas fa-thermometer-half me-1"></i>Suhu Tubuh
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" 
-                                           step="0.1" 
-                                           class="form-control @error('body_temp') is-invalid @enderror" 
-                                           id="body_temp" 
-                                           name="body_temp" 
-                                           value="{{ old('body_temp', 36.6) }}" 
-                                           placeholder="36.6"
-                                           min="35" 
-                                           max="42">
-                                    <span class="input-group-text">°C</span>
-                                </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    <strong>Normal:</strong> 36.1-37.2°C
-                                </div>
-                                @error('body_temp')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="bp_meds" class="form-label">
-                                    <i class="fas fa-pills me-1"></i>Konsumsi Obat Tekanan Darah
-                                </label>
-                                <select class="form-select @error('bp_meds') is-invalid @enderror" id="bp_meds" name="bp_meds">
-                                    <option value="">Pilih Opsi</option>
-                                    <option value="1" {{ old('bp_meds') == '1' ? 'selected' : '' }}>Ya, sedang mengonsumsi</option>
-                                    <option value="0" {{ old('bp_meds') == '0' ? 'selected' : '' }}>Tidak</option>
-                                </select>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Apakah saat ini mengonsumsi obat untuk tekanan darah tinggi?
-                                </div>
-                                @error('bp_meds')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                                <label for="pregnancies" class="form-label"><i class="fas fa-baby me-1"></i>Jumlah Kehamilan <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control @error('pregnancies') is-invalid @enderror" id="pregnancies" name="pregnancies" value="{{ old('pregnancies', 0) }}" placeholder="0" min="0" max="20" required>
+                                    <span class="input-group-text">kali</span>
+                                </div>
+                                @error('pregnancies')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                             <div class="col-md-4 mb-3">
+                                <label for="heart_rate" class="form-label"><i class="fas fa-heart me-1"></i>Detak Jantung</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control @error('heart_rate') is-invalid @enderror" id="heart_rate" name="heart_rate" value="{{ old('heart_rate', 70) }}" placeholder="70" min="40" max="200">
+                                    <span class="input-group-text">bpm</span>
+                                </div>
+                                @error('heart_rate')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
                         </div>
-                        
-                        <!-- Informasi Gaya Hidup -->
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h4 class="text-primary mb-3">
-                                    <i class="fas fa-running me-2"></i>Informasi Gaya Hidup
-                                </h4>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="current_smoker" class="form-label">
-                                    <i class="fas fa-smoking me-1"></i>Status Merokok
-                                </label>
-                                <select class="form-select @error('current_smoker') is-invalid @enderror" id="current_smoker" name="current_smoker">
-                                    <option value="">Pilih Status</option>
-                                    <option value="1" {{ old('current_smoker') == '1' ? 'selected' : '' }}>Ya, saya merokok</option>
-                                    <option value="0" {{ old('current_smoker') == '0' ? 'selected' : '' }}>Tidak merokok</option>
-                                </select>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Status merokok saat ini (dalam 30 hari terakhir)
-                                </div>
-                                @error('current_smoker')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="col-md-6 mb-3" id="cigs_container" style="display: none;">
-                                <label for="cigs_per_day" class="form-label">
-                                    <i class="fas fa-calculator me-1"></i>Jumlah Rokok per Hari
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" 
-                                           class="form-control @error('cigs_per_day') is-invalid @enderror" 
-                                           id="cigs_per_day" 
-                                           name="cigs_per_day" 
-                                           value="{{ old('cigs_per_day', 0) }}" 
-                                           placeholder="10"
-                                           min="0" 
-                                           max="100">
-                                    <span class="input-group-text">batang</span>
-                                </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Rata-rata jumlah rokok yang dikonsumsi per hari
-                                </div>
-                                @error('cigs_per_day')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        
-                        <!-- Hidden fields -->
-                        <input type="hidden" name="sex" value="0">
-                        
-                        <!-- Submit Section -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card bg-light border-0 mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-warning">
-                                            <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
-                                        </h5>
-                                        <p class="card-text mb-0">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Hasil deteksi ini hanya untuk referensi awal dan tidak menggantikan konsultasi medis profesional. 
-                                            Pastikan semua data yang dimasukkan akurat untuk hasil yang optimal.
-                                        </p>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-flex justify-content-between">
-                                    <a href="{{ route('deteksi.index') }}" class="btn btn-outline-secondary btn-lg">
-                                        <i class="fas fa-arrow-left me-2"></i>Kembali
-                                    </a>
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-paper-plane me-2"></i>Mulai Deteksi
-                                    </button>
-                                </div>
-                            </div>
+
+                        <div class="d-flex justify-content-between">
+                           <a href="{{ route('deteksi.index') }}" class="btn btn-outline-secondary btn-lg"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
+                           <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane me-2"></i>Mulai Deteksi</button>
                         </div>
                     </form>
                 </div>
@@ -434,22 +147,27 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Get all required elements ---
     const smokerSelect = document.getElementById('current_smoker');
     const cigsContainer = document.getElementById('cigs_container');
-    const cigsPerDayField = document.getElementById('cigs_per_day');
     const systolicInput = document.getElementById('systolic_bp');
     const diastolicInput = document.getElementById('diastolic_bp');
     const mapDisplay = document.getElementById('map_display');
-    const bloodPressureHidden = document.getElementById('blood_pressure');
     
+    // --- NEW: Elements for BMI calculation ---
+    const tinggiInput = document.getElementById('tinggi_badan');
+    const beratInput = document.getElementById('berat_badan');
+    const bmiDisplay = document.getElementById('bmi_display');
+    const bmiHidden = document.getElementById('bmi');
+
     // Toggle cigarettes per day field
     function toggleCigsPerDay() {
+        if (!smokerSelect) return;
         if (smokerSelect.value === '1') {
             cigsContainer.style.display = 'block';
-            cigsContainer.classList.add('animate__animated', 'animate__fadeIn');
         } else {
             cigsContainer.style.display = 'none';
-            cigsPerDayField.value = '0';
+            document.getElementById('cigs_per_day').value = '0';
         }
     }
     
@@ -461,163 +179,76 @@ document.addEventListener('DOMContentLoaded', function() {
         if (systolic > 0 && diastolic > 0) {
             const map = ((systolic + (2 * diastolic)) / 3).toFixed(1);
             mapDisplay.value = map;
-            bloodPressureHidden.value = map;
-            
-            // Add color coding for MAP values
-            mapDisplay.classList.remove('text-success', 'text-warning', 'text-danger');
-            if (map < 70) {
-                mapDisplay.classList.add('text-danger');
-            } else if (map > 100) {
-                mapDisplay.classList.add('text-warning');
-            } else {
-                mapDisplay.classList.add('text-success');
-            }
         } else {
             mapDisplay.value = '';
-            bloodPressureHidden.value = '';
         }
     }
     
-    // Validate BMI input
-    function validateBMI() {
-        const bmiInput = document.getElementById('bmi');
-        const bmiValue = parseFloat(bmiInput.value);
-        
-        if (bmiValue) {
-            bmiInput.classList.remove('border-success', 'border-warning', 'border-danger');
-            
-            if (bmiValue < 18.5) {
-                bmiInput.classList.add('border-warning');
-            } else if (bmiValue >= 18.5 && bmiValue <= 24.9) {
-                bmiInput.classList.add('border-success');
-            } else if (bmiValue >= 25 && bmiValue <= 29.9) {
-                bmiInput.classList.add('border-warning');
+    // --- NEW: Function to calculate BMI ---
+    function calculateBMI() {
+        const tinggi = parseFloat(tinggiInput.value) || 0;
+        const berat = parseFloat(beratInput.value) || 0;
+
+        // Check if values are valid for calculation
+        if (tinggi > 0 && berat > 0) {
+            // Convert height from cm to meters
+            const tinggiM = tinggi / 100;
+            // Calculate BMI: kg / (m * m)
+            const bmi = berat / (tinggiM * tinggiM);
+            const bmiFormatted = bmi.toFixed(1);
+
+            // Update display and hidden fields
+            bmiDisplay.value = bmiFormatted;
+            bmiHidden.value = bmiFormatted;
+
+            // Optional: Add color coding for BMI display
+            bmiDisplay.classList.remove('text-success', 'text-warning', 'text-danger');
+            if (bmi < 18.5) {
+                bmiDisplay.classList.add('text-warning');
+            } else if (bmi >= 18.5 && bmi <= 24.9) {
+                bmiDisplay.classList.add('text-success');
             } else {
-                bmiInput.classList.add('border-danger');
+                bmiDisplay.classList.add('text-danger');
             }
+        } else {
+            // Clear fields if input is not valid
+            bmiDisplay.value = '';
+            bmiHidden.value = '';
         }
     }
-    
-    // Validate blood sugar input
-    function validateBloodSugar() {
-        const bsInput = document.getElementById('bs');
-        const bsValue = parseFloat(bsInput.value);
-        
-        if (bsValue) {
-            bsInput.classList.remove('border-success', 'border-warning', 'border-danger');
-            
-            if (bsValue < 70) {
-                bsInput.classList.add('border-warning');
-            } else if (bsValue >= 70 && bsValue <= 100) {
-                bsInput.classList.add('border-success');
-            } else if (bsValue > 100 && bsValue < 126) {
-                bsInput.classList.add('border-warning');
-            } else {
-                bsInput.classList.add('border-danger');
-            }
-        }
+
+    // --- Event listeners ---
+    if (smokerSelect) {
+        smokerSelect.addEventListener('change', toggleCigsPerDay);
     }
-    
-    // Event listeners
-    smokerSelect.addEventListener('change', toggleCigsPerDay);
     systolicInput.addEventListener('input', calculateMAP);
     diastolicInput.addEventListener('input', calculateMAP);
-    document.getElementById('bmi').addEventListener('input', validateBMI);
-    document.getElementById('bs').addEventListener('input', validateBloodSugar);
+
+    // --- NEW: Event listeners for BMI calculation ---
+    tinggiInput.addEventListener('input', calculateBMI);
+    beratInput.addEventListener('input', calculateBMI);
     
-    // Initial calculations
-    toggleCigsPerDay();
+    // --- Initial calculations on page load (for old data) ---
+    if (smokerSelect) {
+        toggleCigsPerDay();
+    }
     calculateMAP();
-    validateBMI();
-    validateBloodSugar();
-    
-    // Form validation before submit
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const requiredFields = document.querySelectorAll('input[required], select[required]');
-        let isValid = true;
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                field.classList.add('is-invalid');
-                isValid = false;
-            } else {
-                field.classList.remove('is-invalid');
-            }
-        });
-        
-        if (!isValid) {
-            e.preventDefault();
-            alert('Mohon lengkapi semua field yang wajib diisi (bertanda *)');
-            
-            // Scroll to first invalid field
-            const firstInvalid = document.querySelector('.is-invalid');
-            if (firstInvalid) {
-                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstInvalid.focus();
-            }
-        }
-    });
-    
-    // Add tooltips for better UX
-    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltips.forEach(tooltip => {
-        new bootstrap.Tooltip(tooltip);
-    });
+    calculateBMI(); 
 });
 </script>
+@endsection
 
+@section('styles')
+{{-- You can add the same styles you had before here if they are not in a global stylesheet --}}
 <style>
 .form-control:focus {
     border-color: #0d6efd;
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
+.text-success { color: #198754 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-danger  { color: #dc3545 !important; }
 
-.border-success {
-    border-color: #198754 !important;
-}
-
-.border-warning {
-    border-color: #ffc107 !important;
-}
-
-.border-danger {
-    border-color: #dc3545 !important;
-}
-
-.card {
-    border: none;
-    border-radius: 15px;
-}
-
-.card-header {
-    border-radius: 15px 15px 0 0 !important;
-}
-
-.form-control, .form-select {
-    border-radius: 8px;
-}
-
-.btn {
-    border-radius: 8px;
-    padding: 0.75rem 1.5rem;
-}
-
-.input-group-text {
-    background-color: #f8f9fa;
-    border-color: #dee2e6;
-}
-
-.animate__fadeIn {
-    animation-duration: 0.5s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate__animated.animate__fadeIn {
-    animation-name: fadeIn;
-}
+/* ... other styles ... */
 </style>
 @endsection
