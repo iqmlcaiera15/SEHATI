@@ -186,8 +186,7 @@ class DeteksiDesktopController extends Controller
                     'HeartRate' => (float)$heartRate
                 ]
             ];
-            dd($requestData);
-            
+
             Log::info('Sending request to ML API:', [
                 'user_id' => $user->id,
                 'deteksi_id' => $deteksi->id,
