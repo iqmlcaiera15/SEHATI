@@ -39,6 +39,17 @@ class DeteksiDesktopController extends Controller
     public function indexlatest()
     {
         $deteksiPenyakit = DeteksiPenyakit::latest()->first();
+        switch ($deteksi->maternal_health_prediction) {
+        case 'low risk':
+            $deteksi->maternal_health_prediction = 0;
+             break;
+        case 'medium risk':
+             $deteksi->maternal_health_prediction = 1;
+            break;
+        case 'high risk':
+            $deteksi->maternal_health_prediction = 2;
+            break;
+}
         
         if (!$deteksiPenyakit) {
             return redirect()->route('deteksi.index')->with('info', 'Belum ada data deteksi');
