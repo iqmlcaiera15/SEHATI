@@ -14,11 +14,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     
     <!-- Custom CSS -->
-    <style>
-    body {
-        background-color: #f8f9fa;
-    }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     
 </head>
 <body class="sb-nav-fixed">
