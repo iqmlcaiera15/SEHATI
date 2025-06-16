@@ -125,70 +125,57 @@
                         <div class="col-md-4 mb-4">
                             <div class="card h-100">
                                 <div class="card-header 
-                                    @if($deteksi->maternal_health_prediction == 0)
-                                        bg-success text-white
-                                    @elseif($deteksi->maternal_health_prediction == 1)
+                                    @if($deteksi->maternal_health_prediction === 'low risk')
                                         bg-warning text-dark
-                                    @else
+                                    @elseif($deteksi->maternal_health_prediction === 'high risk')
                                         bg-danger text-white
+                                    @else
+                                        bg-success text-white
                                     @endif">
                                     <h5 class="mb-0">Hasil Kesehatan Maternal</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="text-center mb-3">
                                         <h2>
-                                            <div class="card-header 
-                                                @if($deteksi->maternal_health_prediction === 'low risk')
-                                                    bg-warning text-dark
-                                                @elseif($deteksi->maternal_health_prediction === 'high risk')
-                                                    bg-danger text-white
-                                                @else
-                                                    bg-success text-white
-                                                @endif">
-                                                <h5 class="mb-0">Hasil Kesehatan Maternal</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="text-center mb-3">
-                                                    <h2>
-                                                        @if($deteksi->maternal_health_prediction === 'low risk')
-                                                            <i class="fas fa-exclamation-circle text-warning"></i> Risiko Rendah
-                                                        @elseif($deteksi->maternal_health_prediction === 'high risk')
-                                                            <i class="fas fa-exclamation-triangle text-danger"></i> Risiko Tinggi
-                                                        @else
-                                                            <i class="fas fa-check-circle text-success"></i> Normal
-                                                        @endif
-                                                    </h2>
-                                                </div>
-                                                <div>
-                                                    <p>Faktor risiko yang dianalisis:</p>
-                                                    <ul>
-                                                        <li>Usia: {{ $deteksi->age }} tahun</li>
-                                                        <li>Gula Darah: {{ $deteksi->bs }} mg/dL</li>
-                                                        <li>Tekanan Sistolik: {{ $deteksi->systolic_bp ?? 'Tidak diisi' }}</li>
-                                                        <li>Tekanan Diastolik: {{ $deteksi->diastolic_bp ?? 'Tidak diisi' }}</li>
-                                                        <li>Detak Jantung: {{ $deteksi->heart_rate ?? 'Tidak diisi' }}</li>
-                                                        <li>Suhu Tubuh: {{ $deteksi->body_temp ?? 'Tidak diisi' }} °C</li>
-                                                    </ul>
-                                                </div>
+                                            @if($deteksi->maternal_health_prediction === 'low risk')
+                                                <i class="fas fa-exclamation-circle text-warning"></i> Risiko Rendah
+                                            @elseif($deteksi->maternal_health_prediction === 'high risk')
+                                                <i class="fas fa-exclamation-triangle text-danger"></i> Risiko Tinggi
+                                            @else
+                                                <i class="fas fa-check-circle text-success"></i> Normal
+                                            @endif
+                                        </h2>
+                                    </div>
+                                    <div>
+                                        <p>Faktor risiko yang dianalisis:</p>
+                                        <ul>
+                                            <li>Usia: {{ $deteksi->age }} tahun</li>
+                                            <li>Gula Darah: {{ $deteksi->bs }} mg/dL</li>
+                                            <li>Tekanan Sistolik: {{ $deteksi->systolic_bp ?? 'Tidak diisi' }}</li>
+                                            <li>Tekanan Diastolik: {{ $deteksi->diastolic_bp ?? 'Tidak diisi' }}</li>
+                                            <li>Detak Jantung: {{ $deteksi->heart_rate ?? 'Tidak diisi' }}</li>
+                                            <li>Suhu Tubuh: {{ $deteksi->body_temp ?? 'Tidak diisi' }} °C</li>
+                                        </ul>
+                                    </div>
 
-                                                <div class="mt-3">
-                                                    @if($deteksi->maternal_health_prediction === 'low risk')
-                                                        <p class="alert alert-warning">
-                                                            Hasil menunjukkan risiko rendah pada kesehatan maternal. Disarankan untuk berkonsultasi dengan dokter.
-                                                        </p>
-                                                    @elseif($deteksi->maternal_health_prediction === 'high risk')
-                                                        <p class="alert alert-danger">
-                                                            Hasil menunjukkan risiko tinggi pada kesehatan maternal. Harap segera konsultasi dengan dokter.
-                                                        </p>
-                                                    @else
-                                                        <p class="alert alert-success">
-                                                            Hasil menunjukkan kondisi kesehatan maternal normal. Tetap jaga pola hidup sehat.
-                                                        </p>
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                                                
+                                    <div class="mt-3">
+                                        @if($deteksi->maternal_health_prediction === 'medium risk')
+                                            <p class="alert alert-warning">
+                                                Hasil menunjukkan risiko rendah pada kesehatan maternal. Disarankan untuk berkonsultasi dengan dokter.
+                                            </p>
+                                        @elseif($deteksi->maternal_health_prediction === 'high risk')
+                                            <p class="alert alert-danger">
+                                                Hasil menunjukkan risiko tinggi pada kesehatan maternal. Harap segera konsultasi dengan dokter.
+                                            </p>
+                                        @else
+                                            <p class="alert alert-success">
+                                                Hasil menunjukkan kondisi kesehatan maternal normal. Tetap jaga pola hidup sehat.
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                    
                     <div class="row mt-4">
                         <div class="col-md-12">
                             <div class="alert alert-info">
