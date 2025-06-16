@@ -137,7 +137,7 @@
                                 <div class="card-body">
                                     <div class="text-center mb-3">
                                         <h2>
-                                            @if($deteksi->maternal_health_prediction === 'low risk')
+                                            @if($deteksi->maternal_health_prediction === 'medium risk')
                                                 <i class="fas fa-exclamation-circle text-warning"></i> Risiko Rendah
                                             @elseif($deteksi->maternal_health_prediction === 'high risk')
                                                 <i class="fas fa-exclamation-triangle text-danger"></i> Risiko Tinggi
