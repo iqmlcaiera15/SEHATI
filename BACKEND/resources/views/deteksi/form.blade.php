@@ -21,6 +21,7 @@
                     <form method="POST" action="{{ route('deteksi.store') }}">
                         @csrf
                         
+                        <!-- Data Pribadi -->
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <h4 class="text-primary mb-3">
@@ -76,6 +77,7 @@
                             </div>
                         </div>
                         
+                        <!-- Data Fisik -->
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <h4 class="text-primary mb-3">
@@ -83,37 +85,81 @@
                                 </h4>
                             </div>
                             
-                            {{-- PERUBAHAN DIMULAI: Implementasi dari Kode 1 --}}
+                            <!-- Input Tinggi Badan -->
                             <div class="col-md-4 mb-3">
-                                <label for="tinggi_badan" class="form-label"><i class="fas fa-ruler-vertical me-1"></i>Tinggi Badan <span class="text-danger">*</span></label>
+                                <label for="tinggi_badan" class="form-label">
+                                    <i class="fas fa-ruler-vertical me-1"></i>Tinggi Badan 
+                                    <span class="text-danger">*</span>
+                                </label>
                                 <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control @error('tinggi_badan') is-invalid @enderror" id="tinggi_badan" name="tinggi_badan" value="{{ old('tinggi_badan') }}" placeholder="160" min="100" max="250" required>
+                                    <input type="number" 
+                                           step="0.1" 
+                                           class="form-control @error('tinggi_badan') is-invalid @enderror" 
+                                           id="tinggi_badan" 
+                                           name="tinggi_badan" 
+                                           value="{{ old('tinggi_badan') }}" 
+                                           placeholder="160"
+                                           min="100" 
+                                           max="250"
+                                           required>
                                     <span class="input-group-text">cm</span>
                                 </div>
-                                @error('tinggi_badan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Masukkan tinggi badan dalam centimeter
+                                </div>
+                                @error('tinggi_badan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
+                            <!-- Input Berat Badan -->
                             <div class="col-md-4 mb-3">
-                                <label for="berat_badan" class="form-label"><i class="fas fa-weight me-1"></i>Berat Badan <span class="text-danger">*</span></label>
+                                <label for="berat_badan" class="form-label">
+                                    <i class="fas fa-weight me-1"></i>Berat Badan 
+                                    <span class="text-danger">*</span>
+                                </label>
                                 <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control @error('berat_badan') is-invalid @enderror" id="berat_badan" name="berat_badan" value="{{ old('berat_badan') }}" placeholder="55" min="30" max="200" required>
+                                    <input type="number" 
+                                           step="0.1" 
+                                           class="form-control @error('berat_badan') is-invalid @enderror" 
+                                           id="berat_badan" 
+                                           name="berat_badan" 
+                                           value="{{ old('berat_badan') }}" 
+                                           placeholder="55"
+                                           min="30" 
+                                           max="200"
+                                           required>
                                     <span class="input-group-text">kg</span>
                                 </div>
-                                @error('berat_badan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Masukkan berat badan dalam kilogram
+                                </div>
+                                @error('berat_badan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             
+                            <!-- BMI Display (Calculated automatically) -->
                             <div class="col-md-4 mb-3">
-                                <label for="bmi_display" class="form-label"><i class="fas fa-calculator me-1"></i>BMI (Dihitung Otomatis)</label>
+                                <label for="bmi_display" class="form-label">
+                                    <i class="fas fa-calculator me-1"></i>BMI (Body Mass Index)
+                                </label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control bg-light @error('bmi') is-invalid @enderror" id="bmi_display" readonly placeholder="Hasil BMI">
+                                    <input type="text" 
+                                           class="form-control bg-light" 
+                                           id="bmi_display" 
+                                           readonly 
+                                           placeholder="Akan dihitung otomatis">
                                     <span class="input-group-text">kg/m²</span>
                                 </div>
-                                <div class="form-text"><i class="fas fa-info-circle me-1"></i><small>Normal: 18.5-24.9</small></div>
-                                <input type="hidden" id="bmi" name="bmi" value="{{ old('bmi') }}">
-                                @error('bmi')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <strong>Normal:</strong> 18.5-24.9 | <strong>Berlebih:</strong> 25-29.9 | <strong>Obesitas:</strong> ≥30
+                                </div>
                             </div>
-                            {{-- PERUBAHAN SELESAI --}}
-
+                            
                             <div class="col-md-4 mb-3">
                                 <label for="systolic_bp" class="form-label">
                                     <i class="fas fa-heartbeat me-1"></i>Tekanan Sistolik 
@@ -166,8 +212,7 @@
                                 @enderror
                             </div>
                             
-                            <input type="hidden" id="blood_pressure" name="blood_pressure" value="{{ old('blood_pressure') }}">
-                            
+                            <!-- MAP Display -->
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">
                                     <i class="fas fa-chart-line me-1"></i>Mean Arterial Pressure (MAP)
@@ -212,6 +257,7 @@
                             </div>
                         </div>
                         
+                        <!-- Data Kesehatan -->
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <h4 class="text-primary mb-3">
@@ -219,18 +265,19 @@
                                 </h4>
                             </div>
                             
-                            <div class="col-md-4 mb-3">
-                                <label for="bs" class="form-label">
+                            <!-- Input Gula Darah dengan Konversi Otomatis -->
+                            <div class="col-md-6 mb-3">
+                                <label for="bs_mgdl" class="form-label">
                                     <i class="fas fa-tint me-1"></i>Gula Darah 
                                     <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
                                     <input type="number" 
                                            step="0.1" 
-                                           class="form-control @error('bs') is-invalid @enderror" 
-                                           id="bs" 
-                                           name="bs" 
-                                           value="{{ old('bs') }}" 
+                                           class="form-control @error('bs_mgdl') is-invalid @enderror" 
+                                           id="bs_mgdl" 
+                                           name="bs_mgdl" 
+                                           value="{{ old('bs_mgdl') }}" 
                                            placeholder="100"
                                            min="50" 
                                            max="500"
@@ -242,9 +289,29 @@
                                     <strong>Normal:</strong> 70-100 (puasa) | 70-140 (setelah makan)<br>
                                     <small>Diabetes: ≥126 (puasa) atau ≥200 (sewaktu)</small>
                                 </div>
-                                @error('bs')
+                                @error('bs_mgdl')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+
+                            <!-- Display Konversi ke mmol/L -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-exchange-alt me-1"></i>Gula Darah (mmol/L)
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" 
+                                           class="form-control bg-light" 
+                                           id="bs_mmol_display" 
+                                           readonly 
+                                           placeholder="Akan dikonversi otomatis">
+                                    <span class="input-group-text">mmol/L</span>
+                                </div>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <strong>Konversi:</strong> mg/dL ÷ 18.0182 = mmol/L<br>
+                                    <small><strong>Normal mmol/L:</strong> 3.9-5.6 (puasa) | 3.9-7.8 (setelah makan)</small>
+                                </div>
                             </div>
                             
                             <div class="col-md-4 mb-3">
@@ -341,6 +408,7 @@
                             </div>
                         </div>
                         
+                        <!-- Informasi Gaya Hidup -->
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <h4 class="text-primary mb-3">
@@ -391,8 +459,10 @@
                             </div>
                         </div>
                         
+                        <!-- Hidden fields -->
                         <input type="hidden" name="sex" value="0">
                         
+                        <!-- Submit Section -->
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="card bg-light border-0 mb-3">
@@ -429,22 +499,22 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // --- Get all required elements ---
     const smokerSelect = document.getElementById('current_smoker');
     const cigsContainer = document.getElementById('cigs_container');
     const cigsPerDayField = document.getElementById('cigs_per_day');
     const systolicInput = document.getElementById('systolic_bp');
     const diastolicInput = document.getElementById('diastolic_bp');
     const mapDisplay = document.getElementById('map_display');
-    const bloodPressureHidden = document.getElementById('blood_pressure');
     
-    // --- PERUBAHAN DIMULAI: Elemen untuk kalkulasi BMI dari Kode 1 ---
+    // Input untuk BMI calculation
     const tinggiInput = document.getElementById('tinggi_badan');
     const beratInput = document.getElementById('berat_badan');
     const bmiDisplay = document.getElementById('bmi_display');
-    const bmiHidden = document.getElementById('bmi');
-    // --- PERUBAHAN SELESAI ---
-
+    
+    // Input untuk Blood Sugar conversion
+    const bsMgdlInput = document.getElementById('bs_mgdl');
+    const bsMmolDisplay = document.getElementById('bs_mmol_display');
+    
     // Toggle cigarettes per day field
     function toggleCigsPerDay() {
         if (smokerSelect.value === '1') {
@@ -456,6 +526,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Calculate BMI automatically
+    function calculateBMI() {
+        const tinggi = parseFloat(tinggiInput.value) || 0;
+        const berat = parseFloat(beratInput.value) || 0;
+        
+        if (tinggi > 0 && berat > 0) {
+            const tinggiMeter = tinggi / 100; // Convert cm to meters
+            const bmi = (berat / (tinggiMeter * tinggiMeter)).toFixed(2);
+            bmiDisplay.value = bmi;
+            
+            // Add color coding for BMI values
+            bmiDisplay.classList.remove('text-success', 'text-warning', 'text-danger');
+            if (bmi < 18.5) {
+                bmiDisplay.classList.add('text-warning');
+            } else if (bmi >= 18.5 && bmi <= 24.9) {
+                bmiDisplay.classList.add('text-success');
+            } else if (bmi >= 25 && bmi <= 29.9) {
+                bmiDisplay.classList.add('text-warning');
+            } else {
+                bmiDisplay.classList.add('text-danger');
+            }
+        } else {
+            bmiDisplay.value = '';
+        }
+    }
+    
+    // Convert Blood Sugar from mg/dL to mmol/L
+    function convertBloodSugar() {
+        const bsMgdl = parseFloat(bsMgdlInput.value) || 0;
+        
+        if (bsMgdl > 0) {
+            const bsMmol = (bsMgdl / 18.0182).toFixed(2);
+            bsMmolDisplay.value = bsMmol;
+            
+            // Add color coding for blood sugar values (mg/dL)
+            bsMgdlInput.classList.remove('border-success', 'border-warning', 'border-danger');
+            bsMmolDisplay.classList.remove('text-success', 'text-warning', 'text-danger');
+            
+            if (bsMgdl < 70) {
+                bsMgdlInput.classList.add('border-warning');
+                bsMmolDisplay.classList.add('text-warning');
+            } else if (bsMgdl >= 70 && bsMgdl <= 100) {
+                bsMgdlInput.classList.add('border-success');
+                bsMmolDisplay.classList.add('text-success');
+            } else if (bsMgdl > 100 && bsMgdl < 126) {
+                bsMgdlInput.classList.add('border-warning');
+                bsMmolDisplay.classList.add('text-warning');
+            } else {
+                bsMgdlInput.classList.add('border-danger');
+                bsMmolDisplay.classList.add('text-danger');
+            }
+        } else {
+            bsMmolDisplay.value = '';
+        }
+    }
+    
     // Calculate MAP (Mean Arterial Pressure)
     function calculateMAP() {
         const systolic = parseFloat(systolicInput.value) || 0;
@@ -464,7 +590,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (systolic > 0 && diastolic > 0) {
             const map = ((systolic + (2 * diastolic)) / 3).toFixed(1);
             mapDisplay.value = map;
-            bloodPressureHidden.value = map;
             
             // Add color coding for MAP values
             mapDisplay.classList.remove('text-success', 'text-warning', 'text-danger');
@@ -477,81 +602,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             mapDisplay.value = '';
-            bloodPressureHidden.value = '';
         }
     }
     
-    // --- PERUBAHAN DIMULAI: Fungsi kalkulasi BMI dari Kode 1 ---
-    function calculateBMI() {
-        const tinggi = parseFloat(tinggiInput.value) || 0;
-        const berat = parseFloat(beratInput.value) || 0;
-
-        // Check if values are valid for calculation
-        if (tinggi > 0 && berat > 0) {
-            // Convert height from cm to meters
-            const tinggiM = tinggi / 100;
-            // Calculate BMI: kg / (m * m)
-            const bmi = berat / (tinggiM * tinggiM);
-            const bmiFormatted = bmi.toFixed(1);
-
-            // Update display and hidden fields
-            bmiDisplay.value = bmiFormatted;
-            bmiHidden.value = bmiFormatted;
-
-            // Optional: Add color coding for BMI display
-            bmiDisplay.classList.remove('text-success', 'text-warning', 'text-danger');
-            if (bmi < 18.5) {
-                bmiDisplay.classList.add('text-warning');
-            } else if (bmi >= 18.5 && bmi <= 24.9) {
-                bmiDisplay.classList.add('text-success');
-            } else {
-                bmiDisplay.classList.add('text-danger');
-            }
-        } else {
-            // Clear fields if input is not valid
-            bmiDisplay.value = '';
-            bmiHidden.value = '';
-            bmiDisplay.classList.remove('text-success', 'text-warning', 'text-danger');
-        }
-    }
-    // --- PERUBAHAN SELESAI ---
-    
-    // Validate blood sugar input
-    function validateBloodSugar() {
-        const bsInput = document.getElementById('bs');
-        const bsValue = parseFloat(bsInput.value);
-        
-        if (bsValue) {
-            bsInput.classList.remove('border-success', 'border-warning', 'border-danger');
-            
-            if (bsValue < 70) {
-                bsInput.classList.add('border-warning');
-            } else if (bsValue >= 70 && bsValue <= 100) {
-                bsInput.classList.add('border-success');
-            } else if (bsValue > 100 && bsValue < 126) {
-                bsInput.classList.add('border-warning');
-            } else {
-                bsInput.classList.add('border-danger');
-            }
-        }
-    }
-    
-    // --- Event listeners ---
+    // Event listeners
     smokerSelect.addEventListener('change', toggleCigsPerDay);
     systolicInput.addEventListener('input', calculateMAP);
     diastolicInput.addEventListener('input', calculateMAP);
-    document.getElementById('bs').addEventListener('input', validateBloodSugar);
-    
-    // --- PERUBAHAN DIMULAI: Event listener untuk kalkulasi BMI dari Kode 1 ---
     tinggiInput.addEventListener('input', calculateBMI);
     beratInput.addEventListener('input', calculateBMI);
-    // --- PERUBAHAN SELESAI ---
+    bsMgdlInput.addEventListener('input', convertBloodSugar);
     
-    // --- Initial calculations on page load ---
+    // Initial calculations
     toggleCigsPerDay();
     calculateMAP();
-    calculateBMI(); // Panggil fungsi calculateBMI saat halaman dimuat
-    validateBloodSugar();
+    calculateBMI();
+    convertBloodSugar();
     
     // Form validation before submit
     document.querySelector('form').addEventListener('submit', function(e) {
@@ -567,10 +633,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        // Validate BMI calculation
+        const bmi = parseFloat(bmiDisplay.value);
+        if (!bmi || bmi < 10 || bmi > 50) {
+            alert('BMI tidak valid. Pastikan tinggi dan berat badan diisi dengan benar.');
+            tinggiInput.focus();
+            e.preventDefault();
+            return;
+        }
+        
+        // Validate blood sugar conversion
+        const bsMmol = parseFloat(bsMmolDisplay.value);
+        if (!bsMmol || bsMmol < 2.8 || bsMmol > 27.8) {
+            alert('Nilai gula darah tidak valid. Pastikan nilai gula darah dalam range yang wajar.');
+            bsMgdlInput.focus();
+            e.preventDefault();
+            return;
+        }
+        
         if (!isValid) {
             e.preventDefault();
             alert('Mohon lengkapi semua field yang wajib diisi (bertanda *)');
             
+            // Scroll to first invalid field
             const firstInvalid = document.querySelector('.is-invalid');
             if (firstInvalid) {
                 firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -586,24 +671,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
 
-@section('styles')
 <style>
 .form-control:focus {
     border-color: #0d6efd;
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-/* Digunakan oleh JS untuk validasi blood sugar */
-.border-success { border-color: #198754 !important; }
-.border-warning { border-color: #ffc107 !important; }
-.border-danger  { border-color: #dc3545 !important; }
+.border-success {
+    border-color: #198754 !important;
+}
 
-/* Digunakan oleh JS untuk kalkulasi BMI dan MAP */
-.text-success { color: #198754 !important; }
-.text-warning { color: #ffc107 !important; }
-.text-danger  { color: #dc3545 !important; }
+.border-warning {
+    border-color: #ffc107 !important;
+}
+
+.border-danger {
+    border-color: #dc3545 !important;
+}
 
 .card {
     border: none;
@@ -639,6 +724,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .animate__animated.animate__fadeIn {
     animation-name: fadeIn;
+}
+
+/* Styling untuk readonly inputs dengan hasil perhitungan */
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+.text-success {
+    color: #198754 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
 }
 </style>
 @endsection
