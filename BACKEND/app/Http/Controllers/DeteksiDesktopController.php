@@ -218,7 +218,7 @@ class DeteksiDesktopController extends Controller
                         'predictions' => $prediction
                     ]);
 
-                    return redirect()->route('deteksi.show', $deteksi->id)
+                    return redirect()->route('deteksi.show', $deteksi->id ?? 1)
                         ->with('success', 'Data berhasil disimpan dan prediksi telah diterima.');
                 } else {
                     Log::error('Unexpected response format from ML API', [
