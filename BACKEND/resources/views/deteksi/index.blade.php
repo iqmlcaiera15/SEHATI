@@ -67,12 +67,12 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if($deteksi->maternal_health_prediction == 0)
+                                            @if($deteksi->maternal_health_prediction == 'low risk' )
                                                 <span class="badge bg-success">Normal</span>
-                                            @elseif($deteksi->maternal_health_prediction == 1)
+                                            @elseif($deteksi->maternal_health_prediction == 'medium risk')
                                                 <span class="badge bg-warning">Risiko Rendah</span>
                                             @else
-                                                <span class="badge bg-danger">Risiko Tinggi</span>
+                                                <span class="badge bg-danger">High Risk</span>
                                             @endif
                                         </td>
                                         <td>{{ $deteksi->created_at->format('d M Y H:i') }}</td>
