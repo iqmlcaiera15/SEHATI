@@ -12,7 +12,7 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <!-- Custom styles -->
-    <link href="{{ asset('css/styles.css') }}" rel="stylesheet" />
+    <link href="{{ asset('assets/css/styles.css') }}" rel="stylesheet" />
 </head>
 <body class="sb-nav-fixed">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
@@ -84,7 +84,7 @@
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core JavaScript -->
-    <script src="{{ asset('js/scripts.js') }}"></script>
+    <script src="{{ asset('assets/js/scripts.js') }}"></script>
 </body>
 </html>
 
