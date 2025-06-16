@@ -58,6 +58,7 @@ class DeteksiDesktopController extends Controller
                 'age' => 'required|integer|min:15|max:100',
                 'tinggi_badan' => 'required|numeric|min:100|max:250', // Validasi tinggi badan (cm)
                 'berat_badan' => 'required|numeric|min:30|max:200',  // Validasi berat badan (kg)
+                'bmi' => 'nullable|numeric|min:10|max:50', // Validasi hasil kalkulasi BMI
                 'bs' => 'required|numeric|min:50|max:500',
                 'skin_thickness' => 'nullable|numeric|min:0|max:100',
                 'current_smoker' => 'nullable|integer|in:0,1',
@@ -74,6 +75,7 @@ class DeteksiDesktopController extends Controller
                 'age.min' => 'Umur minimal 15 tahun',
                 'tinggi_badan.required' => 'Tinggi badan wajib diisi.',
                 'berat_badan.required' => 'Berat badan wajib diisi.',
+                'bmi.required' => 'BMI tidak dapat dihitung. Pastikan tinggi dan berat badan terisi.',
                 'bs.required' => 'Gula darah wajib diisi',
                 'bs.min' => 'Nilai gula darah tidak valid',
                 'systolic_bp.required' => 'Tekanan sistolik wajib diisi',
