@@ -267,9 +267,23 @@
             <hr>
             <h6><i class="fas fa-list"></i> Detail Jawaban EPDS:</h6>
             <div class="row">
+                @php
+                    $epdsQuestions = [
+                        'Dapat tertawa dan melihat sisi lucu dari berbagai hal',
+                        'Dapat menantikan sesuatu dengan perasaan senang',
+                        'Menyalahkan diri sendiri tanpa alasan ketika hal buruk terjadi',
+                        'Merasa cemas atau khawatir tanpa alasan yang jelas',
+                        'Merasa takut atau panik tanpa alasan yang jelas',
+                        'Merasa kewalahan dengan berbagai hal',
+                        'Sulit tidur karena merasa tidak bahagia',
+                        'Merasa sedih atau sengsara',
+                        'Merasa tidak bahagia sampai menangis',
+                        'Terlintas pikiran untuk menyakiti diri sendiri'
+                    ];
+                @endphp
                 @foreach($prediksi->epds->answers as $index => $answer)
                 <div class="col-md-6 mb-2">
-                    <small class="text-muted">Pertanyaan {{ $index + 1 }}:</small>
+                    <small class="text-muted">{{ $epdsQuestions[$index] ?? 'Pertanyaan ' . ($index + 1) }}:</small>
                     <span class="badge bg-light text-dark">{{ $answer }}</span>
                 </div>
                 @endforeach
