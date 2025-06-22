@@ -15,7 +15,6 @@ class PrediksiDepresiController extends Controller
     public function index()
     {
         $user = Auth::user(); // Ambil user dari JWT
-        dd($user);
     
         // Ambil data  hanya milik user tersebut
         $prediksidepresi = PrediksiDepresi::where('user_id', $user->id)->get();
