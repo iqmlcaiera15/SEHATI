@@ -12,21 +12,20 @@ use Illuminate\Support\Facades\Log;
 class PrediksiDepresiController extends Controller
 {
 
+    // public function index()
+    // {
+    // return response()->json(PrediksiDepresi::all());
+    // }
+
     public function index()
     {
-    return response()->json(PrediksiDepresi::all());
-    }
-
-    public function index1()
-    {
         $user = Auth::user(); // Ambil user dari JWT
-    
-        // Ambil data  hanya milik user tersebut
+
+        // Ambil data hanya milik user tersebut
         $prediksidepresi = PrediksiDepresi::where('user_id', $user->id)->get();
-    
-        return response()->json([
-            'PrediksiDepresi' => $prediksidepresi
-        ]);
+
+        // Return direct array seperti ::all()
+        return response()->json($prediksidepresi);
     }
 
         public function store(Request $request)
