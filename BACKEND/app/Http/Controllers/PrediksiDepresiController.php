@@ -6,10 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\PrediksiDepresi;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PrediksiDepresiController extends Controller
 {
-    
+
     public function index()
     {
         $user = Auth::user(); // Ambil user dari JWT
