@@ -38,9 +38,6 @@
                                     <a href="{{ route('register.bidan.form') }}" class="btn btn-primary btn-lg">
                                         <i class="fas fa-user-nurse me-2"></i> Daftar sebagai Bidan
                                     </a>
-                                    <a href="{{ route('register.dinkes.form') }}" class="btn btn-success btn-lg">
-                                        <i class="fas fa-hospital me-2"></i> Daftar sebagai Dinkes
-                                    </a>
                                     
                                     <div class="text-center mt-3">
                                         <p>Sudah memiliki akun? <a href="{{ route('auth.login') }}" class="fw-bold">Masuk di sini</a></p>
