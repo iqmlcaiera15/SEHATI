@@ -14,6 +14,11 @@ class PrediksiDepresiController extends Controller
 
     public function index()
     {
+    return response()->json(PrediksiDepresi::all());
+    }
+
+    public function index1()
+    {
         $user = Auth::user(); // Ambil user dari JWT
     
         // Ambil data  hanya milik user tersebut
