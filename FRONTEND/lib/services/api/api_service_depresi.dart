@@ -135,8 +135,8 @@ class DepressionService {
     }
   }
 
-  // Method to get all prediction history
-  Future<List<dynamic>> getDepressionHistory() async {
+    // Method to get all prediction history
+    Future<List<dynamic>> getDepressionHistory() async {
     final token = await _storage.read(key: 'jwt_token');
 
     if (token == null || token.isEmpty) {
@@ -153,12 +153,31 @@ class DepressionService {
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final decoded = jsonDecode(response.body);
+        
+        // Handle different response formats
+        if (decoded is List) {
+          // Format: PrediksiDepresi::all() - direct array
+          return decoded;
+        } else if (decoded is Map<String, dynamic>) {
+          // Format: wrapped in object
+          if (decoded.containsKey('PrediksiDepresi')) {
+            final data = decoded['PrediksiDepresi'];
+            if (data is List) {
+              return data; // Return array (bisa kosong atau berisi data)
+            }
+          }
+          // Jika ada key lain, sesuaikan di sini
+          return []; // Return empty list jika tidak ada data
+        }
+        
+        return []; // Default return empty list
       } else {
         final errorMessage = _parseErrorResponse(response);
         throw Exception('Failed to get depression history: $errorMessage');
       }
     } catch (e) {
+      print('Error in getDepressionHistory: $e'); // Debug log
       if (e is Exception) {
         rethrow;
       }
