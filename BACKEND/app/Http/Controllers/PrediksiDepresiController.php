@@ -9,9 +9,17 @@ use Illuminate\Support\Facades\Http;
 
 class PrediksiDepresiController extends Controller
 {
+    
     public function index()
     {
-        return response()->json(PrediksiDepresi::all());
+        $user = Auth::user(); // Ambil user dari JWT
+    
+        // Ambil data DeteksiPenyakit hanya milik user tersebut
+        $prediksidepresi = PrediksiDepresi::where('user_id', $user->id)->get();
+    
+        return response()->json([
+            'PrediksiDepresi' => $prediksidepresi
+        ]);
     }
 
         public function store(Request $request)
