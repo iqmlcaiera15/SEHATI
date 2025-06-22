@@ -6,12 +6,13 @@ import 'package:provider/provider.dart';
 import 'package:Sehati/view/prediksidepresi/detail_result.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-// Provider untuk mengelola state
+
 class DepressionHistoryProvider with ChangeNotifier {
   bool isLoading = true;
   List<dynamic> historyItems = [];
   String errorMessage = '';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
+  
   DepressionHistoryProvider() {
     fetchHistory();
   }
@@ -24,11 +25,14 @@ class DepressionHistoryProvider with ChangeNotifier {
     final token = await _storage.read(key: 'jwt_token');
 
     if (token == null || token.isEmpty) {
-      throw Exception('No token found. User might not be logged in.');
+      errorMessage = 'No token found. User might not be logged in.';
+      isLoading = false;
+      notifyListeners();
+      return;
     }
 
     try {
-      // Fetch both prediction and EPDS data
+      
       final prediksiResponse = await http.get(
         Uri.parse('https://sehatiapp-production.up.railway.app/api/prediksidepresi'),
         headers: {
@@ -51,20 +55,20 @@ class DepressionHistoryProvider with ChangeNotifier {
         final prediksiData = json.decode(prediksiResponse.body);
         final epdsData = json.decode(epdsResponse.body);
         
-        // Create a map of prediksi_depresi_id to EPDS data for quick lookup
+      
         final Map<int, dynamic> epdsMap = {};
         for (var epds in epdsData) {
           epdsMap[epds['prediksi_depresi_id']] = epds;
         }
         
-        // Combine the data
+      
         final List<dynamic> combinedData = [];
         
         for (var prediksi in prediksiData) {
           final int prediksiId = prediksi['id'];
           
           if (epdsMap.containsKey(prediksiId)) {
-            // If there's a corresponding EPDS, add it with EPDS data
+           
             combinedData.add({
               ...prediksi,
               'has_epds': true,
@@ -72,16 +76,15 @@ class DepressionHistoryProvider with ChangeNotifier {
               'score': epdsMap[prediksiId]['score'],
             });
           } else {
-            // If no corresponding EPDS, add prediction data only
+           
             combinedData.add({
               ...prediksi,
               'has_epds': false,
-              'score': 0, // No depression score for prediksi-only records
+              'score': 0, 
             });
           }
         }
         
-        // Sort by creation date (newest first)
         combinedData.sort((a, b) {
           DateTime dateA = DateTime.parse(a['created_at']);
           DateTime dateB = DateTime.parse(b['created_at']);
@@ -103,6 +106,10 @@ class DepressionHistoryProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchHistoryByUserId(String userId) async {
+    await fetchHistory();
+  }
+
   String getFormattedDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
@@ -114,7 +121,6 @@ class DepressionHistoryProvider with ChangeNotifier {
 
   String getDepressionStatus(int score, bool hasEpds, int? hasilPrediksi) {
     if (!hasEpds) {
-      // For prediction results without EPDS
       return hasilPrediksi == 1 ? 'Berpotensi Depresi' : 'Tidak Ada Gejala Depresi';
     }
     
@@ -132,17 +138,13 @@ class DepressionHistoryProvider with ChangeNotifier {
 
   Color getStatusColor(int score, bool hasEpds, int? hasilPrediksi) {
     if (!hasEpds) {
-      // For prediction results without EPDS
       return hasilPrediksi == 1 ? const Color(0xFFFFAA4D) : const Color(0xFF4DBAFF);
     }
     
-    // For EPDS results
-    if (score >= 13) {
+    if (score >= 14) {
       return const Color(0xFFFF4D4D);
-    } else if (score >= 10) {
+    } else if (score >= 12) {
       return const Color(0xFFFFAA4D);
-    } else if (score >= 1) {
-      return const Color(0xFFFFE04D);
     } else {
       return const Color(0xFF4DBAFF);
     }

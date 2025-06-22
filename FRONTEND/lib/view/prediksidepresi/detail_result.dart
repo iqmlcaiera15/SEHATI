@@ -25,13 +25,11 @@ class DepressionDetailView extends StatelessWidget {
 
 
   Color _getStatusColor(int score) {
-    if (score >= 13) {
+    if (score >= 14) {
       return const Color(0xFFFF4D4D);
-    } else if (score >= 10) {
+    } else if (score >= 12) {
       return const Color(0xFFFFAA4D);
-    } else if (score >= 1) {
-      return const Color(0xFFFFE04D);
-    } else {
+    }  else {
       return const Color(0xFF4DBAFF);
     }
   }
