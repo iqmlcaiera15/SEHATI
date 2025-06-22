@@ -3,11 +3,35 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:Sehati/view/prediksidepresi/detail_result.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Assuming the DepressionHistoryProvider is in the same file or imported
 
-class Historyview extends StatelessWidget {
+class Historyview extends StatefulWidget {
   const Historyview({Key? key}) : super(key: key);
+
+  @override
+  State<Historyview> createState() => _HistoryviewState();
+}
+
+class _HistoryviewState extends State<Historyview> {
+  String? userId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('user_id');
+    
+    if (userId != null && mounted) {
+      // Fetch history setelah mendapatkan user_id
+      context.read<DepressionHistoryProvider>().fetchHistoryByUserId(userId!);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +67,13 @@ class Historyview extends StatelessWidget {
   Widget _buildBody() {
     return Consumer<DepressionHistoryProvider>(
       builder: (context, provider, child) {
+        // Trigger fetch jika belum ada data dan userId tersedia
+        if (provider.historyItems.isEmpty && !provider.isLoading && userId != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            provider.fetchHistoryByUserId(userId!);
+          });
+        }
+
         if (provider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -68,7 +99,11 @@ class Historyview extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () => provider.fetchHistory(),
+                  onPressed: () {
+                    if (userId != null) {
+                      provider.fetchHistoryByUserId(userId!);
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4DBAFF),
                     foregroundColor: Colors.white,
@@ -89,169 +124,232 @@ class Historyview extends StatelessWidget {
 
         if (provider.historyItems.isEmpty) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 16),
-                const Text(
-                  'Belum ada riwayat prediksi',
-                  style: TextStyle(
-                    color: Color(0xFF1E293B),
-                    fontSize: 16,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Ilustrasi dengan lingkaran latar belakang
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4DBAFF).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.history,
+                        size: 60,
+                        color: Color(0xFF4DBAFF),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Lakukan tes prediksi depresi untuk melihat hasilnya di sini',
-                  style: TextStyle(
-                    color: Color(0xFF4C617F),
-                    fontSize: 14,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Belum ada riwayat prediksi',
+                    style: TextStyle(
+                      color: Color(0xFF1E293B),
+                      fontSize: 18,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Lakukan tes prediksi depresi untuk melihat hasilnya di sini',
+                    style: TextStyle(
+                      color: Color(0xFF4C617F),
+                      fontSize: 14,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  // Tambahan card kecil untuk visual appeal
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF4DBAFF),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Riwayat Anda akan muncul di sini',
+                          style: TextStyle(
+                            color: Color(0xFF4C617F),
+                            fontSize: 12,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: provider.historyItems.length,
-          itemBuilder: (context, index) {
-            final item = provider.historyItems[index];
-            final bool hasEpds = item['has_epds'] ?? false;
-            final int score = item['score'] as int? ?? 0;
-            final int? hasilPrediksi = item['hasil_prediksi'] as int?;
-            final date = provider.getFormattedDate(item['created_at']);
-            final status = provider.getDepressionStatus(score, hasEpds, hasilPrediksi);
-            final statusColor = provider.getStatusColor(score, hasEpds, hasilPrediksi);
+        return RefreshIndicator(
+          onRefresh: () async {
+            if (userId != null) {
+              await provider.fetchHistoryByUserId(userId!);
+            }
+          },
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: provider.historyItems.length,
+            itemBuilder: (context, index) {
+              final item = provider.historyItems[index];
+              final bool hasEpds = item['has_epds'] ?? false;
+              final int score = item['score'] as int? ?? 0;
+              final int? hasilPrediksi = item['hasil_prediksi'] as int?;
+              final date = provider.getFormattedDate(item['created_at']);
+              final status = provider.getDepressionStatus(score, hasEpds, hasilPrediksi);
+              final statusColor = provider.getStatusColor(score, hasEpds, hasilPrediksi);
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: InkWell(
-                onTap: () {
-                  if (hasEpds) {
-                    final epdsData = item['epds_data'];
-                    // Properly cast the data to Map<String, dynamic>
-                    final castData = epdsData is Map ? Map<String, dynamic>.from(epdsData) : <String, dynamic>{};
-                    
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DepressionDetailView(
-                          score: score,
-                          data: castData,
-                          id: item['id'],
-                        ),
-                      ),
-                    );
-                  } else {
-                    // Properly cast the prediksi data
-                    final castItem = Map<String, dynamic>.from(item);
-                    
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => _buildPrediksiDetailPage(context, castItem),
-                      ),
-                    );
-                  }
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: statusColor,
-                              shape: BoxShape.circle,
-                            ),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: InkWell(
+                  onTap: () {
+                    if (hasEpds) {
+                      final epdsData = item['epds_data'];
+                      // Properly cast the data to Map<String, dynamic>
+                      final castData = epdsData is Map ? Map<String, dynamic>.from(epdsData) : <String, dynamic>{};
+                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DepressionDetailView(
+                            score: score,
+                            data: castData,
+                            id: item['id'],
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              status,
-                              style: TextStyle(
+                        ),
+                      );
+                    } else {
+                      // Properly cast the prediksi data
+                      final castItem = Map<String, dynamic>.from(item);
+                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => _buildPrediksiDetailPage(context, castItem),
+                        ),
+                      );
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
                                 color: statusColor,
-                                fontSize: 16,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                status,
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontSize: 16,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                hasEpds ? 'Skor: $score' : (hasilPrediksi == 1 ? 'Potensi' : 'Aman'),
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          date,
+                          style: const TextStyle(
+                            color: Color(0xFF4C617F),
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        if (!hasEpds && hasilPrediksi == 0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Hasil prediksi awal',
+                              style: TextStyle(
+                                color: const Color(0xFF4C617F),
+                                fontSize: 12,
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              hasEpds ? 'Skor: $score' : (hasilPrediksi == 1 ? 'Potensi' : 'Aman'),
-                              style: TextStyle(
-                                color: statusColor,
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        date,
-                        style: const TextStyle(
-                          color: Color(0xFF4C617F),
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      if (!hasEpds && hasilPrediksi == 0)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            'Hasil prediksi awal',
-                            style: TextStyle(
-                              color: const Color(0xFF4C617F),
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );
