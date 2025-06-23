@@ -14,20 +14,20 @@ class DepressionDetailView extends StatelessWidget {
   }) : super(key: key);
 
   String _getDepressionStatus(int score) {
-  if (score >= 14) {
+  if (score >= 13) {
     return 'Risiko Tinggi Depresi';
-  } else if (score >= 12) {
+  } else if (score >= 10) {
     return 'Kemungkinan Depresi';
   } else {
-    return 'Gejala Ringan';
+    return 'Tidak Terindikasi Depresi';
   }
 }
 
 
   Color _getStatusColor(int score) {
-    if (score >= 14) {
+    if (score >= 13) {
       return const Color(0xFFFF4D4D);
-    } else if (score >= 12) {
+    } else if (score >= 10) {
       return const Color(0xFFFFAA4D);
     }  else {
       return const Color(0xFF4DBAFF);
@@ -45,9 +45,9 @@ class DepressionDetailView extends StatelessWidget {
 }
 
   String _getRecommendation(int score) {
-  if (score >= 14) {
+  if (score >= 13) {
     return 'Skor Anda menunjukkan risiko tinggi depresi. Segera lakukan penilaian diagnostik dan pengobatan dengan tenaga kesehatan profesional atau spesialis.';
-  } else if (score >= 12) {
+  } else if (score >= 10) {
     return 'Skor Anda menunjukkan kemungkinan depresi. Disarankan untuk mendapatkan dukungan, edukasi, dan melakukan konsultasi dengan dokter layanan primer.';
   } else {
     return 'Skor Anda menunjukkan gejala ringan. Lakukan skrining ulang dalam 2–4 minggu dan pertimbangkan berkonsultasi dengan tenaga medis.';

@@ -141,9 +141,9 @@ class DepressionHistoryProvider with ChangeNotifier {
       return hasilPrediksi == 1 ? const Color(0xFFFFAA4D) : const Color(0xFF4DBAFF);
     }
     
-    if (score >= 14) {
+    if (score >= 13) {
       return const Color(0xFFFF4D4D);
-    } else if (score >= 12) {
+    } else if (score >= 10) {
       return const Color(0xFFFFAA4D);
     } else {
       return const Color(0xFF4DBAFF);

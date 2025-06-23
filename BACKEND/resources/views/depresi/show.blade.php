@@ -53,13 +53,13 @@
                 
                 // Logika berdasarkan hasil prediksi dan skor EPDS (konsisten dengan index)
                 if ($prediksi->hasil_prediksi == 1) {
-                    if ($prediksi->epds && $prediksi->epds->score >= 14) {
+                    if ($prediksi->epds && $prediksi->epds->score >= 13) {
                         $finalResult = true;
                         $resultText = 'Resiko Tinggi Depresi';
                         $resultDescription = 'Menunjukkan gejala depresi dengan skor EPDS tinggi (skor: ' . $prediksi->epds->score . '). Memerlukan evaluasi medis segera.';
                         $badgeClass = 'bg-danger';
                         $headerClass = 'bg-danger';
-                    } elseif ($prediksi->epds && $prediksi->epds->score >= 12) {
+                    } elseif ($prediksi->epds && $prediksi->epds->score >= 10) {
                         $finalResult = true;
                         $resultText = 'Kemungkinan Gejala Depresi';
                         $resultDescription = 'Menunjukkan gejala depresi dengan skor EPDS sedang (skor: ' . $prediksi->epds->score . '). Disarankan untuk konsultasi lebih lanjut.';
@@ -77,13 +77,13 @@
                         $headerClass = 'bg-success';
                     }
                 } elseif ($prediksi->hasil_prediksi == 0) {
-                    if ($prediksi->epds && $prediksi->epds->score >= 14) {
+                    if ($prediksi->epds && $prediksi->epds->score >= 13) {
                         $finalResult = true;
                         $resultText = 'Resiko Tinggi Depresi';
                         $resultDescription = 'Meskipun gejala awal tidak terdeteksi, skor EPDS tinggi menunjukkan risiko depresi (skor: ' . $prediksi->epds->score . '). Memerlukan evaluasi medis segera.';
                         $badgeClass = 'bg-danger';
                         $headerClass = 'bg-danger';
-                    } elseif ($prediksi->epds && $prediksi->epds->score >= 12) {
+                    } elseif ($prediksi->epds && $prediksi->epds->score >= 10) {
                         $finalResult = true;
                         $resultText = 'Kemungkinan Gejala Depresi';
                         $resultDescription = 'Meskipun gejala awal tidak terdeteksi, skor EPDS menunjukkan kemungkinan depresi (skor: ' . $prediksi->epds->score . '). Disarankan untuk konsultasi lebih lanjut.';
@@ -220,8 +220,8 @@
                 <div class="col-md-4">
                     <div class="text-center">
                         <h2 class="display-4 
-                            @if($prediksi->epds->score >= 14) text-danger
-                            @elseif($prediksi->epds->score >= 12) text-warning
+                            @if($prediksi->epds->score >= 13) text-danger
+                            @elseif($prediksi->epds->score >= 10) text-warning
                             @else text-success
                             @endif">
                             {{ $prediksi->epds->score }}
@@ -232,13 +232,13 @@
                 <div class="col-md-4">
                     <div class="text-center">
                         <span class="badge 
-                            @if($prediksi->epds->score >= 14) bg-danger
-                            @elseif($prediksi->epds->score >= 12) bg-warning
+                            @if($prediksi->epds->score >= 13) bg-danger
+                            @elseif($prediksi->epds->score >= 10) bg-warning
                             @else bg-success
                             @endif fs-6 p-2">
-                            @if($prediksi->epds->score >= 14)
+                            @if($prediksi->epds->score >= 13)
                                 Resiko Tinggi Depresi
-                            @elseif($prediksi->epds->score >= 12)
+                            @elseif($prediksi->epds->score >= 10)
                                 Kemungkinan Gejala Depresi
                             @else
                                 Gejala Ringan
@@ -251,12 +251,12 @@
                     <div class="text-center">
                         <h6 class="text-info">Interpretasi:</h6>
                         <p class="small">
-                            @if($prediksi->epds->score >= 14)
-                                Skor ≥ 14 menunjukkan risiko tinggi depresi dan memerlukan evaluasi medis segera.
-                            @elseif($prediksi->epds->score >= 12)
-                                Skor 12-13 menunjukkan kemungkinan depresi dan disarankan untuk konsultasi lebih lanjut.
+                            @if($prediksi->epds->score >= 13)
+                                Skor ≥ 13 menunjukkan risiko tinggi depresi dan memerlukan evaluasi medis segera.
+                            @elseif($prediksi->epds->score >= 10)
+                                Skor 10-13 menunjukkan kemungkinan depresi dan disarankan untuk konsultasi lebih lanjut.
                             @else
-                                Skor < 12 menunjukkan gejala ringan dengan risiko depresi rendah.
+                                Skor < 10 menunjukkan gejala ringan dengan risiko depresi rendah.
                             @endif
                         </p>
                     </div>

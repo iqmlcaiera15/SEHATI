@@ -34,7 +34,7 @@ class DepressionResult extends StatelessWidget {
 
     // EPDS Score severity levels
     if (score != null) {
-      if (score! >= 14) {
+      if (score! >= 13) {
         return {
           'title': 'Risiko Tinggi Depresi',
           'description':
@@ -42,7 +42,7 @@ class DepressionResult extends StatelessWidget {
           'color': const Color(0xFFFF4D4D),
           'buttonText': 'Cari Bantuan Profesional',
         };
-      } else if (score! >= 12) {
+      } else if (score! >= 10) {
         return {
           'title': 'Kemungkinan Depresi',
           'description':
@@ -52,10 +52,10 @@ class DepressionResult extends StatelessWidget {
         };
       } else {
         return {
-          'title': 'Gejala Ringan',
+          'title': 'Tidak Ada Gejala Depresi',
           'description':
-              'Skor EPDS Anda menunjukkan gejala ringan. Lakukan re-screen dalam 2–4 minggu dan pertimbangkan konsultasi dengan tenaga medis.',
-          'color': const Color(0xFFFFE04D),
+              'Berdasarkan jawaban Anda, tidak ada indikasi gejala depresi saat ini.',
+          'color': const Color(0xFF4DBAFF),
           'buttonText': 'Lihat Saran',
         };
       } 
@@ -92,7 +92,7 @@ class DepressionResult extends StatelessWidget {
 
     // If depressed based on EPDS
     if (score != null) {
-      if (score! >= 13) {
+      if (score! >= 14) {
         return [
           {
             'title': 'Konsultasi segera',

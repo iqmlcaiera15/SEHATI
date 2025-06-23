@@ -51,11 +51,11 @@
                             
                             // Logika berdasarkan hasil prediksi dan skor EPDS
                             if ($data->hasil_prediksi == 1) {
-                                if ($data->epds && $data->epds->score >= 14) {
+                                if ($data->epds && $data->epds->score >= 13) {
                                     $finalResult = true;
                                     $hasilText = 'Resiko Tinggi Depresi';
                                     $badgeClass = 'bg-danger';
-                                } elseif ($data->epds && $data->epds->score >= 12) {
+                                } elseif ($data->epds && $data->epds->score >= 10) {
                                     $finalResult = true;
                                     $hasilText = 'Kemungkinan Gejala Depresi';
                                     $badgeClass = 'bg-warning';
@@ -65,11 +65,11 @@
                                     $badgeClass = 'bg-success';
                                 }
                             } elseif ($data->hasil_prediksi == 0) {
-                                if ($data->epds && $data->epds->score >= 14) {
+                                if ($data->epds && $data->epds->score >= 13) {
                                     $finalResult = true;
                                     $hasilText = 'Resiko Tinggi Depresi';
                                     $badgeClass = 'bg-danger';
-                                } elseif ($data->epds && $data->epds->score >= 12) {
+                                } elseif ($data->epds && $data->epds->score >= 10) {
                                     $finalResult = true;
                                     $hasilText = 'Kemungkinan Gejala Depresi';
                                     $badgeClass = 'bg-warning';
