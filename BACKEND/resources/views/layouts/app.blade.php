@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     
 </head>
-<body class="sb-nav-fixed">
+<body class="d-flex flex-column min-vh-100 sb-nav-fixed">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ route('bidan.dashboard') }}">
@@ -66,7 +66,7 @@
     </div>
 </nav>
 
-<main class="container mt-4">
+<main class="container mt-4 flex-grow-1">
     @yield('content')
 </main>
 
