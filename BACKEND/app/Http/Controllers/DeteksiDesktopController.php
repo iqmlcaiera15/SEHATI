@@ -14,7 +14,7 @@ class DeteksiDesktopController extends Controller
         $user = Auth::user();
 
         // Ambil data DeteksiPenyakit hanya milik user tersebut
-        $deteksiPenyakit = DeteksiPenyakit::where('user_id', $user->id)->get();
+        $deteksiPenyakit = DeteksiPenyakit::all();
         
         return view('deteksi.index', compact('deteksiPenyakit'));
     }
