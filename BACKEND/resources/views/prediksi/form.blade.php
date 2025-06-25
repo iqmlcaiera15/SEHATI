@@ -2,31 +2,33 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <!-- Note di luar card -->
-    <div class="row mb-2">
-        <div class="col-lg-8 col-md-10 mx-auto">
-            <div class="alert alert-info mb-3 rounded-3 px-4" style="background:linear-gradient(90deg, #eef7ff 70%, #e6f2fb);border:1.5px solid #bae0fd;">
-                <i class="fas fa-info-circle me-2"></i>
-                <b>Semua kolom wajib diisi</b>, gunakan kata sederhana, misal: <b>“tidak ada”</b> jika sehat.
-            </div>
-        </div>
-    </div>
 
-    <!-- Card Header -->
-    <div class="row mb-3">
+    <!-- Header Card -->
+    <div class="row mb-0">
         <div class="col-lg-8 col-md-10 mx-auto">
-            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #53b6ec 0%, #a1e3ec 100%); border-radius: 14px;">
+            <div class="card border-0 shadow-sm mb-0" style="background: linear-gradient(135deg, #53b6ec 0%, #58b3fa 100%); border-radius: 14px;">
                 <div class="card-body text-white d-flex justify-content-between align-items-center py-3">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fas fa-baby fs-2"></i>
                         <span style="font-size: 1.4rem; font-weight: 600;">Form Prediksi Persalinan</span>
                     </div>
                     <a href="{{ route('prediksi.index') }}"
-                        class="btn btn-outline-secondary fw-semibold d-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-none"
-                        style="border:1.5px solid #d7e4ef; color:#343a40;">
+                        class="btn btn-white fw-semibold d-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-none"
+                        style="border:1.5px solid #d7e4ef; color:#2176a6; background:#fff;">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert di bawah header -->
+    <div class="row mb-3">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="alert alert-info mb-0 rounded-3 px-4 py-2"
+                style="background:linear-gradient(90deg, #eef7ff 70%, #e6f2fb);border:1.5px solid #bae0fd; font-size:1.08rem;">
+                <i class="fas fa-info-circle me-2"></i>
+                <b>Semua kolom wajib diisi</b>, gunakan kata sederhana, misal: <b>“tidak ada”</b> jika sehat.
             </div>
         </div>
     </div>
@@ -218,6 +220,12 @@
         background: linear-gradient(60deg, #1a87e3, #4dbaff);
         color: #fff !important;
     }
+    .btn-white {
+        background: #fff !important;
+        color: #2176a6 !important;
+        border: 1.5px solid #d7e4ef !important;
+        font-weight: 600;
+    }
     .needs-validation .form-control:invalid,
     .needs-validation .form-select:invalid {
         border-color: #e0e6ed !important;
@@ -225,42 +233,3 @@
     }
 </style>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Validasi input: tidak boleh hanya angka untuk field kesehatan
-        function cekString(fieldId, msgId) {
-            const field = document.getElementById(fieldId);
-            const msg = document.getElementById(msgId);
-            if(!field) return;
-            field.addEventListener('input', function() {
-                if (/^\d+$/.test(field.value)) {
-                    msg && (msg.style.display = 'block');
-                } else {
-                    msg && (msg.style.display = 'none');
-                }
-            });
-        }
-        cekString('riwayat_kesehatan_ibu', 'err_kesehatan_ibu');
-        cekString('kondisi_kesehatan_janin', 'err_kesehatan_janin');
-
-        // Bootstrap tooltip & validation
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-        const forms = document.querySelectorAll('.needs-validation');
-        Array.from(forms).forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    });
-</script>
-@endpush

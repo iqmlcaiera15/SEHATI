@@ -96,20 +96,20 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="row g-0 align-items-stretch">
-            <!-- Tombol Prediksi Baru (Kecil, Hijau) -->
-            <div class="col-md-3 d-flex align-items-center">
+            <!-- Tombol Tambah Prediksi Baru (kalem, kecil, tidak mencolok) -->
+            <div class="col-auto d-flex align-items-center">
                 <a href="{{ route('prediksi.form') }}"
-                   class="btn px-3 py-2 fw-semibold d-flex flex-row align-items-center gap-2 justify-content-center w-100"
-                   style="background: linear-gradient(45deg, #43e97b, #38f9d7); border: none; color: #184a34; border-radius: 14px; box-shadow: 0 4px 12px rgba(67, 233, 123, 0.11); font-size: 1.13rem; min-height: 48px; max-width: 250px;">
+                   class="btn btn-tambah-prediksi fw-semibold d-flex align-items-center gap-2 px-4 py-2"
+                   style="font-size: 1.04rem; min-width: 170px;">
                     <i class="fas fa-plus-circle"></i>
-                    Prediksi Baru
+                    Tambah Prediksi Baru
                 </a>
             </div>
             <!-- Form Filter -->
-            <div class="col-md-9">
-                <form method="GET" action="{{ route('prediksi.index') }}" class="row g-2 align-items-end justify-content-end ms-md-2 mt-3 mt-md-0">
+            <div class="col">
+                <form method="GET" action="{{ route('prediksi.index') }}" class="d-flex flex-wrap gap-2 align-items-end justify-content-end ms-md-2 mt-3 mt-md-0">
                     @if(Auth::user()->role === 'bidan')
-                    <div class="col-auto">
+                    <div>
                         <label for="user_id" class="form-label mb-1">Nama Ibu Hamil</label>
                         <select name="user_id" id="user_id" class="form-select shadow-sm rounded-3">
                             <option value="">Semua</option>
@@ -123,7 +123,7 @@
                         </select>
                     </div>
                     @endif
-                    <div class="col-auto">
+                    <div>
                         <label for="method" class="form-label mb-1">Metode Persalinan</label>
                         <select name="method" id="method" class="form-select shadow-sm rounded-3">
                             <option value="">Semua</option>
@@ -131,11 +131,11 @@
                             <option value="caesar" {{ request('method') == 'caesar' ? 'selected' : '' }}>Caesar</option>
                         </select>
                     </div>
-                    <div class="col-auto">
+                    <div>
                         <label for="hpl" class="form-label mb-1">HPL</label>
                         <input type="date" name="hpl" id="hpl" class="form-control shadow-sm rounded-3" value="{{ request('hpl') }}">
                     </div>
-                    <div class="col-auto d-flex align-items-end gap-2 mt-md-4">
+                    <div class="d-flex align-items-end gap-2 mb-2">
                         <button type="submit" class="btn btn-danger d-flex align-items-center gap-2 shadow-sm rounded-3 px-3">
                             <i class="fas fa-filter"></i>
                             Terapkan Filter
@@ -150,6 +150,7 @@
         </div>
     </div>
 </div>
+
 
 
     <!-- Main Table -->
