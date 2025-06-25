@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Sehati/services/api/api_service_penyakit.dart'; // Pastikan path ini benar
 import 'result_deteksi_page.dart'; // Pastikan path ini benar
+import 'dart:math'; // Diperlukan untuk perhitungan BMI
 
 class AddDataPenyakit extends StatefulWidget {
   const AddDataPenyakit({super.key});
@@ -18,22 +19,34 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _pregnanciesController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
-  final TextEditingController _bmiController = TextEditingController();
-  // --- MODIFIKASI ---
-  // Controller ini sekarang akan diisi secara otomatis
+  // --- MODIFIKASI: Controller baru untuk berat dan tinggi ---
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
+  final TextEditingController _bmiController = TextEditingController(); // Tetap ada untuk menampung hasil
+  // --- AKHIR MODIFIKASI ---
   final TextEditingController _bloodPressureController = TextEditingController();
   final TextEditingController _bsController = TextEditingController();
-  final TextEditingController _skinThicknessController = TextEditingController();
   final TextEditingController _sexController = TextEditingController();
   final TextEditingController _cigsPerDayController = TextEditingController();
   final TextEditingController _systolicBpController = TextEditingController();
   final TextEditingController _diastolicBpController = TextEditingController();
   final TextEditingController _heartRateController = TextEditingController();
   final TextEditingController _bodyTempController = TextEditingController();
+  // Controller _skinThicknessController tidak lagi digunakan, diganti state dropdown
 
   // State untuk input Ya/Tidak
   String? _selectedCurrentSmoker;
   String? _selectedBpMeds;
+
+  // --- MODIFIKASI: State baru untuk dropdown ketebalan kulit ---
+  String? _selectedSkinThickness;
+  final Map<String, int> _skinThicknessMap = {
+    'Tidak Diketahui': 0,
+    'Tipis': 10,
+    'Sedang': 35,
+    'Tebal': 40,
+  };
+  // --- AKHIR MODIFIKASI ---
 
   final List<String> _yesNoOptions = ['Ya', 'Tidak'];
 
@@ -41,12 +54,15 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   final Map<String, String> _fieldInfo = {
     'pregnancies': 'Jumlah kehamilan yang pernah dialami (angka, misal: 0, 1, 2)',
     'age': 'Usia Anda saat ini dalam tahun (angka, misal: 30)',
-    'bmi': 'Body Mass Index (BMI) - indikator kegemukan. Dihitung dari berat (kg) / (tinggi (m))^2. Normal: 18.5-24.9',
-    // --- MODIFIKASI --- Deskripsi diubah untuk mencerminkan perhitungan otomatis
+    // --- MODIFIKASI: Deskripsi BMI diubah ---
+    'bmi': 'Body Mass Index (BMI) dihitung otomatis dari berat dan tinggi badan Anda. Normal: 18.5-24.9',
+    'weight_height': 'Masukkan berat badan dalam kilogram (kg) dan tinggi badan dalam sentimeter (cm).',
+    // --- AKHIR MODIFIKASI ---
     'blood_pressure': 'Mean Arterial Pressure (MAP) dihitung secara otomatis dari tekanan sistolik dan diastolik Anda.',
     'bs': 'Kadar gula darah (mg/dL). Normal puasa: <100 mg/dL, 2 jam setelah makan: <140 mg/dL',
-    'skin_thickness': 'Ketebalan lipatan kulit trisep (mm). Biasanya diukur oleh tenaga medis.',
-    'sex': 'Jenis kelamin. Sistem ini secara default untuk perempuan (nilai 1).',
+    // --- MODIFIKASI: Deskripsi Skin Thickness diubah ---
+    'skin_thickness': 'Perkiraan ketebalan lipatan kulit trisep. Pilih kategori yang paling sesuai atau "Tidak Diketahui" jika tidak yakin.',
+    // --- MODIFIKASI: Key 'sex' dihapus karena field tidak lagi ditampilkan ---
     'current_smoker': 'Apakah Anda perokok aktif saat ini?',
     'cigs_per_day': 'Jika perokok, rata-rata jumlah batang rokok yang dihisap per hari. Jika tidak, isi 0 atau kosongkan.',
     'bp_meds': 'Apakah Anda sedang dalam pengobatan atau rutin mengonsumsi obat untuk tekanan darah?',
@@ -59,37 +75,63 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   @override
   void initState() {
     super.initState();
-    _sexController.text = "1";
+    _sexController.text = "1"; // <-- PENTING: Nilai sex=1 tetap di-set di sini
     _selectedCurrentSmoker = "Tidak";
     _selectedBpMeds = "Tidak";
+    // --- MODIFIKASI: Default value untuk dropdown kulit ---
+    _selectedSkinThickness = 'Tidak Diketahui';
     _bodyTempController.text = "36.5";
     _updateCigsPerDayField();
 
-    // --- MODIFIKASI BARU ---
-    // Tambahkan listener ke controller sistolik dan diastolik
+    // Listener untuk perhitungan MAP (Otomatis)
     _systolicBpController.addListener(_calculateAndSetMAP);
     _diastolicBpController.addListener(_calculateAndSetMAP);
+
+    // --- MODIFIKASI: Listener untuk perhitungan BMI (Otomatis) ---
+    _weightController.addListener(_calculateAndSetBMI);
+    _heightController.addListener(_calculateAndSetBMI);
   }
 
-  // --- MODIFIKASI BARU ---
   // Fungsi untuk menghitung dan mengatur MAP (Mean Arterial Pressure)
   void _calculateAndSetMAP() {
     final double? systolic = double.tryParse(_systolicBpController.text);
     final double? diastolic = double.tryParse(_diastolicBpController.text);
 
-    // Pastikan kedua nilai valid sebelum menghitung
     if (systolic != null && diastolic != null && systolic > 0 && diastolic > 0) {
-      // Rumus MAP = (Sistolik + 2 * Diastolik) / 3
       final double map = (systolic + (2 * diastolic)) / 3;
-      // Update controller dengan nilai yang sudah diformat ke 2 angka desimal
-      setState(() {
+      if (mounted) {
+        setState(() {
           _bloodPressureController.text = map.toStringAsFixed(2);
-      });
+        });
+      }
     } else {
-      // Kosongkan field jika salah satu input tidak valid
-      setState(() {
+       if (mounted) {
+        setState(() {
           _bloodPressureController.text = "";
-      });
+        });
+      }
+    }
+  }
+
+  // --- MODIFIKASI: Fungsi baru untuk menghitung BMI ---
+  void _calculateAndSetBMI() {
+    final double? weight = double.tryParse(_weightController.text);
+    final double? heightCm = double.tryParse(_heightController.text);
+
+    if (weight != null && heightCm != null && weight > 0 && heightCm > 0) {
+      final double heightM = heightCm / 100;
+      final double bmi = weight / (heightM * heightM);
+       if (mounted) {
+        setState(() {
+          _bmiController.text = bmi.toStringAsFixed(2);
+        });
+      }
+    } else {
+       if (mounted) {
+        setState(() {
+          _bmiController.text = "";
+        });
+      }
     }
   }
 
@@ -100,6 +142,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   }
 
   Future<void> _submitData() async {
+    // Validasi form sebelum menampilkan dialog konfirmasi
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -114,27 +157,21 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     }
 
     final shouldContinue = await _showConfirmationDialog();
-    if (!shouldContinue) return;
+    if (shouldContinue == null || !shouldContinue) return;
 
     setState(() {
       _isLoading = true;
     });
-
-    // --- MODIFIKASI ---
-    // Perhitungan MAP tidak perlu dilakukan lagi di sini karena controller
-    // _bloodPressureController sudah berisi nilai yang benar dari listener.
-    // Kode di bawah ini akan mengambil nilai yang sudah dihitung secara otomatis.
 
     final formData = {
       "nama": _namaController.text,
       "pregnancies": int.tryParse(_pregnanciesController.text) ?? 0,
       "age": double.tryParse(_ageController.text) ?? 0.0,
       "bmi": double.tryParse(_bmiController.text) ?? 0.0,
-      // Nilai ini diambil dari controller yang sudah di-update otomatis
       "blood_pressure": double.tryParse(_bloodPressureController.text),
       "bs": double.tryParse(_bsController.text) ?? 0.0,
-      "skin_thickness": double.tryParse(_skinThicknessController.text),
-      "sex": int.tryParse(_sexController.text) ?? 1,
+      "skin_thickness": _skinThicknessMap[_selectedSkinThickness],
+      "sex": int.tryParse(_sexController.text) ?? 1, // <-- PENTING: Nilai sex=1 tetap dikirim
       "current_smoker": _selectedCurrentSmoker == "Ya" ? 1 : 0,
       "cigs_per_day": _selectedCurrentSmoker == "Ya" ? (int.tryParse(_cigsPerDayController.text) ?? 0) : 0,
       "bp_meds": _selectedBpMeds == "Ya" ? 1 : 0,
@@ -175,79 +212,79 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     }
   }
 
-  Future<bool> _showConfirmationDialog() async {
-     // --- MODIFIKASI BARU ---
-     // Pastikan nilai MAP terupdate di dialog konfirmasi
-     _calculateAndSetMAP();
+  Future<bool?> _showConfirmationDialog() async {
+    // Pastikan nilai MAP & BMI terupdate di dialog konfirmasi
+    _calculateAndSetMAP();
+    _calculateAndSetBMI();
 
     return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Row(
-              children: [
-                Icon(Icons.check_circle_outline, color: Color(0xFF4DBAFF)),
-                SizedBox(width: 10),
-                Text('Konfirmasi Data', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              ],
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Pastikan data yang Anda masukkan sudah benar. Apakah Anda yakin ingin melanjutkan?', style: TextStyle(fontSize: 14)),
-                  const SizedBox(height: 20),
-                  Text('Berikut ringkasan data Anda:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade700)),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blue.shade100)
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildConfirmationRow('Nama', _namaController.text),
-                        _buildConfirmationRow('Usia', '${_ageController.text} tahun'),
-                        _buildConfirmationRow('BMI', _bmiController.text),
-                        _buildConfirmationRow('Tekanan Darah', '${_systolicBpController.text}/${_diastolicBpController.text} mmHg'),
-                        // --- MODIFIKASI --- Menampilkan MAP yang dihitung
-                        _buildConfirmationRow('MAP (Rata-rata)', '${_bloodPressureController.text} mmHg'),
-                        _buildConfirmationRow('Status Perokok', _selectedCurrentSmoker ?? 'Tidak'),
-                        if (_selectedCurrentSmoker == "Ya")
-                           _buildConfirmationRow('Rokok/Hari', _cigsPerDayController.text),
-                        _buildConfirmationRow('Konsumsi Obat Darah', _selectedBpMeds ?? 'Tidak'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  'Periksa Kembali',
-                  style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle_outline, color: Color(0xFF4DBAFF)),
+            SizedBox(width: 10),
+            Text('Konfirmasi Data', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Pastikan data yang Anda masukkan sudah benar. Apakah Anda yakin ingin melanjutkan?', style: TextStyle(fontSize: 14)),
+              const SizedBox(height: 20),
+              Text('Berikut ringkasan data Anda:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade700)),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade100)
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4DBAFF),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildConfirmationRow('Nama', _namaController.text),
+                    _buildConfirmationRow('Usia', '${_ageController.text} tahun'),
+                    _buildConfirmationRow('Berat / Tinggi', '${_weightController.text} kg / ${_heightController.text} cm'),
+                    _buildConfirmationRow('BMI (Otomatis)', _bmiController.text),
+                    _buildConfirmationRow('Ketebalan Kulit', _selectedSkinThickness ?? '-'),
+                    _buildConfirmationRow('Tekanan Darah', '${_systolicBpController.text}/${_diastolicBpController.text} mmHg'),
+                    _buildConfirmationRow('MAP (Otomatis)', '${_bloodPressureController.text} mmHg'),
+                    _buildConfirmationRow('Status Perokok', _selectedCurrentSmoker ?? 'Tidak'),
+                    if (_selectedCurrentSmoker == "Ya")
+                      _buildConfirmationRow('Rokok/Hari', _cigsPerDayController.text),
+                    _buildConfirmationRow('Konsumsi Obat Darah', _selectedBpMeds ?? 'Tidak'),
+                  ],
                 ),
-                child: const Text('Lanjutkan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
               ),
             ],
           ),
-        ) ??
-        false;
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Periksa Kembali',
+              style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4DBAFF),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text('Lanjutkan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildConfirmationRow(String label, String value) {
@@ -265,18 +302,21 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
 
   @override
   void dispose() {
-    // --- MODIFIKASI BARU ---
     // Hapus listener untuk mencegah memory leak
     _systolicBpController.removeListener(_calculateAndSetMAP);
     _diastolicBpController.removeListener(_calculateAndSetMAP);
+    _weightController.removeListener(_calculateAndSetBMI);
+    _heightController.removeListener(_calculateAndSetBMI);
 
+    // Dispose semua controller
     _namaController.dispose();
     _pregnanciesController.dispose();
     _ageController.dispose();
+    _weightController.dispose();
+    _heightController.dispose();
     _bmiController.dispose();
     _bloodPressureController.dispose();
     _bsController.dispose();
-    _skinThicknessController.dispose();
     _sexController.dispose();
     _cigsPerDayController.dispose();
     _systolicBpController.dispose();
@@ -286,7 +326,6 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     super.dispose();
   }
 
-  // Widget _buildTextField tidak perlu diubah
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -360,6 +399,14 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(color: Colors.grey.shade200, width: 1.0),
               ),
+              errorBorder: OutlineInputBorder( 
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.red.shade700, width: 1.0),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.red.shade700, width: 1.5),
+              ),
               suffixIcon: suffix,
             ),
             validator: isRequired
@@ -371,6 +418,9 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                       if (double.tryParse(value) == null) {
                         return 'Masukkan angka yang valid';
                       }
+                      if (double.parse(value) < 0) {
+                        return 'Nilai tidak boleh negatif';
+                      }
                     }
                     return null;
                   }
@@ -381,10 +431,73 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     );
   }
 
-  // Widget-widget lain tidak perlu diubah...
-  // ... (_buildYesNoDropdownField, _showInfoPopup, _buildInfoBox)
-
-   Widget _buildYesNoDropdownField({
+  Widget _buildCustomDropdownField({
+    required String? currentValue,
+    required String label,
+    required Map<String, int> items,
+    required ValueChanged<String?> onChanged,
+    String? fieldKey,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+           Row(
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFF1E293B),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (fieldKey != null && _fieldInfo.containsKey(fieldKey))
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
+                  child: InkWell(
+                    onTap: () => _showInfoPopup(context, label, _fieldInfo[fieldKey]!),
+                    borderRadius: BorderRadius.circular(12),
+                    child: const Icon(Icons.info_outline, size: 18, color: Color(0xFF4DBAFF)),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<String>(
+            value: currentValue,
+            items: items.keys.map((String key) {
+              return DropdownMenuItem<String>(
+                value: key,
+                child: Text(key, style: const TextStyle(fontSize: 15)),
+              );
+            }).toList(),
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF4DBAFF), width: 1.5),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildYesNoDropdownField({
     required String currentValue,
     required String label,
     required ValueChanged<String?> onChanged,
@@ -471,7 +584,6 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
       ),
     );
   }
-
 
   void _showInfoPopup(BuildContext context, String title, String content) {
     showDialog(
@@ -566,17 +678,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               keyboardType: TextInputType.number,
               fieldKey: 'age',
             ),
-            _buildTextField(
-              controller: _sexController,
-              label: 'Jenis Kelamin',
-              keyboardType: TextInputType.number,
-              fieldKey: 'sex',
-              enabled: false,
-              suffix: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: Text('Perempuan', style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
-              ),
-            ),
+            // --- MODIFIKASI: Field Jenis Kelamin Dihapus dari UI ---
           ],
         ),
         isActive: _currentStep >= 0,
@@ -612,22 +714,51 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               'Pengukuran Fisik',
               'Pengukuran-pengukuran berikut membantu menilai kondisi fisik Anda yang berkaitan dengan risiko kesehatan tertentu.'
             ),
-            _buildTextField(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    controller: _weightController,
+                    label: 'Berat Badan',
+                    hintText: 'Contoh: 60',
+                    keyboardType: TextInputType.number,
+                    fieldKey: 'weight_height',
+                    suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('kg', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                   child: _buildTextField(
+                    controller: _heightController,
+                    label: 'Tinggi Badan',
+                    hintText: 'Contoh: 158',
+                    keyboardType: TextInputType.number,
+                    suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('cm', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
+                  ),
+                ),
+              ],
+            ),
+             _buildTextField(
               controller: _bmiController,
               label: 'BMI (Body Mass Index)',
-              hintText: 'Contoh: 22.5',
+              hintText: 'Dihitung otomatis',
               keyboardType: TextInputType.number,
               fieldKey: 'bmi',
+              enabled: false,
+              isRequired: false,
               suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('kg/m²', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
             ),
-            _buildTextField(
-              controller: _skinThicknessController,
+            _buildCustomDropdownField(
+              currentValue: _selectedSkinThickness,
               label: 'Ketebalan Lipatan Kulit',
-              hintText: 'Contoh: 20 (Jika ada)',
-              keyboardType: TextInputType.number,
+              items: _skinThicknessMap,
+              onChanged: (value) {
+                setState(() {
+                  _selectedSkinThickness = value;
+                });
+              },
               fieldKey: 'skin_thickness',
-              isRequired: false,
-              suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mm', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
             ),
             _buildTextField(
               controller: _bodyTempController,
@@ -652,6 +783,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               'Tekanan darah yang sehat selama kehamilan sangat penting. Cukup isi tekanan Sistolik dan Diastolik, nilai rata-rata akan dihitung otomatis.'
             ),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: _buildTextField(
@@ -676,8 +808,6 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                 ),
               ],
             ),
-            // --- MODIFIKASI UI ---
-            // Field ini sekarang dinonaktifkan dan label/hintnya diubah
             _buildTextField(
               controller: _bloodPressureController,
               label: 'Tekanan Darah Rata-rata (MAP)',
@@ -685,7 +815,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               keyboardType: TextInputType.number,
               fieldKey: 'blood_pressure',
               isRequired: false,
-              enabled: false, // <-- PENTING: Field tidak bisa diisi manual
+              enabled: false,
               suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mmHg', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
             ),
             _buildTextField(
@@ -757,7 +887,6 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
   }
 
 
-  // Seluruh widget build() di bawah ini tidak perlu diubah.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -780,12 +909,23 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
             currentStep: _currentStep,
             onStepTapped: (step) => setState(() => _currentStep = step),
             onStepContinue: () {
-              if (_currentStep < _buildSteps().length - 1) {
-                setState(() {
-                  _currentStep += 1;
-                });
+              final isLastStep = _currentStep == _buildSteps().length - 1;
+              if (_formKey.currentState!.validate()) {
+                if (isLastStep) {
+                  _submitData();
+                } else {
+                  setState(() {
+                    _currentStep += 1;
+                  });
+                }
               } else {
-                _submitData();
+                 ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Harap lengkapi semua data wajib (*) di langkah ini dengan benar.'),
+                    backgroundColor: Colors.orange.shade700,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
               }
             },
             onStepCancel: () {
@@ -813,7 +953,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                           ),
                           elevation: 2,
                         ),
-                        child: _isLoading
+                        child: _isLoading && (_currentStep == _buildSteps().length -1)
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
@@ -825,7 +965,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                             : Text(
                                 _currentStep < _buildSteps().length - 1
                                     ? 'Lanjut'
-                                    : 'Kirim Data',
+                                    : 'Kirim & Lihat Hasil',
                                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                               ),
                       ),

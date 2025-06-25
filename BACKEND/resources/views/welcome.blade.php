@@ -25,7 +25,7 @@
                                 <div>
                                     <p class="mb-0"><i class="fas fa-shield-alt me-2"></i> Aman & Terpercaya</p>
                                     <p class="mb-0"><i class="fas fa-chart-line me-2"></i> Analisis Data Akurat</p>
-                                    <p class="mb-0"><i class="fas fa-user-md me-2"></i> Didukung Tenaga Profesional</p>
+                                    <p class="mb-0"><i class="fas fa-user-md me-2"></i> Dukungan Bantuan</p>
                                 </div>
                             </div>
                         </div>
@@ -106,7 +106,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h5 class="fw-bold">Dukungan & Bantuan</h5>
-                            <p class="mb-0">Jika Anda memerlukan bantuan dalam menggunakan sistem ini, silakan hubungi tim dukungan kami di <a href="mailto:support@example.com">support@example.com</a> atau hubungi <strong>0800-1234-5678</strong>.</p>
+                            <p class="mb-0">Jika Anda memerlukan bantuan dalam menggunakan sistem ini, silakan hubungi tim dukungan kami di <a href="mailto:inuriadi73@gmail.com">inuriadi73@gmail.com</a> atau hubungi <strong>0812-2424-9920</strong>.</p>
                         </div>
                     </div>
                 </div>

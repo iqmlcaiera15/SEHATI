@@ -316,8 +316,6 @@ String _formatHPL(String? hpl) {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _buildStatItem('HPL', _formatHPL(_hpl)),
-                              _buildStatItem('Usia', '30 tahun'),
-                              _buildStatItem('BMI', '23.5'),
                             ],
                           ),
                         ],
