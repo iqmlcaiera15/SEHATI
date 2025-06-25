@@ -96,19 +96,17 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="row g-0 align-items-stretch">
-            <!-- Tombol Prediksi Baru -->
-            <div class="col-md-4 d-flex align-items-start">
-                <a href="{{ route('prediksi.form') }}" class="btn btn-lg px-4 py-3 fw-bold d-flex flex-column align-items-start justify-content-center w-100"
-                    style="background: linear-gradient(45deg, #4dbaff, #1a87e3); border: none; color: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(26, 135, 227, 0.15); min-height: 80px;">
-                    <span>
-                        <i class="fas fa-plus-circle me-2 fs-5"></i>
-                        Prediksi Baru
-                    </span>
-                    <small class="opacity-75">Lakukan prediksi baru</small>
+            <!-- Tombol Prediksi Baru (Kecil, Hijau) -->
+            <div class="col-md-3 d-flex align-items-center">
+                <a href="{{ route('prediksi.form') }}"
+                   class="btn px-3 py-2 fw-semibold d-flex flex-row align-items-center gap-2 justify-content-center w-100"
+                   style="background: linear-gradient(45deg, #43e97b, #38f9d7); border: none; color: #184a34; border-radius: 14px; box-shadow: 0 4px 12px rgba(67, 233, 123, 0.11); font-size: 1.13rem; min-height: 48px; max-width: 250px;">
+                    <i class="fas fa-plus-circle"></i>
+                    Prediksi Baru
                 </a>
             </div>
             <!-- Form Filter -->
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <form method="GET" action="{{ route('prediksi.index') }}" class="row g-2 align-items-end justify-content-end ms-md-2 mt-3 mt-md-0">
                     @if(Auth::user()->role === 'bidan')
                     <div class="col-auto">

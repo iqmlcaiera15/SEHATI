@@ -2,79 +2,76 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4dbaff 0%, #1a87e3 100%); border-radius: 15px;">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-2">
-                                <i class="fas fa-baby me-2"></i>
-                                Form Prediksi Persalinan
-                            </h2>
-                            <span class="opacity-75">
-                                Mohon isi data berikut dengan lengkap dan benar agar hasil prediksi lebih akurat.<br>
-                                Semua kolom wajib diisi, gunakan kata sederhana, misal: <b>“tidak ada”</b> jika sehat.
-                            </span>
-                        </div>
-                        <a href="{{ route('prediksi.index') }}" class="btn btn-outline-light d-flex align-items-center shadow-sm px-4 rounded-3 fw-semibold">
-                            <i class="fas fa-arrow-left me-2"></i> Kembali
-                        </a>
+    <!-- Note di luar card -->
+    <div class="row mb-2">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="alert alert-info mb-3 rounded-3 px-4" style="background:linear-gradient(90deg, #eef7ff 70%, #e6f2fb);border:1.5px solid #bae0fd;">
+                <i class="fas fa-info-circle me-2"></i>
+                <b>Semua kolom wajib diisi</b>, gunakan kata sederhana, misal: <b>“tidak ada”</b> jika sehat.
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Header -->
+    <div class="row mb-3">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #53b6ec 0%, #a1e3ec 100%); border-radius: 14px;">
+                <div class="card-body text-white d-flex justify-content-between align-items-center py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-baby fs-2"></i>
+                        <span style="font-size: 1.4rem; font-weight: 600;">Form Prediksi Persalinan</span>
                     </div>
+                    <a href="{{ route('prediksi.index') }}"
+                        class="btn btn-outline-secondary fw-semibold d-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-none"
+                        style="border:1.5px solid #d7e4ef; color:#343a40;">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Error Alert Friendly -->
+    <!-- Error Alert -->
     @if ($errors->any())
-        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
-            <strong>Mohon lengkapi isian berikut:</strong>
-            <ul class="mb-0 mt-2">
-                @foreach ($errors->all() as $error)
-                    <li>
-                        @php
-                            $map = [
-                                'The user id field is required.' => 'Nama ibu hamil belum dipilih.',
-                                'The usia ibu field is required.' => 'Usia ibu belum diisi.',
-                                'The tekanan darah field is required.' => 'Tekanan darah belum dipilih.',
-                                'The riwayat persalinan field is required.' => 'Riwayat persalinan belum dipilih.',
-                                'The posisi janin field is required.' => 'Posisi janin belum dipilih.',
-                                'The riwayat kesehatan ibu field is required.' => 'Riwayat kesehatan ibu belum diisi.',
-                                'The kondisi kesehatan janin field is required.' => 'Kondisi kesehatan janin belum diisi.',
-                                'The usia ibu must be between 15 and 50.' => 'Usia ibu harus antara 15 sampai 50 tahun.',
-                                'The usia ibu must be at least 15.' => 'Usia ibu minimal 15 tahun.',
-                                'The usia ibu may not be greater than 50.' => 'Usia ibu maksimal 50 tahun.',
-                            ];
-                        @endphp
-                        {{ $map[$error] ?? $error }}
-                    </li>
-                @endforeach
-            </ul>
+    <div class="row mb-2">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="alert alert-danger shadow-sm rounded-3 mb-3">
+                <strong>Mohon lengkapi isian berikut:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
         </div>
+    </div>
     @endif
     @if(session('error'))
-        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
-            {{ session('error') }}
+        <div class="row mb-2">
+            <div class="col-lg-8 col-md-10 mx-auto">
+                <div class="alert alert-danger shadow-sm rounded-3 mb-3">{{ session('error') }}</div>
+            </div>
         </div>
     @endif
     @if(session('success'))
-        <div class="alert alert-success shadow-sm rounded-3 mb-4">
-            {{ session('success') }}
+        <div class="row mb-2">
+            <div class="col-lg-8 col-md-10 mx-auto">
+                <div class="alert alert-success shadow-sm rounded-3 mb-3">{{ session('success') }}</div>
+            </div>
         </div>
     @endif
 
-<!-- Form Card -->
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-md-10 mx-auto">
-        <div class="card shadow-sm border-0" style="border-radius: 18px;">
-            <div class="card-body px-4 py-4">
-                <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate autocomplete="off">
-                    @csrf
-                    <div class="row gx-4 gy-3">
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="card shadow-sm border-0" style="border-radius: 18px;">
+                <div class="card-body px-4 py-4">
+                    <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate autocomplete="off">
+                        @csrf
+
+                        <!-- Nama Ibu Hamil Full Width -->
                         @if(Auth::user()->role === 'bidan')
-                        <div class="col-md-6">
+                        <div class="mb-3">
                             <label for="user_id" class="form-label fw-semibold">
                                 Nama Ibu Hamil <span class="text-danger">*</span>
                             </label>
@@ -96,91 +93,88 @@
                             <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
                         @endif
 
-                        <div class="col-md-6">
-                            <label for="usia_ibu" class="form-label fw-semibold">
-                                Usia Ibu <span class="text-danger">*</span>
-                            </label>
-                            <input type="number" id="usia_ibu" name="usia_ibu" class="form-control custom-input" min="15" max="50"
-                                value="{{ old('usia_ibu') }}" required placeholder="Isi usia ibu, contoh: 28">
-                            <small class="text-muted">Masukkan usia antara 15 sampai 50 tahun</small>
-                            @error('usia_ibu')
-                                <div class="text-danger small mt-1">{{ $message == "The usia ibu field is required." ? "Usia ibu belum diisi." : $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="tekanan_darah" class="form-label fw-semibold">
-                                Tekanan Darah <span class="text-danger">*</span>
-                            </label>
-                            <select id="tekanan_darah" name="tekanan_darah" class="form-select custom-input" required>
-                                <option value="">-- Pilih --</option>
-                                <option value="normal" {{ old('tekanan_darah') == 'normal' ? 'selected' : '' }}>Normal</option>
-                                <option value="rendah" {{ old('tekanan_darah') == 'rendah' ? 'selected' : '' }}>Rendah</option>
-                                <option value="tinggi" {{ old('tekanan_darah') == 'tinggi' ? 'selected' : '' }}>Tinggi</option>
-                            </select>
-                            @error('tekanan_darah')
-                                <div class="text-danger small mt-1">Tekanan darah wajib dipilih.</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="riwayat_persalinan" class="form-label fw-semibold">
-                                Riwayat Persalinan <span class="text-danger">*</span>
-                            </label>
-                            <select id="riwayat_persalinan" name="riwayat_persalinan" class="form-select custom-input" required>
-                                <option value="">-- Pilih --</option>
-                                <option value="tidak ada" {{ old('riwayat_persalinan') == 'tidak ada' ? 'selected' : '' }}>Tidak Ada</option>
-                                <option value="normal" {{ old('riwayat_persalinan') == 'normal' ? 'selected' : '' }}>Normal</option>
-                                <option value="caesar" {{ old('riwayat_persalinan') == 'caesar' ? 'selected' : '' }}>Caesar</option>
-                            </select>
-                            @error('riwayat_persalinan')
-                                <div class="text-danger small mt-1">Riwayat persalinan wajib dipilih.</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="posisi_janin" class="form-label fw-semibold">
-                                Posisi Janin <span class="text-danger">*</span>
-                            </label>
-                            <select id="posisi_janin" name="posisi_janin" class="form-select custom-input" required>
-                                <option value="">-- Pilih --</option>
-                                <option value="normal" {{ old('posisi_janin') == 'normal' ? 'selected' : '' }}>Normal</option>
-                                <option value="lintang" {{ old('posisi_janin') == 'lintang' ? 'selected' : '' }}>Lintang</option>
-                                <option value="sungsang" {{ old('posisi_janin') == 'sungsang' ? 'selected' : '' }}>Sungsang</option>
-                            </select>
-                            @error('posisi_janin')
-                                <div class="text-danger small mt-1">Posisi janin wajib dipilih.</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="riwayat_kesehatan_ibu" class="form-label fw-semibold">
-                                Riwayat Kesehatan Ibu <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" id="riwayat_kesehatan_ibu" name="riwayat_kesehatan_ibu" class="form-control custom-input"
-                                value="{{ old('riwayat_kesehatan_ibu') }}" required placeholder="Contoh: hipertensi, tidak ada">
-                            <small class="text-muted">Tulis penyakit seperti “hipertensi”, atau jika sehat tulis “tidak ada”. Tidak boleh angka saja.</small>
-                            <div id="err_kesehatan_ibu" class="text-danger small mt-1" style="display:none">
-                                Mohon isi dengan huruf/kalimat, tidak boleh hanya angka.
+                        <div class="row gx-3 gy-3">
+                            <div class="col-md-6">
+                                <label for="usia_ibu" class="form-label fw-semibold">
+                                    Usia Ibu <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" id="usia_ibu" name="usia_ibu" class="form-control custom-input" min="15" max="50"
+                                    value="{{ old('usia_ibu') }}" required placeholder="Isi usia ibu, contoh: 28">
+                                <div class="text-muted mt-1" style="font-size: 0.93rem;">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    Masukkan usia antara 15 sampai 50 tahun
+                                </div>
+                                @error('usia_ibu')
+                                    <div class="text-danger small mt-1">{{ $message == "The usia ibu field is required." ? "Usia ibu belum diisi." : $message }}</div>
+                                @enderror
                             </div>
-                            @error('riwayat_kesehatan_ibu')
-                                <div class="text-danger small mt-1">Riwayat kesehatan ibu wajib diisi.</div>
-                            @enderror
-                        </div>
 
-                        <div class="col-12">
-                            <label for="kondisi_kesehatan_janin" class="form-label fw-semibold">
-                                Kondisi Kesehatan Janin <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" id="kondisi_kesehatan_janin" name="kondisi_kesehatan_janin" class="form-control custom-input"
-                                value="{{ old('kondisi_kesehatan_janin') }}" required placeholder="Contoh: normal, detak jantung lambat">
-                            <small class="text-muted">Tulis “normal” jika sehat. Tidak boleh hanya angka.</small>
-                            <div id="err_kesehatan_janin" class="text-danger small mt-1" style="display:none">
-                                Mohon isi dengan huruf/kalimat, tidak boleh hanya angka.
+                            <div class="col-md-6">
+                                <label for="tekanan_darah" class="form-label fw-semibold">
+                                    Tekanan Darah <span class="text-danger">*</span>
+                                </label>
+                                <select id="tekanan_darah" name="tekanan_darah" class="form-select custom-input" required>
+                                    <option value="">-- Pilih --</option>
+                                    <option value="normal" {{ old('tekanan_darah') == 'normal' ? 'selected' : '' }}>Normal</option>
+                                    <option value="rendah" {{ old('tekanan_darah') == 'rendah' ? 'selected' : '' }}>Rendah</option>
+                                    <option value="tinggi" {{ old('tekanan_darah') == 'tinggi' ? 'selected' : '' }}>Tinggi</option>
+                                </select>
+                                @error('tekanan_darah')
+                                    <div class="text-danger small mt-1">Tekanan darah wajib dipilih.</div>
+                                @enderror
                             </div>
-                            @error('kondisi_kesehatan_janin')
-                                <div class="text-danger small mt-1">Kondisi janin wajib diisi.</div>
-                            @enderror
+
+                            <div class="col-md-6">
+                                <label for="riwayat_persalinan" class="form-label fw-semibold">
+                                    Riwayat Persalinan <span class="text-danger">*</span>
+                                </label>
+                                <select id="riwayat_persalinan" name="riwayat_persalinan" class="form-select custom-input" required>
+                                    <option value="">-- Pilih --</option>
+                                    <option value="tidak ada" {{ old('riwayat_persalinan') == 'tidak ada' ? 'selected' : '' }}>Tidak Ada</option>
+                                    <option value="normal" {{ old('riwayat_persalinan') == 'normal' ? 'selected' : '' }}>Normal</option>
+                                    <option value="caesar" {{ old('riwayat_persalinan') == 'caesar' ? 'selected' : '' }}>Caesar</option>
+                                </select>
+                                @error('riwayat_persalinan')
+                                    <div class="text-danger small mt-1">Riwayat persalinan wajib dipilih.</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="posisi_janin" class="form-label fw-semibold">
+                                    Posisi Janin <span class="text-danger">*</span>
+                                </label>
+                                <select id="posisi_janin" name="posisi_janin" class="form-select custom-input" required>
+                                    <option value="">-- Pilih --</option>
+                                    <option value="normal" {{ old('posisi_janin') == 'normal' ? 'selected' : '' }}>Normal</option>
+                                    <option value="lintang" {{ old('posisi_janin') == 'lintang' ? 'selected' : '' }}>Lintang</option>
+                                    <option value="sungsang" {{ old('posisi_janin') == 'sungsang' ? 'selected' : '' }}>Sungsang</option>
+                                </select>
+                                @error('posisi_janin')
+                                    <div class="text-danger small mt-1">Posisi janin wajib dipilih.</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="riwayat_kesehatan_ibu" class="form-label fw-semibold">
+                                    Riwayat Kesehatan Ibu <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="riwayat_kesehatan_ibu" name="riwayat_kesehatan_ibu" class="form-control custom-input"
+                                    value="{{ old('riwayat_kesehatan_ibu') }}" required placeholder="Contoh: Hipertensi, Mata Minus">
+                                @error('riwayat_kesehatan_ibu')
+                                    <div class="text-danger small mt-1">Riwayat kesehatan ibu wajib diisi.</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="kondisi_kesehatan_janin" class="form-label fw-semibold">
+                                    Kondisi Kesehatan Janin <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="kondisi_kesehatan_janin" name="kondisi_kesehatan_janin" class="form-control custom-input"
+                                    value="{{ old('kondisi_kesehatan_janin') }}" required placeholder="Contoh: Fetal Distress, Bayi Besar">
+                                @error('kondisi_kesehatan_janin')
+                                    <div class="text-danger small mt-1">Kondisi janin wajib diisi.</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="col-12 text-end mt-4">
@@ -190,13 +184,12 @@
                                 Prediksi Sekarang
                             </button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 
 <style>
     .custom-input,
@@ -240,11 +233,12 @@
         function cekString(fieldId, msgId) {
             const field = document.getElementById(fieldId);
             const msg = document.getElementById(msgId);
+            if(!field) return;
             field.addEventListener('input', function() {
                 if (/^\d+$/.test(field.value)) {
-                    msg.style.display = 'block';
+                    msg && (msg.style.display = 'block');
                 } else {
-                    msg.style.display = 'none';
+                    msg && (msg.style.display = 'none');
                 }
             });
         }

@@ -64,14 +64,18 @@
                         <div class="mb-3">
                             <i class="fas fa-stethoscope" style="font-size: 3rem; color: #4dbaff;"></i>
                         </div>
-                        <!-- HEADLINE HASIL BERWARNA -->
-                        <div class="hasil-prediksi {{ $headlineClass }}">
-                            {{ $isCaesar ? 'Caesar' : 'Normal' }}
+                        <!-- HEADLINE HASIL DALAM OVAL -->
+                        <div class="d-flex flex-column align-items-center mb-2">
+                            <div class="fw-bold"
+                                style="font-size: 2.5rem; color: #1a87e3; letter-spacing: 1.5px; margin-bottom: 8px;">
+                                {{ $isCaesar ? 'Caesar' : 'Normal' }}
+                            </div>
+                            <div class="rounded-pill px-4 py-2 fw-bold border border-primary text-primary"
+                                style="font-size: 1.15rem; border-width: 2px !important;">
+                                {{ ucfirst($prediction->metode_persalinan) }}
+                            </div>
                         </div>
-                        <span class="badge px-4 py-2 fw-bold rounded-pill border {{ $badgeClass }} badge-custom">
-                            {{ ucfirst($prediction->metode_persalinan) }}
-                        </span>
-                        <div class="text-muted small mt-1 mb-2">
+                        <div class="text-muted small mt-2 mb-2">
                             <i class="fas fa-calendar-alt me-1"></i>
                             {{ $prediction->created_at->format('d M Y, H:i') }} &nbsp;|&nbsp;
                             <b>HPL:</b> {{ $hpl }}
