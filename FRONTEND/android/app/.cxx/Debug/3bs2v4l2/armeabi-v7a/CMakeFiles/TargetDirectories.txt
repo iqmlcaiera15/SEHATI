@@ -1,0 +1,2 @@
+C:/Users/ATIYAH ZAHRA/Desktop/Tugas Akhir/SEHATI/FRONTEND/android/app/.cxx/Debug/3bs2v4l2/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/ATIYAH ZAHRA/Desktop/Tugas Akhir/SEHATI/FRONTEND/android/app/.cxx/Debug/3bs2v4l2/armeabi-v7a/CMakeFiles/rebuild_cache.dir

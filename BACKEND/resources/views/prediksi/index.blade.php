@@ -4,8 +4,9 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 class="fw-semibold text-primary">Daftar Prediksi Metode Persalinan</h2>
-        <a href="{{ route('prediksi.form') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center px-3 py-2 fw-semibold shadow-sm">
-            <i class="bi bi-plus me-1"></i> Prediksi Baru
+        <a href="{{ route('prediksi.form') }}"
+           class="btn btn-success btn-lg d-flex align-items-center gap-2 px-4 py-2 fw-semibold shadow-sm">
+            <i class="bi bi-plus-circle fs-5"></i> Tambah Prediksi Baru
         </a>
     </div>
 
@@ -37,10 +38,17 @@
         </div>
         <div class="col-md-4">
             <label for="hpl" class="form-label">HPL</label>
-            <input type="date" name="hpl" id="hpl" class="form-control shadow-sm" value="{{ request('hpl') }}">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-success text-white">
+                    <i class="bi bi-calendar-event"></i>
+                </span>
+                <input type="date" name="hpl" id="hpl" class="form-control" value="{{ request('hpl') }}">
+            </div>
         </div>
         <div class="col-md-12 d-grid mt-2">
-            <button type="submit" class="btn btn-outline-primary shadow-sm">Terapkan Filter</button>
+            <button type="submit" class="btn btn-success d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                <i class="bi bi-funnel-fill"></i> Terapkan Filter
+            </button>
         </div>
     </form>
 
@@ -55,6 +63,7 @@
                             <th>Faktor</th>
                             <th>Confidence</th>
                             <th>HPL</th>
+                            <th>Waktu Prediksi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -85,6 +94,12 @@
                                         : '-' }}
                                 </td>
                                 <td>
+                                    {{-- Kolom waktu prediksi, format waktu lokal --}}
+                                    {{ $prediction->created_at
+                                        ? \Carbon\Carbon::parse($prediction->created_at)->format('H:i, d-m-Y')
+                                        : '-' }}
+                                </td>
+                                <td>
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-outline-primary shadow-sm" type="button" id="aksiDropdown{{ $prediction->id }}" data-bs-toggle="dropdown" aria-expanded="false">
                                             <i class="bi bi-three-dots-vertical fs-5"></i>
@@ -112,7 +127,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">Belum ada data prediksi.</td>
+                                <td colspan="7" class="text-center text-muted py-4">Belum ada data prediksi.</td>
                             </tr>
                         @endforelse
                     </tbody>
