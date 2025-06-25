@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="container-fluid py-4">
-
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
@@ -14,7 +13,10 @@
                                 <i class="fas fa-baby me-2"></i>
                                 Form Prediksi Persalinan
                             </h2>
-                            <span class="opacity-75">Isi data berikut untuk mendapatkan prediksi metode persalinan yang akurat. Pastikan semua data diisi dengan benar.</span>
+                            <span class="opacity-75">
+                                Mohon isi data berikut dengan lengkap dan benar agar hasil prediksi lebih akurat.<br>
+                                Semua kolom wajib diisi, gunakan kata sederhana, misal: <b>“tidak ada”</b> jika sehat.
+                            </span>
                         </div>
                         <a href="{{ route('prediksi.index') }}" class="btn btn-outline-light d-flex align-items-center shadow-sm px-4 rounded-3 fw-semibold">
                             <i class="fas fa-arrow-left me-2"></i> Kembali
@@ -44,7 +46,6 @@
                                 'The usia ibu must be between 15 and 50.' => 'Usia ibu harus antara 15 sampai 50 tahun.',
                                 'The usia ibu must be at least 15.' => 'Usia ibu minimal 15 tahun.',
                                 'The usia ibu may not be greater than 50.' => 'Usia ibu maksimal 50 tahun.',
-                                // fallback
                             ];
                         @endphp
                         {{ $map[$error] ?? $error }}
@@ -73,6 +74,7 @@
                     <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate autocomplete="off">
                         @csrf
                         <div class="row g-4">
+
                             {{-- Bidan: Pilih user --}}
                             @if(Auth::user()->role === 'bidan')
                                 <div class="col-md-6">
@@ -159,8 +161,11 @@
                                     Riwayat Kesehatan Ibu <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" id="riwayat_kesehatan_ibu" name="riwayat_kesehatan_ibu" class="form-control rounded-3"
-                                    value="{{ old('riwayat_kesehatan_ibu') }}" required placeholder="Contoh: hipertensi, tidak ada, dll">
-                                <small class="text-muted">Jika tidak ada, tulis “tidak ada”.</small>
+                                    value="{{ old('riwayat_kesehatan_ibu') }}" required placeholder="Contoh: hipertensi, tidak ada">
+                                <small class="text-muted">Tulis penyakit seperti “hipertensi”, atau jika sehat tulis “tidak ada”. Tidak boleh angka saja.</small>
+                                <div id="err_kesehatan_ibu" class="text-danger small mt-1" style="display:none">
+                                    Mohon isi dengan huruf/kalimat, tidak boleh hanya angka.
+                                </div>
                                 @error('riwayat_kesehatan_ibu')
                                     <div class="text-danger small mt-1">Riwayat kesehatan ibu wajib diisi.</div>
                                 @enderror
@@ -171,8 +176,11 @@
                                     Kondisi Kesehatan Janin <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" id="kondisi_kesehatan_janin" name="kondisi_kesehatan_janin" class="form-control rounded-3"
-                                    value="{{ old('kondisi_kesehatan_janin') }}" required placeholder="Contoh: normal, detak jantung lambat, dll">
-                                <small class="text-muted">Jika tidak ada kelainan, tulis “normal”.</small>
+                                    value="{{ old('kondisi_kesehatan_janin') }}" required placeholder="Contoh: normal, detak jantung lambat">
+                                <small class="text-muted">Tulis “normal” jika sehat. Tidak boleh hanya angka.</small>
+                                <div id="err_kesehatan_janin" class="text-danger small mt-1" style="display:none">
+                                    Mohon isi dengan huruf/kalimat, tidak boleh hanya angka.
+                                </div>
                                 @error('kondisi_kesehatan_janin')
                                     <div class="text-danger small mt-1">Kondisi janin wajib diisi.</div>
                                 @enderror
@@ -210,13 +218,27 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Tooltip
+        // Validasi input: tidak boleh hanya angka untuk field kesehatan
+        function cekString(fieldId, msgId) {
+            const field = document.getElementById(fieldId);
+            const msg = document.getElementById(msgId);
+            field.addEventListener('input', function() {
+                if (/^\d+$/.test(field.value)) {
+                    msg.style.display = 'block';
+                } else {
+                    msg.style.display = 'none';
+                }
+            });
+        }
+        cekString('riwayat_kesehatan_ibu', 'err_kesehatan_ibu');
+        cekString('kondisi_kesehatan_janin', 'err_kesehatan_janin');
+
+        // Bootstrap tooltip & validation
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
 
-        // Bootstrap validation
         const forms = document.querySelectorAll('.needs-validation');
         Array.from(forms).forEach(function (form) {
             form.addEventListener('submit', function (event) {

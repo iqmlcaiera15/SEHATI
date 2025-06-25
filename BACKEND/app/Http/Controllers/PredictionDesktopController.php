@@ -111,57 +111,57 @@ class PredictionDesktopController extends Controller
     }
 
     // Proses simpan prediksi baru
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'user_id' => 'required|exists:users,id',
-        'usia_ibu' => 'required|integer|min:15|max:50',
-        'tekanan_darah' => 'required|in:normal,rendah,tinggi',
-        'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
-        'posisi_janin' => 'required|in:normal,lintang,sungsang',
-        'riwayat_kesehatan_ibu' => 'required|string',
-        'kondisi_kesehatan_janin' => 'required|string',
-    ]);
-
-    try {
-        $dataToSend = [
-            'usia_ibu' => (int)$request->usia_ibu,
-            'tekanan_darah' => strtolower($request->tekanan_darah),
-            'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
-            'posisi_janin' => strtolower($request->posisi_janin),
-            'riwayat_kesehatan_ibu' => strtolower($request->riwayat_kesehatan_ibu),
-            'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
-        ];
-
-        // Request ke Flask API
-        $response = Http::post('https://sehatimlprediksi-production.up.railway.app/predict', $dataToSend);
-        $result = $response->json();
-
-        if (!$response->ok() || !isset($result['hasil_prediksi'])) {
-            return redirect()->back()->with('error', 'Prediksi gagal. Coba lagi.');
-        }
-
-        $prediction = Prediction::create([
-            'user_id' => $request->user_id,
-            'usia_ibu' => $dataToSend['usia_ibu'],
-            'tekanan_darah' => $dataToSend['tekanan_darah'],
-            'riwayat_persalinan' => $dataToSend['riwayat_persalinan'],
-            'posisi_janin' => $dataToSend['posisi_janin'],
-            'riwayat_kesehatan_ibu' => $dataToSend['riwayat_kesehatan_ibu'],
-            'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
-            'metode_persalinan' => $result['hasil_prediksi'],
-            'faktor' => $result['faktor'] ?? '-', // <= Perbaikan di sini
-            'confidence' => isset($result['confidence']) && $result['confidence'] !== null
-                ? $result['confidence']
-                : 0,
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'usia_ibu' => 'required|integer|min:15|max:50',
+            'tekanan_darah' => 'required|in:normal,rendah,tinggi',
+            'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
+            'posisi_janin' => 'required|in:normal,lintang,sungsang',
+            'riwayat_kesehatan_ibu' => ['required', 'string', 'regex:/[a-zA-Z]/'],
+            'kondisi_kesehatan_janin' => ['required', 'string', 'regex:/[a-zA-Z]/'],
+        ], [
+            'riwayat_kesehatan_ibu.regex' => 'Riwayat kesehatan ibu tidak boleh hanya angka.',
+            'kondisi_kesehatan_janin.regex' => 'Kondisi kesehatan janin tidak boleh hanya angka.',
         ]);
 
-        return redirect()->route('prediksi.show', $prediction->id)
-            ->with('success', 'Data prediksi berhasil disimpan!');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat prediksi: ' . $e->getMessage());
+        try {
+            $dataToSend = [
+                'usia_ibu' => (int)$request->usia_ibu,
+                'tekanan_darah' => strtolower($request->tekanan_darah),
+                'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
+                'posisi_janin' => strtolower($request->posisi_janin),
+                'riwayat_kesehatan_ibu' => strtolower($request->riwayat_kesehatan_ibu),
+                'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
+            ];
+
+            $response = Http::post('https://sehatimlprediksi-production.up.railway.app/predict', $dataToSend);
+            $result = $response->json();
+
+            if (!$response->ok() || !isset($result['hasil_prediksi'])) {
+                return redirect()->back()->with('error', 'Prediksi gagal. Coba lagi.');
+            }
+
+            $prediction = Prediction::create([
+                'user_id' => $request->user_id,
+                'usia_ibu' => $dataToSend['usia_ibu'],
+                'tekanan_darah' => $dataToSend['tekanan_darah'],
+                'riwayat_persalinan' => $dataToSend['riwayat_persalinan'],
+                'posisi_janin' => $dataToSend['posisi_janin'],
+                'riwayat_kesehatan_ibu' => $dataToSend['riwayat_kesehatan_ibu'],
+                'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
+                'metode_persalinan' => $result['hasil_prediksi'] ?? '-',
+                'faktor' => $result['faktor'] ?? '-',
+                'confidence' => $result['confidence'] ?? 0,
+            ]);
+
+            return redirect()->route('prediksi.show', $prediction->id)
+                ->with('success', 'Data prediksi berhasil disimpan!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat prediksi: ' . $e->getMessage());
+        }
     }
-}
 
 
     // Hapus semua data prediksi
