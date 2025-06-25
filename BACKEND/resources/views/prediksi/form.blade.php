@@ -72,27 +72,26 @@
             <div class="card-body px-4 py-4">
                 <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate autocomplete="off">
                     @csrf
-                    <div class="row g-4">
-                        {{-- Bidan: Pilih user --}}
+                    <div class="row gx-4 gy-3">
                         @if(Auth::user()->role === 'bidan')
-                            <div class="col-md-6">
-                                <label for="user_id" class="form-label fw-semibold">
-                                    Nama Ibu Hamil <span class="text-danger">*</span>
-                                </label>
-                                <select id="user_id" name="user_id" class="form-select custom-input" required>
-                                    <option value="">-- Pilih Ibu Hamil --</option>
-                                    @foreach($users as $user)
-                                        @if($user->role === 'ibu_hamil')
-                                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                                {{ $user->name }}
-                                            </option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @error('user_id')
-                                    <div class="text-danger small mt-1">Nama ibu hamil wajib dipilih.</div>
-                                @enderror
-                            </div>
+                        <div class="col-md-6">
+                            <label for="user_id" class="form-label fw-semibold">
+                                Nama Ibu Hamil <span class="text-danger">*</span>
+                            </label>
+                            <select id="user_id" name="user_id" class="form-select custom-input" required>
+                                <option value="">-- Pilih Ibu Hamil --</option>
+                                @foreach($users as $user)
+                                    @if($user->role === 'ibu_hamil')
+                                        <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            @error('user_id')
+                                <div class="text-danger small mt-1">Nama ibu hamil wajib dipilih.</div>
+                            @enderror
+                        </div>
                         @else
                             <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
                         @endif
@@ -169,7 +168,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <label for="kondisi_kesehatan_janin" class="form-label fw-semibold">
                                 Kondisi Kesehatan Janin <span class="text-danger">*</span>
                             </label>
@@ -183,9 +182,8 @@
                                 <div class="text-danger small mt-1">Kondisi janin wajib diisi.</div>
                             @enderror
                         </div>
-                    </div>
-                    <div class="row mt-4">
-                        <div class="col-12 text-center">
+
+                        <div class="col-12 text-end mt-4">
                             <button type="submit" class="btn btn-gradient-main px-5 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm rounded-3"
                                 style="font-size: 1.13rem;">
                                 <i class="fas fa-check-circle me-2"></i>
