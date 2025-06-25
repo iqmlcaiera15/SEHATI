@@ -5,8 +5,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 class="fw-semibold text-primary">Daftar Prediksi Metode Persalinan</h2>
         <a href="{{ route('prediksi.form') }}"
-           class="btn btn-success btn-lg d-flex align-items-center gap-2 px-4 py-2 fw-semibold shadow-sm">
-            <i class="bi bi-plus-circle fs-5"></i> Tambah Prediksi Baru
+           class="btn fw-bold d-flex align-items-center gap-2 shadow-lg"
+           style="background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%); color: white; font-size: 1.15rem; padding: 0.8rem 2rem; border-radius: 0.8rem;">
+            <i class="bi bi-plus-lg fs-4"></i> Tambah Prediksi Baru
         </a>
     </div>
 
@@ -39,15 +40,17 @@
         <div class="col-md-4">
             <label for="hpl" class="form-label">HPL</label>
             <div class="input-group shadow-sm">
-                <span class="input-group-text bg-success text-white">
+                <span class="input-group-text bg-info text-white">
                     <i class="bi bi-calendar-event"></i>
                 </span>
                 <input type="date" name="hpl" id="hpl" class="form-control" value="{{ request('hpl') }}">
             </div>
         </div>
         <div class="col-md-12 d-grid mt-2">
-            <button type="submit" class="btn btn-success d-flex align-items-center justify-content-center gap-2 shadow-sm">
-                <i class="bi bi-funnel-fill"></i> Terapkan Filter
+            <button type="submit"
+                class="btn fw-bold d-flex align-items-center justify-content-center gap-2 shadow-lg"
+                style="background: linear-gradient(90deg, #8b5cf6 0%, #06b6d4 100%); color: white; font-size: 1.05rem; padding: 0.7rem 1.5rem; border-radius: 0.8rem;">
+                <i class="bi bi-funnel-fill fs-5"></i> Terapkan Filter
             </button>
         </div>
     </form>
@@ -90,13 +93,12 @@
                                 </td>
                                 <td>
                                     {{ $prediction->hpl && $prediction->hpl->hpl
-                                        ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d-m-Y')
+                                        ? \Carbon\Carbon::parse($prediction->hpl->hpl)->isoFormat('D MMMM Y')
                                         : '-' }}
                                 </td>
                                 <td>
-                                    {{-- Kolom waktu prediksi, format waktu lokal --}}
                                     {{ $prediction->created_at
-                                        ? \Carbon\Carbon::parse($prediction->created_at)->format('H:i, d-m-Y')
+                                        ? \Carbon\Carbon::parse($prediction->created_at)->isoFormat('D MMMM Y — HH:mm')
                                         : '-' }}
                                 </td>
                                 <td>
