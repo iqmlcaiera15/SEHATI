@@ -1,134 +1,185 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-        <h2 class="fw-semibold text-primary">Daftar Prediksi Metode Persalinan</h2>
-        <a href="{{ route('prediksi.form') }}"
-           class="btn btn-primary btn-lg d-flex align-items-center gap-2 px-4 py-2 fw-semibold shadow"
-           style="background: linear-gradient(90deg, #4dbaff 0%, #1a87e3 100%); border: none;">
-            <i class="bi bi-file-earmark-plus fs-4"></i>
-            Prediksi Baru
-        </a>
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4dbaff 0%, #1a87e3 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-2">
+                                <i class="fas fa-baby me-2"></i>
+                                Riwayat Prediksi Persalinan
+                            </h2>
+                            <p class="mb-0 opacity-75">Kelola dan pantau hasil prediksi metode persalinan</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="badge bg-light text-dark px-3 py-2 fs-6">
+                                <i class="fas fa-users me-1"></i>
+                                {{ $predictions->count() }} Data
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    {{-- Filter --}}
-    <form method="GET" action="{{ route('prediksi.index') }}" class="row g-3 align-items-end mb-4">
-        @if(Auth::user()->role === 'bidan')
-        <div class="col-md-4">
-            <label for="user_id" class="form-label">Nama Ibu Hamil</label>
-            <select name="user_id" id="user_id" class="form-select shadow-sm">
-                <option value="">Semua</option>
-                @foreach($users as $user)
-                    @if($user->role === 'ibu_hamil')
-                        <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                            {{ $user->name }}
-                        </option>
-                    @endif
-                @endforeach
-            </select>
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+                <div>
+                    <a href="{{ route('prediksi.form') }}" class="btn btn-lg px-4 py-3 fw-bold d-flex flex-column align-items-start"
+                        style="background: linear-gradient(45deg, #4dbaff, #1a87e3); border: none; color: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(26, 135, 227, 0.15);">
+                        <span>
+                            <i class="fas fa-plus-circle me-2 fs-5"></i>
+                            Prediksi Baru
+                        </span>
+                        <small class="opacity-75">Lakukan prediksi baru</small>
+                    </a>
+                </div>
+                <div>
+                    <form method="GET" action="{{ route('prediksi.index') }}" class="d-flex gap-2 flex-wrap align-items-end">
+                        @if(Auth::user()->role === 'bidan')
+                        <div>
+                            <label for="user_id" class="form-label mb-1">Nama Ibu Hamil</label>
+                            <select name="user_id" id="user_id" class="form-select shadow-sm rounded-3">
+                                <option value="">Semua</option>
+                                @foreach($users as $user)
+                                    @if($user->role === 'ibu_hamil')
+                                        <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        @endif
+                        <div>
+                            <label for="method" class="form-label mb-1">Metode Persalinan</label>
+                            <select name="method" id="method" class="form-select shadow-sm rounded-3">
+                                <option value="">Semua</option>
+                                <option value="normal" {{ request('method') == 'normal' ? 'selected' : '' }}>Normal</option>
+                                <option value="caesar" {{ request('method') == 'caesar' ? 'selected' : '' }}>Caesar</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="hpl" class="form-label mb-1">HPL</label>
+                            <input type="date" name="hpl" id="hpl" class="form-control shadow-sm rounded-3" value="{{ request('hpl') }}">
+                        </div>
+                        <div class="d-flex align-items-end">
+                            <button type="submit" class="btn btn-danger btn-lg d-flex align-items-center gap-2 shadow-sm rounded-3 px-4">
+                                <i class="fas fa-filter"></i>
+                                Terapkan Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        @endif
+    </div>
 
-        <div class="col-md-4">
-            <label for="method" class="form-label">Metode Persalinan</label>
-            <select name="method" id="method" class="form-select shadow-sm">
-                <option value="">Semua</option>
-                <option value="normal" {{ request('method') == 'normal' ? 'selected' : '' }}>Normal</option>
-                <option value="caesar" {{ request('method') == 'caesar' ? 'selected' : '' }}>Caesar</option>
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label for="hpl" class="form-label">HPL</label>
-            <input type="date" name="hpl" id="hpl" class="form-control shadow-sm" value="{{ request('hpl') }}">
-        </div>
-        <div class="col-md-12 d-grid mt-2">
-            <button type="submit" class="btn btn-danger d-flex align-items-center justify-content-center gap-2 shadow-sm">
-                <i class="bi bi-funnel-fill"></i>
-                Terapkan Filter
-            </button>
-        </div>
-    </form>
-
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered align-middle mb-0">
-                    <thead class="table-light text-center">
-                        <tr>
-                            <th>Nama Ibu Hamil</th>
-                            <th>Metode</th>
-                            <th>Faktor</th>
-                            <th>Confidence</th>
-                            <th>HPL</th>
-                            <th>Waktu Prediksi</th> <!-- kolom baru -->
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center">
-                        @forelse($predictions as $prediction)
-                            <tr>
-                                <td>{{ $prediction->user->name ?? '-' }}</td>
-                                <td>
-                                    @php
-                                        $metode = strtolower($prediction->metode_persalinan);
-                                        $metodeClass = match($metode) {
-                                            'normal' => 'text-info fw-semibold',
-                                            'caesar' => 'text-danger fw-semibold',
-                                            default => 'text-muted',
-                                        };
-                                    @endphp
-                                    <span class="{{ $metodeClass }}">{{ ucfirst($metode) }}</span>
-                                </td>
-                                <td>
-                                    {{ $prediction->faktor ?? '-' }}
-                                </td>
-                                <td>
-                                    {{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}
-                                </td>
-                                <td>
-                                    {{ $prediction->hpl && $prediction->hpl->hpl
-                                        ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d-m-Y')
-                                        : '-' }}
-                                </td>
-                                <td>
-                                    {{ $prediction->created_at ? \Carbon\Carbon::parse($prediction->created_at)->format('d-m-Y H:i') : '-' }}
-                                </td>
-                                <td>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-primary shadow-sm" type="button" id="aksiDropdown{{ $prediction->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots-vertical fs-5"></i>
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="aksiDropdown{{ $prediction->id }}">
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-2 text-primary fw-semibold" href="{{ route('prediksi.show', $prediction->id) }}">
-                                                    <i class="bi bi-eye"></i>
-                                                    <span>Lihat Detail</span>
+    <!-- Main Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" style="border-radius: 12px; overflow: hidden;">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 py-3 px-4"><i class="fas fa-user me-2"></i>Nama Ibu Hamil</th>
+                                    <th class="border-0 py-3"><i class="fas fa-stethoscope me-2"></i>Metode</th>
+                                    <th class="border-0 py-3"><i class="fas fa-balance-scale me-2"></i>Faktor</th>
+                                    <th class="border-0 py-3"><i class="fas fa-percentage me-2"></i>Confidence</th>
+                                    <th class="border-0 py-3"><i class="fas fa-calendar me-2"></i>HPL</th>
+                                    <th class="border-0 py-3"><i class="fas fa-clock me-2"></i>Waktu Prediksi</th>
+                                    <th class="border-0 py-3 text-center"><i class="fas fa-cogs me-2"></i>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($predictions as $prediction)
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4">{{ $prediction->user->name ?? '-' }}</td>
+                                        <td class="py-3">
+                                            <span class="fw-semibold
+                                                @if(strtolower($prediction->metode_persalinan) == 'normal') text-info
+                                                @elseif(strtolower($prediction->metode_persalinan) == 'caesar') text-danger
+                                                @else text-muted @endif">
+                                                {{ ucfirst($prediction->metode_persalinan) }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3">
+                                            {{ $prediction->faktor ?? '-' }}
+                                        </td>
+                                        <td class="py-3">
+                                            {{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}
+                                        </td>
+                                        <td class="py-3">
+                                            {{ $prediction->hpl && $prediction->hpl->hpl
+                                                ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d-m-Y')
+                                                : '-' }}
+                                        </td>
+                                        <td class="py-3">
+                                            <div>
+                                                <div class="fw-bold">{{ \Carbon\Carbon::parse($prediction->created_at)->format('d M Y') }}</div>
+                                                <small class="text-muted">{{ \Carbon\Carbon::parse($prediction->created_at)->format('H:i') }}</small>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 text-center">
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ route('prediksi.show', $prediction->id) }}"
+                                                    class="btn btn-sm btn-outline-primary" style="border-radius: 8px 0 0 8px;">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                                <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="dropdown-item d-flex align-items-center gap-2 text-danger fw-semibold" type="submit">
-                                                        <i class="bi bi-trash"></i>
-                                                        <span>Hapus</span>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 0 8px 8px 0;">
+                                                        <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-4">Belum ada data prediksi.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-5">
+                                            <i class="fas fa-baby text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                                            <br>
+                                            <span class="d-block mt-2">Belum ada data prediksi.</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(77, 186, 255, 0.07);
+        transform: scale(1.002);
+        transition: all 0.2s ease;
+    }
+    .card, .btn, .badge {
+        transition: all 0.3s ease;
+    }
+    a[href*="prediksi.form"]:hover {
+        background: linear-gradient(45deg, #1a87e3, #4dbaff) !important;
+    }
+</style>
 @endsection
