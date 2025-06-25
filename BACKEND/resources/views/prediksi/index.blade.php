@@ -5,9 +5,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 class="fw-semibold text-primary">Daftar Prediksi Metode Persalinan</h2>
         <a href="{{ route('prediksi.form') }}"
-           class="btn fw-bold d-flex align-items-center gap-2 shadow-lg"
-           style="background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%); color: white; font-size: 1.15rem; padding: 0.8rem 2rem; border-radius: 0.8rem;">
-            <i class="bi bi-plus-lg fs-4"></i> Tambah Prediksi Baru
+           class="btn btn-info btn-sm fw-semibold d-flex align-items-center gap-2 shadow-sm"
+           style="color: white; border-radius: 0.6rem;">
+            <i class="bi bi-plus-lg fs-5"></i>
+            Tambah Prediksi Baru
         </a>
     </div>
 
@@ -48,9 +49,9 @@
         </div>
         <div class="col-md-12 d-grid mt-2">
             <button type="submit"
-                class="btn fw-bold d-flex align-items-center justify-content-center gap-2 shadow-lg"
-                style="background: linear-gradient(90deg, #8b5cf6 0%, #06b6d4 100%); color: white; font-size: 1.05rem; padding: 0.7rem 1.5rem; border-radius: 0.8rem;">
-                <i class="bi bi-funnel-fill fs-5"></i> Terapkan Filter
+                class="btn btn-danger btn-sm d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                style="border-radius: 0.6rem;">
+                <i class="bi bi-funnel-fill"></i> Terapkan Filter
             </button>
         </div>
     </form>
