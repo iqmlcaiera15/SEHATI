@@ -25,7 +25,17 @@
         </div>
     </div>
 
-    <!-- Alert/Error -->
+    <!-- Error/Session Alert -->
+    @if(session('error'))
+        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if(session('success'))
+        <div class="alert alert-success shadow-sm rounded-3 mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
     @if ($errors->any())
         <div class="alert alert-danger shadow-sm rounded-3 mb-4">
             <strong>Terjadi kesalahan:</strong>

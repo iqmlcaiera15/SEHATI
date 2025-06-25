@@ -10,89 +10,145 @@
         : '-';
 @endphp
 
-<div class="container py-5">
+<div class="container-fluid py-4">
+
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4dbaff 0%, #1a87e3 100%); border-radius: 15px;">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-2">
+                                <i class="fas fa-baby me-2"></i>
+                                Hasil Prediksi Persalinan
+                            </h2>
+                            <span class="opacity-75">Detail hasil prediksi metode persalinan berdasarkan data terbaru</span>
+                        </div>
+                        <a href="{{ route('prediksi.index') }}" class="btn btn-outline-light d-flex align-items-center shadow-sm px-4 rounded-3 fw-semibold">
+                            <i class="fas fa-arrow-left me-2"></i> Riwayat
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Hasil Prediksi -->
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden position-relative"
-                 style="background: linear-gradient(110deg, #F6F9FF 70%, #e8f0ff 100%);">
-                <!-- Badge Prediksi -->
-                <div class="text-center pt-5 pb-1" style="background: #fff;">
-                    <span class="badge px-4 py-2 fw-bold rounded-pill border {{ $badgeClass }}" style="font-size: 1.15rem; box-shadow: 0 2px 12px rgba(34,139,230,0.07); letter-spacing: 1px;">
-                        {{ ucfirst($prediction->metode_persalinan) }}
-                    </span>
-                </div>
-                <div class="text-center px-4 pb-1 pt-1" style="background: #fff;">
-                    <h2 class="fw-bold mb-2 text-dark" style="letter-spacing: 0.5px;">
-                        Hasil Prediksi Persalinan
-                    </h2>
-                    <div class="small text-muted mb-2">
-                        {{ $prediction->created_at->format('d M Y, H:i') }}
-                        &nbsp;|&nbsp;
-                        <b>HPL:</b> {{ $hpl }}
-                    </div>
-                    <div class="mb-2">
-                        <span class="fw-semibold text-secondary">Faktor Penentu:</span>
-                        <span class="fw-normal">{{ $prediction->faktor ?? 'Tidak tersedia' }}</span>
-                    </div>
-                    <div class="mb-2">
-                        <span class="fw-semibold text-secondary">Confidence:</span>
-                        <span class="fw-normal">{{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}</span>
-                    </div>
-                </div>
-                <!-- Konten Detail -->
-                <div class="card-body p-4 pb-0">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <span class="fw-semibold text-secondary">Nama Ibu:</span>
-                                <span class="fw-normal">{{ $prediction->user->name ?? '-' }}</span>
-                            </div>
-                            <div class="mb-2">
-                                <span class="fw-semibold text-secondary">Usia Ibu:</span>
-                                <span class="fw-normal">{{ $prediction->usia_ibu }} tahun</span>
-                            </div>
-                            <div class="mb-2">
-                                <span class="fw-semibold text-secondary">Tekanan Darah:</span>
-                                <span class="fw-normal">{{ ucfirst($prediction->tekanan_darah) }}</span>
-                            </div>
-                            <div class="mb-2">
-                                <span class="fw-semibold text-secondary">Riwayat Persalinan:</span>
-                                <span class="fw-normal">{{ ucfirst($prediction->riwayat_persalinan) }}</span>
-                            </div>
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="background: linear-gradient(110deg, #f8fbff 70%, #e8f0ff 100%); border-radius: 18px;">
+                <div class="card-body p-0">
+
+                    <!-- Badge & Prediksi -->
+                    <div class="text-center py-4" style="background: #fff; border-radius: 18px 18px 0 0;">
+                        <span class="badge px-4 py-2 fw-bold rounded-pill border {{ $badgeClass }}" style="font-size: 1.15rem; box-shadow: 0 2px 12px rgba(34,139,230,0.07); letter-spacing: 1px;">
+                            {{ ucfirst($prediction->metode_persalinan) }}
+                        </span>
+                        <div class="fw-bold mt-3" style="font-size: 2rem; color: #205685; letter-spacing: 0.5px;">
+                            {{ $isCaesar ? 'Caesar' : 'Normal' }}
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-2">
-                                <span class="fw-semibold text-secondary">Posisi Janin:</span>
-                                <span class="fw-normal">{{ ucfirst($prediction->posisi_janin) }}</span>
+                        <div class="text-muted small mt-1">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            {{ $prediction->created_at->format('d M Y, H:i') }} &nbsp;|&nbsp;
+                            <b>HPL:</b> {{ $hpl }}
+                        </div>
+                    </div>
+
+                    <!-- Info Faktor dan Confidence -->
+                    <div class="px-4 pt-4">
+                        <div class="row justify-content-center text-center">
+                            <div class="col-12 col-md-6 mb-2">
+                                <div class="rounded-3 px-3 py-2 bg-light">
+                                    <span class="fw-semibold text-secondary">Faktor Penentu:</span>
+                                    <br>
+                                    <span class="fw-normal">{{ $prediction->faktor ?? 'Tidak tersedia' }}</span>
+                                </div>
                             </div>
-                            <div class="mb-2">
-                                <span class="fw-semibold text-secondary">Kondisi Janin:</span>
-                                <span class="fw-normal">{{ ucfirst($prediction->kondisi_kesehatan_janin) }}</span>
-                            </div>
-                            <div class="mb-2">
-                                <span class="fw-semibold text-secondary">Riwayat Kesehatan Ibu:</span>
-                                <span class="fw-normal">{{ ucfirst($prediction->riwayat_kesehatan_ibu) }}</span>
-                            </div>
-                            <div class="mb-2 d-md-none">
-                                <span class="fw-semibold text-secondary">HPL:</span>
-                                <span class="fw-normal">{{ $hpl }}</span>
+                            <div class="col-12 col-md-6 mb-2">
+                                <div class="rounded-3 px-3 py-2 bg-light">
+                                    <span class="fw-semibold text-secondary">Confidence:</span>
+                                    <br>
+                                    <span class="fw-normal">{{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Tombol Aksi -->
-                <div class="px-4 pb-4 pt-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2" style="background: #fff;">
-                    <a href="{{ route('prediksi.index') }}" class="btn btn-light border fw-semibold px-4">
-                        Kembali ke Riwayat
-                    </a>
-                    @if(Route::has('prediksi.print'))
-                    <a href="{{ route('prediksi.print', $prediction->id) }}" target="_blank" class="btn btn-primary fw-semibold px-4">
-                        Cetak Hasil
-                    </a>
-                    @endif
+
+                    <!-- Konten Detail -->
+                    <div class="px-4 pb-3 pt-4">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <span class="fw-semibold text-secondary">Nama Ibu:</span>
+                                    <span class="fw-normal">{{ $prediction->user->name ?? '-' }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="fw-semibold text-secondary">Usia Ibu:</span>
+                                    <span class="fw-normal">{{ $prediction->usia_ibu }} tahun</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="fw-semibold text-secondary">Tekanan Darah:</span>
+                                    <span class="fw-normal">{{ ucfirst($prediction->tekanan_darah) }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="fw-semibold text-secondary">Riwayat Persalinan:</span>
+                                    <span class="fw-normal">{{ ucfirst($prediction->riwayat_persalinan) }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <span class="fw-semibold text-secondary">Posisi Janin:</span>
+                                    <span class="fw-normal">{{ ucfirst($prediction->posisi_janin) }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="fw-semibold text-secondary">Kondisi Janin:</span>
+                                    <span class="fw-normal">{{ ucfirst($prediction->kondisi_kesehatan_janin) }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="fw-semibold text-secondary">Riwayat Kesehatan Ibu:</span>
+                                    <span class="fw-normal">{{ ucfirst($prediction->riwayat_kesehatan_ibu) }}</span>
+                                </div>
+                                <div class="mb-2 d-md-none">
+                                    <span class="fw-semibold text-secondary">HPL:</span>
+                                    <span class="fw-normal">{{ $hpl }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Aksi -->
+                    <div class="px-4 pb-4 pt-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2" style="background: #fff; border-radius: 0 0 18px 18px;">
+                        <a href="{{ route('prediksi.index') }}"
+                           class="btn btn-outline-primary fw-semibold px-4 py-2 rounded-3">
+                            <i class="fas fa-list me-1"></i> Kembali ke Riwayat
+                        </a>
+                        @if(Route::has('prediksi.print'))
+                        <a href="{{ route('prediksi.print', $prediction->id) }}" target="_blank"
+                           class="btn fw-semibold px-4 py-2 rounded-3"
+                           style="background: linear-gradient(45deg, #4dbaff, #1a87e3); color: white;">
+                            <i class="fas fa-print me-1"></i> Cetak Hasil
+                        </a>
+                        @endif
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+    .btn, .card, .alert { transition: all 0.3s; }
+    .btn-outline-primary:hover {
+        background: linear-gradient(45deg, #4dbaff, #1a87e3) !important;
+        color: white !important;
+        border: none !important;
+    }
+    .badge {
+        letter-spacing: 1px;
+        font-size: 1.12rem;
+    }
+</style>
 @endsection
