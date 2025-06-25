@@ -70,18 +70,16 @@
         <div class="col-lg-8 col-md-10">
             <div class="card shadow-sm border-0" style="border-radius: 18px;">
                 <div class="card-body px-4 py-4">
-
                     <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate autocomplete="off">
                         @csrf
                         <div class="row g-4">
-
                             {{-- Bidan: Pilih user --}}
                             @if(Auth::user()->role === 'bidan')
                                 <div class="col-md-6">
                                     <label for="user_id" class="form-label fw-semibold">
                                         Nama Ibu Hamil <span class="text-danger">*</span>
                                     </label>
-                                    <select id="user_id" name="user_id" class="form-select rounded-3" required>
+                                    <select id="user_id" name="user_id" class="form-select custom-input" required>
                                         <option value="">-- Pilih Ibu Hamil --</option>
                                         @foreach($users as $user)
                                             @if($user->role === 'ibu_hamil')
@@ -103,7 +101,7 @@
                                 <label for="usia_ibu" class="form-label fw-semibold">
                                     Usia Ibu <span class="text-danger">*</span>
                                 </label>
-                                <input type="number" id="usia_ibu" name="usia_ibu" class="form-control rounded-3" min="15" max="50"
+                                <input type="number" id="usia_ibu" name="usia_ibu" class="form-control custom-input" min="15" max="50"
                                     value="{{ old('usia_ibu') }}" required placeholder="Isi usia ibu, contoh: 28">
                                 <small class="text-muted">Masukkan usia antara 15 sampai 50 tahun</small>
                                 @error('usia_ibu')
@@ -115,7 +113,7 @@
                                 <label for="tekanan_darah" class="form-label fw-semibold">
                                     Tekanan Darah <span class="text-danger">*</span>
                                 </label>
-                                <select id="tekanan_darah" name="tekanan_darah" class="form-select rounded-3" required>
+                                <select id="tekanan_darah" name="tekanan_darah" class="form-select custom-input" required>
                                     <option value="">-- Pilih --</option>
                                     <option value="normal" {{ old('tekanan_darah') == 'normal' ? 'selected' : '' }}>Normal</option>
                                     <option value="rendah" {{ old('tekanan_darah') == 'rendah' ? 'selected' : '' }}>Rendah</option>
@@ -130,7 +128,7 @@
                                 <label for="riwayat_persalinan" class="form-label fw-semibold">
                                     Riwayat Persalinan <span class="text-danger">*</span>
                                 </label>
-                                <select id="riwayat_persalinan" name="riwayat_persalinan" class="form-select rounded-3" required>
+                                <select id="riwayat_persalinan" name="riwayat_persalinan" class="form-select custom-input" required>
                                     <option value="">-- Pilih --</option>
                                     <option value="tidak ada" {{ old('riwayat_persalinan') == 'tidak ada' ? 'selected' : '' }}>Tidak Ada</option>
                                     <option value="normal" {{ old('riwayat_persalinan') == 'normal' ? 'selected' : '' }}>Normal</option>
@@ -145,7 +143,7 @@
                                 <label for="posisi_janin" class="form-label fw-semibold">
                                     Posisi Janin <span class="text-danger">*</span>
                                 </label>
-                                <select id="posisi_janin" name="posisi_janin" class="form-select rounded-3" required>
+                                <select id="posisi_janin" name="posisi_janin" class="form-select custom-input" required>
                                     <option value="">-- Pilih --</option>
                                     <option value="normal" {{ old('posisi_janin') == 'normal' ? 'selected' : '' }}>Normal</option>
                                     <option value="lintang" {{ old('posisi_janin') == 'lintang' ? 'selected' : '' }}>Lintang</option>
@@ -160,7 +158,7 @@
                                 <label for="riwayat_kesehatan_ibu" class="form-label fw-semibold">
                                     Riwayat Kesehatan Ibu <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" id="riwayat_kesehatan_ibu" name="riwayat_kesehatan_ibu" class="form-control rounded-3"
+                                <input type="text" id="riwayat_kesehatan_ibu" name="riwayat_kesehatan_ibu" class="form-control custom-input"
                                     value="{{ old('riwayat_kesehatan_ibu') }}" required placeholder="Contoh: hipertensi, tidak ada">
                                 <small class="text-muted">Tulis penyakit seperti “hipertensi”, atau jika sehat tulis “tidak ada”. Tidak boleh angka saja.</small>
                                 <div id="err_kesehatan_ibu" class="text-danger small mt-1" style="display:none">
@@ -175,7 +173,7 @@
                                 <label for="kondisi_kesehatan_janin" class="form-label fw-semibold">
                                     Kondisi Kesehatan Janin <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" id="kondisi_kesehatan_janin" name="kondisi_kesehatan_janin" class="form-control rounded-3"
+                                <input type="text" id="kondisi_kesehatan_janin" name="kondisi_kesehatan_janin" class="form-control custom-input"
                                     value="{{ old('kondisi_kesehatan_janin') }}" required placeholder="Contoh: normal, detak jantung lambat">
                                 <small class="text-muted">Tulis “normal” jika sehat. Tidak boleh hanya angka.</small>
                                 <div id="err_kesehatan_janin" class="text-danger small mt-1" style="display:none">
@@ -187,9 +185,9 @@
                             </div>
                         </div>
 
-                        <div class="mt-5 text-end">
-                            <button type="submit" class="btn btn-lg px-5 py-3 fw-bold d-flex align-items-center gap-2 shadow-sm rounded-3"
-                                style="background: linear-gradient(45deg, #4dbaff, #1a87e3); border: none; color: white;">
+                        <div class="mt-5 text-center">
+                            <button type="submit" class="btn btn-lg btn-gradient-main px-5 py-3 fw-bold d-inline-flex align-items-center gap-2 shadow-sm rounded-3"
+                                style="font-size: 1.25rem;">
                                 <i class="fas fa-check-circle me-2"></i>
                                 Prediksi Sekarang
                             </button>
@@ -201,16 +199,37 @@
     </div>
 </div>
 
-<!-- Custom Styles -->
 <style>
-    .card, .btn, .alert { transition: all 0.3s; }
-    .btn-success, .btn-primary {
-        font-weight: 600; letter-spacing: .5px;
+    .custom-input,
+    .custom-input:focus {
+        border: 1.5px solid #e0e6ed !important;
+        box-shadow: none !important;
+        background: #f9fcff !important;
+        color: #22364b;
+        transition: border 0.2s, background 0.2s;
+        font-size: 1.04rem;
     }
-    .form-label { font-weight: 500; }
+    .custom-input:focus {
+        border-color: #4dbaff !important;
+        background: #f1f8ff !important;
+    }
+    .form-label { font-weight: 600; }
+    .btn-gradient-main {
+        background: linear-gradient(45deg, #4dbaff, #1a87e3);
+        color: white !important;
+        border: none;
+        font-size: 1.13rem;
+        box-shadow: 0 2px 16px rgba(30,170,255,0.10);
+        letter-spacing: 0.5px;
+    }
+    .btn-gradient-main:hover {
+        background: linear-gradient(60deg, #1a87e3, #4dbaff);
+        color: #fff !important;
+    }
     .needs-validation .form-control:invalid,
     .needs-validation .form-select:invalid {
-        border-color: #dc3545;
+        border-color: #e0e6ed !important;
+        background: #fff5f5 !important;
     }
 </style>
 @endsection
