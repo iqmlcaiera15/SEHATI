@@ -1,3 +1,70 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4dbaff 0%, #1a87e3 100%); border-radius: 15px;">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-2">
+                                <i class="fas fa-baby me-2"></i>
+                                Form Prediksi Persalinan
+                            </h2>
+                            <span class="opacity-75">
+                                Mohon isi data berikut dengan lengkap dan benar agar hasil prediksi lebih akurat.<br>
+                                Semua kolom wajib diisi, gunakan kata sederhana, misal: <b>“tidak ada”</b> jika sehat.
+                            </span>
+                        </div>
+                        <a href="{{ route('prediksi.index') }}" class="btn btn-outline-light d-flex align-items-center shadow-sm px-4 rounded-3 fw-semibold">
+                            <i class="fas fa-arrow-left me-2"></i> Kembali
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert Friendly -->
+    @if ($errors->any())
+        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
+            <strong>Mohon lengkapi isian berikut:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>
+                        @php
+                            $map = [
+                                'The user id field is required.' => 'Nama ibu hamil belum dipilih.',
+                                'The usia ibu field is required.' => 'Usia ibu belum diisi.',
+                                'The tekanan darah field is required.' => 'Tekanan darah belum dipilih.',
+                                'The riwayat persalinan field is required.' => 'Riwayat persalinan belum dipilih.',
+                                'The posisi janin field is required.' => 'Posisi janin belum dipilih.',
+                                'The riwayat kesehatan ibu field is required.' => 'Riwayat kesehatan ibu belum diisi.',
+                                'The kondisi kesehatan janin field is required.' => 'Kondisi kesehatan janin belum diisi.',
+                                'The usia ibu must be between 15 and 50.' => 'Usia ibu harus antara 15 sampai 50 tahun.',
+                                'The usia ibu must be at least 15.' => 'Usia ibu minimal 15 tahun.',
+                                'The usia ibu may not be greater than 50.' => 'Usia ibu maksimal 50 tahun.',
+                            ];
+                        @endphp
+                        {{ $map[$error] ?? $error }}
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if(session('success'))
+        <div class="alert alert-success shadow-sm rounded-3 mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
 <!-- Form Card -->
 <div class="row justify-content-center">
     <div class="col-lg-8 col-md-10 mx-auto">
@@ -131,3 +198,77 @@
         </div>
     </div>
 </div>
+
+
+<style>
+    .custom-input,
+    .custom-input:focus {
+        border: 1.5px solid #e0e6ed !important;
+        box-shadow: none !important;
+        background: #f9fcff !important;
+        color: #22364b;
+        transition: border 0.2s, background 0.2s;
+        font-size: 1.04rem;
+    }
+    .custom-input:focus {
+        border-color: #4dbaff !important;
+        background: #f1f8ff !important;
+    }
+    .form-label { font-weight: 600; }
+    .btn-gradient-main {
+        background: linear-gradient(45deg, #4dbaff, #1a87e3);
+        color: white !important;
+        border: none;
+        font-size: 1.13rem;
+        box-shadow: 0 2px 16px rgba(30,170,255,0.10);
+        letter-spacing: 0.5px;
+    }
+    .btn-gradient-main:hover {
+        background: linear-gradient(60deg, #1a87e3, #4dbaff);
+        color: #fff !important;
+    }
+    .needs-validation .form-control:invalid,
+    .needs-validation .form-select:invalid {
+        border-color: #e0e6ed !important;
+        background: #fff5f5 !important;
+    }
+</style>
+@endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Validasi input: tidak boleh hanya angka untuk field kesehatan
+        function cekString(fieldId, msgId) {
+            const field = document.getElementById(fieldId);
+            const msg = document.getElementById(msgId);
+            field.addEventListener('input', function() {
+                if (/^\d+$/.test(field.value)) {
+                    msg.style.display = 'block';
+                } else {
+                    msg.style.display = 'none';
+                }
+            });
+        }
+        cekString('riwayat_kesehatan_ibu', 'err_kesehatan_ibu');
+        cekString('kondisi_kesehatan_janin', 'err_kesehatan_janin');
+
+        // Bootstrap tooltip & validation
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
+@endpush
