@@ -26,7 +26,7 @@
             </div>
         </div>
     </div>
-    
+
         {{-- Tambahkan di sini --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="font-size: 1.07rem;">
@@ -92,64 +92,67 @@
     </div>
 </div>
 
-    <!-- Filter & Action -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
-                <div>
-                    <a href="{{ route('prediksi.form') }}" class="btn btn-lg px-4 py-3 fw-bold d-flex flex-column align-items-start"
-                        style="background: linear-gradient(45deg, #4dbaff, #1a87e3); border: none; color: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(26, 135, 227, 0.15);">
-                        <span>
-                            <i class="fas fa-plus-circle me-2 fs-5"></i>
-                            Prediksi Baru
-                        </span>
-                        <small class="opacity-75">Lakukan prediksi baru</small>
-                    </a>
-                </div>
-                <div>
-                    <form method="GET" action="{{ route('prediksi.index') }}" class="d-flex gap-2 flex-wrap align-items-end">
-                        @if(Auth::user()->role === 'bidan')
-                        <div>
-                            <label for="user_id" class="form-label mb-1">Nama Ibu Hamil</label>
-                            <select name="user_id" id="user_id" class="form-select shadow-sm rounded-3">
-                                <option value="">Semua</option>
-                                @foreach($users as $user)
-                                    @if($user->role === 'ibu_hamil')
-                                        <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }}
-                                        </option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        @endif
-                        <div>
-                            <label for="method" class="form-label mb-1">Metode Persalinan</label>
-                            <select name="method" id="method" class="form-select shadow-sm rounded-3">
-                                <option value="">Semua</option>
-                                <option value="normal" {{ request('method') == 'normal' ? 'selected' : '' }}>Normal</option>
-                                <option value="caesar" {{ request('method') == 'caesar' ? 'selected' : '' }}>Caesar</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="hpl" class="form-label mb-1">HPL</label>
-                            <input type="date" name="hpl" id="hpl" class="form-control shadow-sm rounded-3" value="{{ request('hpl') }}">
-                        </div>
-                        <div class="d-flex align-items-end gap-2 mb-2">
-                            <button type="submit" class="btn btn-danger btn-md d-flex align-items-center gap-2 shadow-sm rounded-3 px-3">
-                                <i class="fas fa-filter"></i>
-                                Terapkan Filter
-                            </button>
-                            <a href="{{ route('prediksi.index') }}" class="btn btn-outline-secondary btn-md d-flex align-items-center gap-2 shadow-sm rounded-3 px-3">
-                                <i class="fas fa-undo"></i>
-                                Reset Filter
-                            </a>
-                        </div>
-                    </form>
-                </div>
+<!-- Filter & Action -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="row g-0 align-items-stretch">
+            <!-- Tombol Prediksi Baru -->
+            <div class="col-md-4 d-flex align-items-start">
+                <a href="{{ route('prediksi.form') }}" class="btn btn-lg px-4 py-3 fw-bold d-flex flex-column align-items-start justify-content-center w-100"
+                    style="background: linear-gradient(45deg, #4dbaff, #1a87e3); border: none; color: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(26, 135, 227, 0.15); min-height: 80px;">
+                    <span>
+                        <i class="fas fa-plus-circle me-2 fs-5"></i>
+                        Prediksi Baru
+                    </span>
+                    <small class="opacity-75">Lakukan prediksi baru</small>
+                </a>
+            </div>
+            <!-- Form Filter -->
+            <div class="col-md-8">
+                <form method="GET" action="{{ route('prediksi.index') }}" class="row g-2 align-items-end justify-content-end ms-md-2 mt-3 mt-md-0">
+                    @if(Auth::user()->role === 'bidan')
+                    <div class="col-auto">
+                        <label for="user_id" class="form-label mb-1">Nama Ibu Hamil</label>
+                        <select name="user_id" id="user_id" class="form-select shadow-sm rounded-3">
+                            <option value="">Semua</option>
+                            @foreach($users as $user)
+                                @if($user->role === 'ibu_hamil')
+                                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                        {{ $user->name }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+                    <div class="col-auto">
+                        <label for="method" class="form-label mb-1">Metode Persalinan</label>
+                        <select name="method" id="method" class="form-select shadow-sm rounded-3">
+                            <option value="">Semua</option>
+                            <option value="normal" {{ request('method') == 'normal' ? 'selected' : '' }}>Normal</option>
+                            <option value="caesar" {{ request('method') == 'caesar' ? 'selected' : '' }}>Caesar</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label for="hpl" class="form-label mb-1">HPL</label>
+                        <input type="date" name="hpl" id="hpl" class="form-control shadow-sm rounded-3" value="{{ request('hpl') }}">
+                    </div>
+                    <div class="col-auto d-flex align-items-end gap-2 mt-md-4">
+                        <button type="submit" class="btn btn-danger d-flex align-items-center gap-2 shadow-sm rounded-3 px-3">
+                            <i class="fas fa-filter"></i>
+                            Terapkan Filter
+                        </button>
+                        <a href="{{ route('prediksi.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 shadow-sm rounded-3 px-3">
+                            <i class="fas fa-undo"></i>
+                            Reset Filter
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
 
     <!-- Main Table -->
     <div class="row">
