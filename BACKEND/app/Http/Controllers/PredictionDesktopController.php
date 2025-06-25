@@ -16,41 +16,47 @@ class PredictionDesktopController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'bidan') {
-            $query = Prediction::with(['user', 'hpl'])->latest();
+            // Semua prediksi untuk summary card
+            $allPredictions = Prediction::all();
+            $users = User::where('role', 'ibu_hamil')->get();
 
-            // Filter by Metode
+            // Data hasil filter (untuk tabel)
+            $query = Prediction::with(['user', 'hpl'])->latest();
             if ($request->filled('method')) {
                 $query->where('metode_persalinan', $request->method);
             }
-            // Filter by Nama Ibu (user_id)
             if ($request->filled('user_id')) {
                 $query->where('user_id', $request->user_id);
             }
-            // Filter by HPL
             if ($request->filled('hpl')) {
                 $query->whereHas('hpl', function ($q) use ($request) {
                     $q->whereDate('hpl', $request->hpl);
                 });
             }
-
             $predictions = $query->get();
         } else {
-            $predictions = Prediction::with(['user', 'hpl'])
-                ->where('user_id', $user->id)
-                ->when($request->filled('hpl'), function ($q) use ($request) {
-                    $q->whereHas('hpl', function ($sub) use ($request) {
-                        $sub->whereDate('hpl', $request->hpl);
-                    });
-                })
-                ->when($request->filled('method'), function ($q) use ($request) {
-                    $q->where('metode_persalinan', $request->method);
-                })
-                ->latest()
-                ->get();
+            // Untuk user ibu hamil: hanya data milik sendiri
+            $allPredictions = Prediction::where('user_id', $user->id)->get();
+            $users = collect([$user]); // hanya dirinya sendiri
+
+            $query = Prediction::with(['user', 'hpl'])->where('user_id', $user->id)->latest();
+            if ($request->filled('method')) {
+                $query->where('metode_persalinan', $request->method);
+            }
+            if ($request->filled('hpl')) {
+                $query->whereHas('hpl', function ($q) use ($request) {
+                    $q->whereDate('hpl', $request->hpl);
+                });
+            }
+            $predictions = $query->get();
         }
 
-        $users = User::where('role', 'ibu_hamil')->get();
-        return view('prediksi.index', compact('predictions', 'users'));
+        // Pass ke view, summary card pakai allPredictions
+        return view('prediksi.index', [
+            'predictions'      => $predictions,
+            'users'            => $users,
+            'allPredictions'   => $allPredictions,
+        ]);
     }
 
     // Form input prediksi
@@ -105,58 +111,57 @@ class PredictionDesktopController extends Controller
     }
 
     // Proses simpan prediksi baru
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'user_id' => 'required|exists:users,id',
-        'usia_ibu' => 'required|integer|min:15|max:50',
-        'tekanan_darah' => 'required|in:normal,rendah,tinggi',
-        'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
-        'posisi_janin' => 'required|in:normal,lintang,sungsang',
-        'riwayat_kesehatan_ibu' => 'required|string',
-        'kondisi_kesehatan_janin' => 'required|string',
-    ]);
-
-    try {
-        $dataToSend = [
-            'usia_ibu' => (int)$request->usia_ibu,
-            'tekanan_darah' => strtolower($request->tekanan_darah),
-            'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
-            'posisi_janin' => strtolower($request->posisi_janin),
-            'riwayat_kesehatan_ibu' => strtolower($request->riwayat_kesehatan_ibu),
-            'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
-        ];
-
-        // Request ke Flask API
-        $response = Http::post('https://sehatimlprediksi-production.up.railway.app/predict', $dataToSend);
-        $result = $response->json();
-
-        if (!$response->ok() || !isset($result['hasil_prediksi'])) {
-            return redirect()->back()->with('error', 'Prediksi gagal. Coba lagi.');
-        }
-
-        $prediction = Prediction::create([
-            'user_id' => $request->user_id,
-            'usia_ibu' => $dataToSend['usia_ibu'],
-            'tekanan_darah' => $dataToSend['tekanan_darah'],
-            'riwayat_persalinan' => $dataToSend['riwayat_persalinan'],
-            'posisi_janin' => $dataToSend['posisi_janin'],
-            'riwayat_kesehatan_ibu' => $dataToSend['riwayat_kesehatan_ibu'],
-            'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
-            'metode_persalinan' => $result['hasil_prediksi'],
-            'faktor' => $result['faktor'],
-            'confidence' => isset($result['confidence']) && $result['confidence'] !== null
-                ? $result['confidence']
-                : 0, // Tidak null
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'usia_ibu' => 'required|integer|min:15|max:50',
+            'tekanan_darah' => 'required|in:normal,rendah,tinggi',
+            'riwayat_persalinan' => 'required|in:tidak ada,normal,caesar',
+            'posisi_janin' => 'required|in:normal,lintang,sungsang',
+            'riwayat_kesehatan_ibu' => 'required|string',
+            'kondisi_kesehatan_janin' => 'required|string',
         ]);
 
-        return redirect()->route('prediksi.show', $prediction->id)
-            ->with('success', 'Data prediksi berhasil disimpan!');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat prediksi: ' . $e->getMessage());
-    }
-}
+        try {
+            $dataToSend = [
+                'usia_ibu' => (int)$request->usia_ibu,
+                'tekanan_darah' => strtolower($request->tekanan_darah),
+                'riwayat_persalinan' => strtolower($request->riwayat_persalinan),
+                'posisi_janin' => strtolower($request->posisi_janin),
+                'riwayat_kesehatan_ibu' => strtolower($request->riwayat_kesehatan_ibu),
+                'kondisi_kesehatan_janin' => strtolower($request->kondisi_kesehatan_janin),
+            ];
 
+            // Request ke Flask API
+            $response = Http::post('https://sehatimlprediksi-production.up.railway.app/predict', $dataToSend);
+            $result = $response->json();
+
+            if (!$response->ok() || !isset($result['hasil_prediksi'])) {
+                return redirect()->back()->with('error', 'Prediksi gagal. Coba lagi.');
+            }
+
+            $prediction = Prediction::create([
+                'user_id' => $request->user_id,
+                'usia_ibu' => $dataToSend['usia_ibu'],
+                'tekanan_darah' => $dataToSend['tekanan_darah'],
+                'riwayat_persalinan' => $dataToSend['riwayat_persalinan'],
+                'posisi_janin' => $dataToSend['posisi_janin'],
+                'riwayat_kesehatan_ibu' => $dataToSend['riwayat_kesehatan_ibu'],
+                'kondisi_kesehatan_janin' => $dataToSend['kondisi_kesehatan_janin'],
+                'metode_persalinan' => $result['hasil_prediksi'],
+                'faktor' => $result['faktor'],
+                'confidence' => isset($result['confidence']) && $result['confidence'] !== null
+                    ? $result['confidence']
+                    : 0,
+            ]);
+
+            return redirect()->route('prediksi.show', $prediction->id)
+                ->with('success', 'Data prediksi berhasil disimpan!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat prediksi: ' . $e->getMessage());
+        }
+    }
 
     // Hapus semua data prediksi
     public function deleteAll()
@@ -187,4 +192,3 @@ public function store(Request $request)
         return redirect()->route('prediksi.index')->with('success', 'Data prediksi berhasil dihapus');
     }
 }
-

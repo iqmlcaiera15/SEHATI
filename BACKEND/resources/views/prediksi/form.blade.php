@@ -2,24 +2,30 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <!-- Header Section -->
+
+    <!-- Header Section: sama dengan index -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h3 class="text-primary fw-bold mb-2">
-                        <i class="fas fa-baby me-2"></i> Form Prediksi Metode Persalinan
-                    </h3>
-                    <span class="text-muted">Isi data berikut untuk hasil prediksi metode persalinan yang akurat</span>
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4dbaff 0%, #1a87e3 100%); border-radius: 15px;">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-2">
+                                <i class="fas fa-baby me-2"></i>
+                                Form Prediksi Persalinan
+                            </h2>
+                            <span class="opacity-75">Isi data berikut untuk hasil prediksi metode persalinan yang akurat</span>
+                        </div>
+                        <a href="{{ route('prediksi.index') }}" class="btn btn-outline-light d-flex align-items-center shadow-sm px-4 rounded-3 fw-semibold">
+                            <i class="fas fa-arrow-left me-2"></i> Kembali
+                        </a>
+                    </div>
                 </div>
-                <a href="{{ route('prediksi.index') }}" class="btn btn-outline-secondary shadow-sm px-4">
-                    <i class="fas fa-arrow-left me-1"></i> Kembali
-                </a>
             </div>
         </div>
     </div>
 
-    <!-- Alert/Info Section -->
+    <!-- Alert/Error -->
     @if ($errors->any())
         <div class="alert alert-danger shadow-sm rounded-3 mb-4">
             <strong>Terjadi kesalahan:</strong>
@@ -31,10 +37,12 @@
         </div>
     @endif
 
+    <!-- Form Card -->
     <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-9">
-            <div class="card shadow-sm border-0 bg-light rounded-4">
-                <div class="card-body px-4 py-4">
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0" style="border-radius: 18px;">
+                <div class="card-body p-4">
+
                     <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate autocomplete="off">
                         @csrf
 
@@ -135,8 +143,10 @@
                         </div>
 
                         <div class="mt-5 text-end">
-                            <button type="submit" class="btn btn-success btn-lg shadow-sm px-5 rounded-3">
-                                <i class="fas fa-check-circle me-2"></i> Prediksi Sekarang
+                            <button type="submit" class="btn btn-lg px-5 py-3 fw-bold d-flex align-items-center gap-2 shadow-sm rounded-3"
+                                style="background: linear-gradient(45deg, #4dbaff, #1a87e3); border: none; color: white;">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Prediksi Sekarang
                             </button>
                         </div>
                     </form>
@@ -146,10 +156,17 @@
     </div>
 </div>
 
-<!-- Custom Styles (optional) -->
+<!-- Custom Styles -->
 <style>
     .card, .btn, .alert { transition: all 0.3s; }
-    .btn-success { font-weight: 600; letter-spacing: .5px; }
+    .btn-success, .btn-primary {
+        font-weight: 600; letter-spacing: .5px;
+    }
+    .form-label { font-weight: 500; }
+    .needs-validation .form-control:invalid,
+    .needs-validation .form-select:invalid {
+        border-color: #dc3545;
+    }
 </style>
 @endsection
 

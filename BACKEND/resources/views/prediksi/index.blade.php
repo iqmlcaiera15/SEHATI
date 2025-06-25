@@ -27,57 +27,61 @@
         </div>
     </div>
 
-    <!-- Card Summary: Total Prediksi Normal & Caesar -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
-                <div class="card-body">
-                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                        style="width: 56px; height: 56px; background: #e3f8ff;">
-                        <i class="fas fa-baby text-info fs-4"></i>
-                    </div>
-                    <div class="fs-3 fw-bold">{{ $predictions->where('metode_persalinan', 'normal')->count() }}</div>
-                    <div class="text-muted small">Prediksi Normal</div>
+<!-- Card Summary: Total Prediksi Normal & Caesar -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                    style="width: 56px; height: 56px; background: #e3f8ff;">
+                    <i class="fas fa-baby text-info fs-4"></i>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
-                <div class="card-body">
-                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                        style="width: 56px; height: 56px; background: #ffe3ea;">
-                        <i class="fas fa-baby text-danger fs-4"></i>
-                    </div>
-                    <div class="fs-3 fw-bold">{{ $predictions->where('metode_persalinan', 'caesar')->count() }}</div>
-                    <div class="text-muted small">Prediksi Caesar</div>
+                <div class="fs-3 fw-bold">
+                    {{ $allPredictions->filter(fn($p) => strtolower($p->metode_persalinan) == 'normal')->count() }}
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
-                <div class="card-body">
-                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                        style="width: 56px; height: 56px; background: #e4eaff;">
-                        <i class="fas fa-users text-primary fs-4"></i>
-                    </div>
-                    <div class="fs-3 fw-bold">{{ $users->where('role','ibu_hamil')->count() }}</div>
-                    <div class="text-muted small">Total Ibu Hamil</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
-                <div class="card-body">
-                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                        style="width: 56px; height: 56px; background: #e3ffec;">
-                        <i class="fas fa-database text-success fs-4"></i>
-                    </div>
-                    <div class="fs-3 fw-bold">{{ $predictions->count() }}</div>
-                    <div class="text-muted small">Total Prediksi</div>
-                </div>
+                <div class="text-muted small">Prediksi Normal</div>
             </div>
         </div>
     </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                    style="width: 56px; height: 56px; background: #ffe3ea;">
+                    <i class="fas fa-baby text-danger fs-4"></i>
+                </div>
+                <div class="fs-3 fw-bold">
+                    {{ $allPredictions->filter(fn($p) => strtolower($p->metode_persalinan) == 'caesar')->count() }}
+                </div>
+                <div class="text-muted small">Prediksi Caesar</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                    style="width: 56px; height: 56px; background: #e4eaff;">
+                    <i class="fas fa-users text-primary fs-4"></i>
+                </div>
+                <div class="fs-3 fw-bold">{{ $users->where('role','ibu_hamil')->count() }}</div>
+                <div class="text-muted small">Total Ibu Hamil</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                    style="width: 56px; height: 56px; background: #e3ffec;">
+                    <i class="fas fa-database text-success fs-4"></i>
+                </div>
+                <div class="fs-3 fw-bold">{{ $allPredictions->count() }}</div>
+                <div class="text-muted small">Total Prediksi</div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Filter & Action -->
     <div class="row mb-4">
