@@ -3,7 +3,7 @@
 @section('content')
 <div class="container-fluid py-4">
 
-    <!-- Header Section: sama dengan index -->
+    <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4dbaff 0%, #1a87e3 100%); border-radius: 15px;">
@@ -14,7 +14,7 @@
                                 <i class="fas fa-baby me-2"></i>
                                 Form Prediksi Persalinan
                             </h2>
-                            <span class="opacity-75">Isi data berikut untuk hasil prediksi metode persalinan yang akurat</span>
+                            <span class="opacity-75">Isi data berikut untuk mendapatkan prediksi metode persalinan yang akurat. Pastikan semua data diisi dengan benar.</span>
                         </div>
                         <a href="{{ route('prediksi.index') }}" class="btn btn-outline-light d-flex align-items-center shadow-sm px-4 rounded-3 fw-semibold">
                             <i class="fas fa-arrow-left me-2"></i> Kembali
@@ -25,7 +25,34 @@
         </div>
     </div>
 
-    <!-- Error/Session Alert -->
+    <!-- Error Alert Friendly -->
+    @if ($errors->any())
+        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
+            <strong>Mohon lengkapi isian berikut:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>
+                        @php
+                            $map = [
+                                'The user id field is required.' => 'Nama ibu hamil belum dipilih.',
+                                'The usia ibu field is required.' => 'Usia ibu belum diisi.',
+                                'The tekanan darah field is required.' => 'Tekanan darah belum dipilih.',
+                                'The riwayat persalinan field is required.' => 'Riwayat persalinan belum dipilih.',
+                                'The posisi janin field is required.' => 'Posisi janin belum dipilih.',
+                                'The riwayat kesehatan ibu field is required.' => 'Riwayat kesehatan ibu belum diisi.',
+                                'The kondisi kesehatan janin field is required.' => 'Kondisi kesehatan janin belum diisi.',
+                                'The usia ibu must be between 15 and 50.' => 'Usia ibu harus antara 15 sampai 50 tahun.',
+                                'The usia ibu must be at least 15.' => 'Usia ibu minimal 15 tahun.',
+                                'The usia ibu may not be greater than 50.' => 'Usia ibu maksimal 50 tahun.',
+                                // fallback
+                            ];
+                        @endphp
+                        {{ $map[$error] ?? $error }}
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     @if(session('error'))
         <div class="alert alert-danger shadow-sm rounded-3 mb-4">
             {{ session('error') }}
@@ -36,26 +63,15 @@
             {{ session('success') }}
         </div>
     @endif
-    @if ($errors->any())
-        <div class="alert alert-danger shadow-sm rounded-3 mb-4">
-            <strong>Terjadi kesalahan:</strong>
-            <ul class="mb-0 mt-2">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <!-- Form Card -->
     <div class="row justify-content-center">
-        <div class="col-lg-9">
+        <div class="col-lg-8 col-md-10">
             <div class="card shadow-sm border-0" style="border-radius: 18px;">
-                <div class="card-body p-4">
+                <div class="card-body px-4 py-4">
 
                     <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate autocomplete="off">
                         @csrf
-
                         <div class="row g-4">
                             {{-- Bidan: Pilih user --}}
                             @if(Auth::user()->role === 'bidan')
@@ -73,7 +89,9 @@
                                             @endif
                                         @endforeach
                                     </select>
-                                    <div class="invalid-feedback">Nama ibu wajib dipilih.</div>
+                                    @error('user_id')
+                                        <div class="text-danger small mt-1">Nama ibu hamil wajib dipilih.</div>
+                                    @enderror
                                 </div>
                             @else
                                 <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
@@ -81,18 +99,19 @@
 
                             <div class="col-md-6">
                                 <label for="usia_ibu" class="form-label fw-semibold">
-                                    Usia Ibu (tahun) <span class="text-danger">*</span>
-                                    <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Masukkan usia ibu antara 15 hingga 50 tahun."></i>
+                                    Usia Ibu <span class="text-danger">*</span>
                                 </label>
                                 <input type="number" id="usia_ibu" name="usia_ibu" class="form-control rounded-3" min="15" max="50"
-                                    value="{{ old('usia_ibu') }}" required placeholder="Contoh: 28">
-                                <div class="invalid-feedback">Usia ibu wajib diisi (15-50).</div>
+                                    value="{{ old('usia_ibu') }}" required placeholder="Isi usia ibu, contoh: 28">
+                                <small class="text-muted">Masukkan usia antara 15 sampai 50 tahun</small>
+                                @error('usia_ibu')
+                                    <div class="text-danger small mt-1">{{ $message == "The usia ibu field is required." ? "Usia ibu belum diisi." : $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6">
                                 <label for="tekanan_darah" class="form-label fw-semibold">
                                     Tekanan Darah <span class="text-danger">*</span>
-                                    <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Pilih kategori tekanan darah saat pemeriksaan."></i>
                                 </label>
                                 <select id="tekanan_darah" name="tekanan_darah" class="form-select rounded-3" required>
                                     <option value="">-- Pilih --</option>
@@ -100,13 +119,14 @@
                                     <option value="rendah" {{ old('tekanan_darah') == 'rendah' ? 'selected' : '' }}>Rendah</option>
                                     <option value="tinggi" {{ old('tekanan_darah') == 'tinggi' ? 'selected' : '' }}>Tinggi</option>
                                 </select>
-                                <div class="invalid-feedback">Tekanan darah wajib dipilih.</div>
+                                @error('tekanan_darah')
+                                    <div class="text-danger small mt-1">Tekanan darah wajib dipilih.</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6">
                                 <label for="riwayat_persalinan" class="form-label fw-semibold">
                                     Riwayat Persalinan <span class="text-danger">*</span>
-                                    <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Pilih metode persalinan yang pernah dialami sebelumnya."></i>
                                 </label>
                                 <select id="riwayat_persalinan" name="riwayat_persalinan" class="form-select rounded-3" required>
                                     <option value="">-- Pilih --</option>
@@ -114,13 +134,14 @@
                                     <option value="normal" {{ old('riwayat_persalinan') == 'normal' ? 'selected' : '' }}>Normal</option>
                                     <option value="caesar" {{ old('riwayat_persalinan') == 'caesar' ? 'selected' : '' }}>Caesar</option>
                                 </select>
-                                <div class="invalid-feedback">Riwayat persalinan wajib dipilih.</div>
+                                @error('riwayat_persalinan')
+                                    <div class="text-danger small mt-1">Riwayat persalinan wajib dipilih.</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6">
                                 <label for="posisi_janin" class="form-label fw-semibold">
                                     Posisi Janin <span class="text-danger">*</span>
-                                    <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Posisi janin terakhir berdasarkan pemeriksaan."></i>
                                 </label>
                                 <select id="posisi_janin" name="posisi_janin" class="form-select rounded-3" required>
                                     <option value="">-- Pilih --</option>
@@ -128,27 +149,33 @@
                                     <option value="lintang" {{ old('posisi_janin') == 'lintang' ? 'selected' : '' }}>Lintang</option>
                                     <option value="sungsang" {{ old('posisi_janin') == 'sungsang' ? 'selected' : '' }}>Sungsang</option>
                                 </select>
-                                <div class="invalid-feedback">Posisi janin wajib dipilih.</div>
+                                @error('posisi_janin')
+                                    <div class="text-danger small mt-1">Posisi janin wajib dipilih.</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6">
                                 <label for="riwayat_kesehatan_ibu" class="form-label fw-semibold">
                                     Riwayat Kesehatan Ibu <span class="text-danger">*</span>
-                                    <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Contoh: diabetes, hipertensi, anemia. Wajib diisi."></i>
                                 </label>
                                 <input type="text" id="riwayat_kesehatan_ibu" name="riwayat_kesehatan_ibu" class="form-control rounded-3"
-                                    value="{{ old('riwayat_kesehatan_ibu') }}" required placeholder="Contoh: hipertensi">
-                                <div class="invalid-feedback">Riwayat kesehatan ibu wajib diisi.</div>
+                                    value="{{ old('riwayat_kesehatan_ibu') }}" required placeholder="Contoh: hipertensi, tidak ada, dll">
+                                <small class="text-muted">Jika tidak ada, tulis “tidak ada”.</small>
+                                @error('riwayat_kesehatan_ibu')
+                                    <div class="text-danger small mt-1">Riwayat kesehatan ibu wajib diisi.</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6">
                                 <label for="kondisi_kesehatan_janin" class="form-label fw-semibold">
                                     Kondisi Kesehatan Janin <span class="text-danger">*</span>
-                                    <i class="fas fa-circle-info text-info ms-1" data-bs-toggle="tooltip" title="Contoh: normal, detak jantung lambat, kelainan. Wajib diisi."></i>
                                 </label>
                                 <input type="text" id="kondisi_kesehatan_janin" name="kondisi_kesehatan_janin" class="form-control rounded-3"
-                                    value="{{ old('kondisi_kesehatan_janin') }}" required placeholder="Contoh: normal">
-                                <div class="invalid-feedback">Kondisi janin wajib diisi.</div>
+                                    value="{{ old('kondisi_kesehatan_janin') }}" required placeholder="Contoh: normal, detak jantung lambat, dll">
+                                <small class="text-muted">Jika tidak ada kelainan, tulis “normal”.</small>
+                                @error('kondisi_kesehatan_janin')
+                                    <div class="text-danger small mt-1">Kondisi janin wajib diisi.</div>
+                                @enderror
                             </div>
                         </div>
 
