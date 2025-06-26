@@ -4,35 +4,13 @@
 @php
     $method = strtolower($prediction->metode_persalinan);
     $isCaesar = $method === 'caesar';
-    $headlineColor = $isCaesar ? '#ff3860' : '#1a87e3'; // merah-pink atau biru
-    $ovalBorder   = $isCaesar ? 'border-danger text-danger' : 'border-primary text-primary';
-    $ovalBg       = $isCaesar ? 'bg-danger bg-opacity-10' : 'bg-primary bg-opacity-10';
+    // Warna headline dan oval pakai class Bootstrap (text-primary / text-danger)
+    $headlineClass = $isCaesar ? 'text-danger' : 'text-primary';
+    $ovalClass     = $isCaesar ? 'border-danger text-danger' : 'border-primary text-primary';
     $hpl = $prediction->hpl && $prediction->hpl->hpl
         ? \Carbon\Carbon::parse($prediction->hpl->hpl)->translatedFormat('d F Y')
         : '-';
 @endphp
-
-<style>
-    .hasil-prediksi-headline {
-        font-size: 2.5rem;
-        letter-spacing: 1.5px;
-        font-weight: 700;
-        margin-bottom: 8px;
-        text-shadow: 0 2px 14px rgba(34,139,230,0.08);
-    }
-    .rounded-oval-label {
-        font-size: 1.13rem;
-        font-weight: 600;
-        padding: 6px 32px;
-        border-radius: 999px;
-        border-width: 2px !important;
-        display: inline-block;
-        margin-bottom: 6px;
-    }
-    .shadow-xs {
-        box-shadow: 0 1px 8px rgba(34,139,230,0.07) !important;
-    }
-</style>
 
 <div class="container-fluid py-4">
     <!-- Header Section -->
@@ -66,12 +44,12 @@
                         <div class="mb-3">
                             <i class="fas fa-stethoscope" style="font-size: 3rem; color: #4dbaff;"></i>
                         </div>
-                        <!-- HEADLINE HASIL BERWARNA -->
+                        <!-- HEADLINE DAN OVAL HASIL -->
                         <div class="d-flex flex-column align-items-center mb-2">
-                            <div class="hasil-prediksi-headline" style="color: {{ $headlineColor }};">
+                            <div class="fw-bold {{ $headlineClass }}" style="font-size:2.5rem;letter-spacing:1.5px;margin-bottom:8px;">
                                 {{ $isCaesar ? 'Caesar' : 'Normal' }}
                             </div>
-                            <div class="rounded-oval-label border {{ $ovalBorder }} {{ $ovalBg }}">
+                            <div class="border {{ $ovalClass }} rounded-pill px-4 py-2 fw-bold" style="font-size:1.15rem; border-width:2px;">
                                 {{ ucfirst($prediction->metode_persalinan) }}
                             </div>
                         </div>
@@ -85,13 +63,13 @@
                     <!-- Info Faktor dan Confidence -->
                     <div class="row g-3 justify-content-center px-4 pt-4 pb-0">
                         <div class="col-12 col-md-6 mb-2">
-                            <div class="rounded-4 px-3 py-3 bg-white border shadow-xs h-100 d-flex flex-column align-items-center">
+                            <div class="rounded-4 px-3 py-3 bg-white border h-100 d-flex flex-column align-items-center">
                                 <span class="fw-semibold text-secondary mb-1"><i class="fas fa-lightbulb me-1"></i> Faktor Penentu</span>
                                 <span class="fw-normal" style="font-size: 1.08rem;">{{ $prediction->faktor ?? 'Tidak tersedia' }}</span>
                             </div>
                         </div>
                         <div class="col-12 col-md-6 mb-2">
-                            <div class="rounded-4 px-3 py-3 bg-white border shadow-xs h-100 d-flex flex-column align-items-center">
+                            <div class="rounded-4 px-3 py-3 bg-white border h-100 d-flex flex-column align-items-center">
                                 <span class="fw-semibold text-secondary mb-1"><i class="fas fa-percentage me-1"></i> Confidence</span>
                                 <span class="fw-normal" style="font-size: 1.19rem;">{{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}</span>
                             </div>
@@ -102,37 +80,37 @@
                     <div class="px-4 py-4">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 shadow-xs d-flex align-items-center gap-2">
+                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 d-flex align-items-center gap-2">
                                     <i class="fas fa-user text-primary"></i>
                                     <span><b>Nama Ibu:</b> {{ $prediction->user->name ?? '-' }}</span>
                                 </div>
-                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 shadow-xs d-flex align-items-center gap-2">
+                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 d-flex align-items-center gap-2">
                                     <i class="fas fa-hourglass-half text-primary"></i>
                                     <span><b>Usia Ibu:</b> {{ $prediction->usia_ibu }} tahun</span>
                                 </div>
-                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 shadow-xs d-flex align-items-center gap-2">
+                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 d-flex align-items-center gap-2">
                                     <i class="fas fa-tint text-primary"></i>
                                     <span><b>Tekanan Darah:</b> {{ ucfirst($prediction->tekanan_darah) }}</span>
                                 </div>
-                                <div class="rounded-3 border bg-light px-3 py-2 shadow-xs d-flex align-items-center gap-2">
+                                <div class="rounded-3 border bg-light px-3 py-2 d-flex align-items-center gap-2">
                                     <i class="fas fa-history text-primary"></i>
                                     <span><b>Riwayat Persalinan:</b> {{ ucfirst($prediction->riwayat_persalinan) }}</span>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 shadow-xs d-flex align-items-center gap-2">
+                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 d-flex align-items-center gap-2">
                                     <i class="fas fa-baby text-primary"></i>
                                     <span><b>Posisi Janin:</b> {{ ucfirst($prediction->posisi_janin) }}</span>
                                 </div>
-                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 shadow-xs d-flex align-items-center gap-2">
+                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 d-flex align-items-center gap-2">
                                     <i class="fas fa-heartbeat text-primary"></i>
                                     <span><b>Kondisi Janin:</b> {{ ucfirst($prediction->kondisi_kesehatan_janin) }}</span>
                                 </div>
-                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 shadow-xs d-flex align-items-center gap-2">
+                                <div class="rounded-3 border bg-light px-3 py-2 mb-2 d-flex align-items-center gap-2">
                                     <i class="fas fa-notes-medical text-primary"></i>
                                     <span><b>Riwayat Kesehatan Ibu:</b> {{ ucfirst($prediction->riwayat_kesehatan_ibu) }}</span>
                                 </div>
-                                <div class="rounded-3 border bg-light px-3 py-2 shadow-xs d-flex align-items-center gap-2 d-md-none">
+                                <div class="rounded-3 border bg-light px-3 py-2 d-flex align-items-center gap-2 d-md-none">
                                     <i class="fas fa-calendar text-primary"></i>
                                     <span><b>HPL:</b> {{ $hpl }}</span>
                                 </div>
