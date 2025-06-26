@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="container-fluid py-4">
-
     <!-- Header Card -->
     <div class="row mb-0">
         <div class="col-lg-8 col-md-10 mx-auto">
@@ -32,6 +31,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Alert Perhatian (kuning) -->
+    <div class="row mt-3 mb-2">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="alert alert-warning mb-0 rounded-3 px-4 py-2 d-flex align-items-center"
+                style="background:linear-gradient(90deg, #fffbe9 70%, #fff7c2);border:1.5px solid #ffe7a7; font-size:1.07rem;">
+                <div>
+                    <span class="fw-bold" style="color:#d29b00;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
+                    </span>
+                    <div class="mt-1" style="color:#222;">
+                        <i class="fas fa-info-circle me-1" style="color:#a2a2a2;font-size:0.98rem;"></i>
+                        Hasil deteksi ini hanya untuk referensi awal dan tidak menggantikan konsultasi medis profesional. Pastikan semua data yang dimasukkan akurat untuk hasil yang optimal.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Error Alert -->
     @if ($errors->any())
@@ -64,10 +82,16 @@
     @endif
 
     <!-- Form Card -->
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mb-5"> <!-- mb-5 tambah jarak bawah -->
         <div class="col-lg-8 col-md-10 mx-auto">
             <div class="card shadow-sm border-0" style="border-radius: 18px;">
                 <div class="card-body px-4 py-4">
+                    <!-- Tambahkan paragraf berikut di bawah judul form -->
+                    <div class="mb-3">
+                        <span class="d-block text-primary" style="font-size: 1.08rem; font-weight: 500;">
+                            Mohon isi data berikut dengan lengkap dan benar agar hasil prediksi lebih akurat
+                        </span>
+                    </div>
                     <form action="{{ route('prediksi.store') }}" method="POST" class="needs-validation" novalidate autocomplete="off">
                         @csrf
 
