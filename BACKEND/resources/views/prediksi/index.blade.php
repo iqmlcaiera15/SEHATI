@@ -2,165 +2,99 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <!-- Header Section -->
+
+    <!-- HEADER -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4dbaff 0%, #1a87e3 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-2">
-                                <i class="fas fa-baby me-2"></i>
-                                Riwayat Prediksi Persalinan
-                            </h2>
-                            <p class="mb-0 opacity-75">Kelola dan pantau hasil prediksi metode persalinan</p>
-                        </div>
-                        <div class="text-end">
-                            <div class="badge bg-light text-dark px-3 py-2 fs-6">
-                                <i class="fas fa-users me-1"></i>
-                                {{ $predictions->count() }} Data
-                            </div>
-                        </div>
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(100deg, #7c84e4 0%, #55b8ff 100%); border-radius: 10px;">
+                <div class="card-body text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1" style="font-weight:600;">
+                            <i class="fas fa-baby me-2"></i>Riwayat Prediksi Persalinan
+                        </h2>
+                        <p class="mb-0 opacity-75">Kelola dan pantau hasil prediksi metode persalinan pasien</p>
                     </div>
+                    <span class="badge bg-light text-dark px-3 py-2 fs-6" style="font-size:1.05rem;">
+                        <i class="fas fa-users me-1"></i>
+                        {{ $users->where('role', 'ibu_hamil')->count() }} Pasien
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="font-size: 1.07rem;">
-            <i class="fas fa-check-circle me-2"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    <!-- Card Summary: Total Prediksi Normal & Caesar -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
-                <div class="card-body">
-                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                        style="width: 56px; height: 56px; background: #e3f8ff;">
-                        <i class="fas fa-baby text-info fs-4"></i>
-                    </div>
-                    <div class="fs-3 fw-bold">
-                        {{ $allPredictions->filter(fn($p) => strtolower($p->metode_persalinan) == 'normal')->count() }}
-                    </div>
-                    <div class="text-muted small">Prediksi Normal</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
-                <div class="card-body">
-                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                        style="width: 56px; height: 56px; background: #ffe3ea;">
-                        <i class="fas fa-baby text-danger fs-4"></i>
-                    </div>
-                    <div class="fs-3 fw-bold">
-                        {{ $allPredictions->filter(fn($p) => strtolower($p->metode_persalinan) == 'caesar')->count() }}
-                    </div>
-                    <div class="text-muted small">Prediksi Caesar</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
-                <div class="card-body">
-                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                        style="width: 56px; height: 56px; background: #e4eaff;">
-                        <i class="fas fa-users text-primary fs-4"></i>
-                    </div>
-                    <div class="fs-3 fw-bold">{{ $users->where('role','ibu_hamil')->count() }}</div>
-                    <div class="text-muted small">Total Ibu Hamil</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px;">
-                <div class="card-body">
-                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                        style="width: 56px; height: 56px; background: #e3ffec;">
-                        <i class="fas fa-database text-success fs-4"></i>
-                    </div>
-                    <div class="fs-3 fw-bold">{{ $allPredictions->count() }}</div>
-                    <div class="text-muted small">Total Prediksi</div>
-                </div>
-            </div>
+    <!-- ACTIONS (hapus semua, export) -->
+    <div class="row mb-3">
+        <div class="col-12 d-flex flex-wrap align-items-center gap-2">
+            <form action="{{ route('prediksi.bulkDelete') }}" method="POST" class="d-inline">
+                @csrf @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger d-flex align-items-center gap-2 fw-semibold px-4 py-2" onclick="return confirm('Yakin hapus semua data prediksi?');">
+                    <i class="fas fa-trash"></i> Hapus Semua
+                </button>
+            </form>
+            <a href="{{ route('prediksi.export') }}" class="btn btn-outline-primary d-flex align-items-center gap-2 fw-semibold px-4 py-2">
+                <i class="fas fa-download"></i> Export Data
+            </a>
         </div>
     </div>
 
-    <!-- Filter & Action -->
-    <div class="row mb-4">
+    <!-- FILTER BAR -->
+    <div class="row mb-3">
         <div class="col-12">
-            <div class="d-flex flex-wrap align-items-end gap-4" style="gap: 28px !important;">
-                <!-- Tombol Tambah Prediksi Baru -->
-                <a href="{{ route('prediksi.form') }}"
-                   class="btn fw-semibold d-flex align-items-center gap-2 px-4 py-2 shadow-sm"
-                   style="background: linear-gradient(45deg, #44d1fc, #1a87e3); color: white; font-size: 1.07rem; border-radius: 0.7rem; min-width: 185px;">
-                    <i class="fas fa-plus-circle"></i>
-                    Tambah Prediksi Baru
-                </a>
-                <!-- Form Filter -->
+            <div class="card border-0 shadow-sm p-3" style="border-radius: 12px;">
                 <form method="GET" action="{{ route('prediksi.index') }}" class="d-flex flex-wrap align-items-end gap-3 mb-0">
-                    @if(Auth::user()->role === 'bidan')
                     <div>
-                        <label for="user_id" class="form-label mb-1">Nama Ibu Hamil</label>
-                        <select name="user_id" id="user_id" class="form-select shadow-sm rounded-3" style="min-width: 150px;">
-                            <option value="">Semua</option>
-                            @foreach($users as $user)
-                                @if($user->role === 'ibu_hamil')
-                                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }}
-                                    </option>
-                                @endif
-                            @endforeach
+                        <label class="form-label fw-semibold mb-1"><i class="fas fa-calendar-alt me-1"></i> Filter Tanggal</label>
+                        <input type="date" name="tanggal" class="form-control" value="{{ request('tanggal') }}" style="min-width:160px;">
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold mb-1"><i class="fas fa-filter me-1"></i> Filter Hasil</label>
+                        <select name="hasil" class="form-select" style="min-width:180px;">
+                            <option value="">-- Semua --</option>
+                            <option value="normal" {{ request('hasil')=='normal' ? 'selected' : '' }}>Normal</option>
+                            <option value="caesar" {{ request('hasil')=='caesar' ? 'selected' : '' }}>Caesar</option>
                         </select>
                     </div>
-                    @endif
-                    <div>
-                        <label for="method" class="form-label mb-1">Metode Persalinan</label>
-                        <select name="method" id="method" class="form-select shadow-sm rounded-3" style="min-width: 130px;">
-                            <option value="">Semua</option>
-                            <option value="normal" {{ request('method') == 'normal' ? 'selected' : '' }}>Normal</option>
-                            <option value="caesar" {{ request('method') == 'caesar' ? 'selected' : '' }}>Caesar</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="hpl" class="form-label mb-1">HPL</label>
-                        <input type="date" name="hpl" id="hpl" class="form-control shadow-sm rounded-3" value="{{ request('hpl') }}" style="min-width: 135px;">
-                    </div>
-                    <div class="d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-danger d-flex align-items-center gap-2 shadow-sm rounded-3 px-3" style="height: 40px;">
-                            <i class="fas fa-filter"></i>
-                            Terapkan Filter
+                    <div class="ms-auto d-flex gap-2 flex-grow-1 flex-md-grow-0 align-items-end">
+                        <input type="text" name="search" class="form-control" style="min-width:210px;" placeholder="Cari nama pasien..." value="{{ request('search') }}">
+                        <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2">
+                            <i class="fas fa-search"></i> Filter
                         </button>
-                        <a href="{{ route('prediksi.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 shadow-sm rounded-3 px-3" style="height: 40px;">
-                            <i class="fas fa-undo"></i>
-                            Reset Filter
-                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Main Table -->
+    <!-- TOMBOL TAMBAH & TITLE DATA -->
+    <div class="row mb-2">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div class="fw-semibold fs-5 d-flex align-items-center gap-2">
+                <i class="fas fa-table"></i>
+                Data Prediksi Metode Persalinan Pasien
+            </div>
+            <a href="{{ route('prediksi.form') }}"
+                class="btn d-flex align-items-center gap-2 px-4 py-2 fw-semibold"
+                style="background: linear-gradient(45deg, #44d1fc, #7c84e4); color: white; border-radius: 7px;">
+                <i class="fas fa-plus-circle"></i> Tambah Prediksi Baru
+            </a>
+        </div>
+    </div>
+
+    <!-- DATA TABLE -->
     <div class="row">
         <div class="col-12">
             <div class="card border-0 shadow-sm" style="border-radius: 15px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0" style="border-radius: 12px; overflow: hidden;">
+                        <table class="table table-hover mb-0 align-middle" style="border-radius: 12px; overflow: hidden;">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="border-0 py-3 px-4"><i class="fas fa-user me-2"></i>Nama Ibu Hamil</th>
-                                    <th class="border-0 py-3"><i class="fas fa-stethoscope me-2"></i>Metode</th>
-                                    <th class="border-0 py-3"><i class="fas fa-balance-scale me-2"></i>Faktor</th>
+                                    <th class="border-0 py-3 px-4"><i class="fas fa-user me-2"></i>Pasien</th>
+                                    <th class="border-0 py-3"><i class="fas fa-stethoscope me-2"></i>Hasil Prediksi</th>
                                     <th class="border-0 py-3"><i class="fas fa-percentage me-2"></i>Confidence</th>
-                                    <th class="border-0 py-3"><i class="fas fa-calendar me-2"></i>HPL</th>
-                                    <th class="border-0 py-3"><i class="fas fa-clock me-2"></i>Waktu Prediksi</th>
+                                    <th class="border-0 py-3"><i class="fas fa-balance-scale me-2"></i>Faktor</th>
+                                    <th class="border-0 py-3"><i class="fas fa-calendar me-2"></i>Tanggal</th>
                                     <th class="border-0 py-3 text-center"><i class="fas fa-cogs me-2"></i>Aksi</th>
                                 </tr>
                             </thead>
@@ -168,38 +102,38 @@
                                 @forelse($predictions as $prediction)
                                     <tr class="border-bottom">
                                         <td class="py-3 px-4">
-                                            <!-- Logo profile abjad -->
-                                            <div class="d-flex align-items-center">
-                                                <div class="rounded-circle me-3 d-flex align-items-center justify-content-center"
-                                                    style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; font-size: 1.3rem;">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                                    style="width: 36px; height: 36px; background: linear-gradient(45deg, #667eea, #7c84e4); color: white; font-size: 1.13rem;">
                                                     {{ strtoupper(substr($prediction->user->name ?? '', 0, 1)) }}
                                                 </div>
-                                                <span>{{ $prediction->user->name ?? '-' }}</span>
+                                                <div>
+                                                    <div class="fw-semibold">{{ $prediction->user->name ?? '-' }}</div>
+                                                    <div class="text-muted small">{{ $prediction->usia_ibu }} tahun</div>
+                                                </div>
                                             </div>
                                         </td>
                                         <td class="py-3">
-                                            <span class="fw-semibold
-                                                @if(strtolower($prediction->metode_persalinan) == 'normal') text-info
-                                                @elseif(strtolower($prediction->metode_persalinan) == 'caesar') text-danger
-                                                @else text-muted @endif">
-                                                {{ ucfirst($prediction->metode_persalinan) }}
+                                            @if(strtolower($prediction->metode_persalinan) == 'normal')
+                                                <span class="badge bg-info text-white px-3 py-2" style="font-size:1.03rem;">Normal</span>
+                                            @elseif(strtolower($prediction->metode_persalinan) == 'caesar')
+                                                <span class="badge bg-danger text-white px-3 py-2" style="font-size:1.03rem;">Caesar</span>
+                                            @else
+                                                <span class="badge bg-secondary px-3 py-2">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-primary text-white px-3 py-2" style="font-size:1.03rem;">
+                                                {{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}
                                             </span>
                                         </td>
                                         <td class="py-3">
                                             {{ $prediction->faktor ?? '-' }}
                                         </td>
                                         <td class="py-3">
-                                            {{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}
-                                        </td>
-                                        <td class="py-3">
-                                            {{ $prediction->hpl && $prediction->hpl->hpl
-                                                ? \Carbon\Carbon::parse($prediction->hpl->hpl)->format('d-m-Y')
-                                                : '-' }}
-                                        </td>
-                                        <td class="py-3">
                                             <div>
-                                                <div class="fw-bold">{{ \Carbon\Carbon::parse($prediction->created_at)->format('d M Y') }}</div>
-                                                <small class="text-muted">{{ \Carbon\Carbon::parse($prediction->created_at)->format('H:i') }}</small>
+                                                <div class="fw-bold">{{ \Carbon\Carbon::parse($prediction->created_at)->translatedFormat('d M Y') }}</div>
+                                                <div class="text-muted small">{{ \Carbon\Carbon::parse($prediction->created_at)->format('H:i') }}</div>
                                             </div>
                                         </td>
                                         <td class="py-3 text-center">
@@ -221,7 +155,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted py-5">
+                                        <td colspan="6" class="text-center text-muted py-5">
                                             <i class="fas fa-baby text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
                                             <br>
                                             <span class="d-block mt-2">Belum ada data prediksi.</span>
@@ -230,6 +164,10 @@
                                 @endforelse
                             </tbody>
                         </table>
+                        <!-- PAGINATION -->
+                        <div class="mt-3 px-3">
+                            {{ $predictions->links('pagination::bootstrap-4') }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -239,26 +177,14 @@
 
 <!-- Custom Styles -->
 <style>
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
-    }
+    .btn, .badge, .card { transition: all .2s;}
+    .btn:hover { filter: brightness(1.07); }
     .table-hover tbody tr:hover {
         background-color: rgba(77, 186, 255, 0.07);
-        transform: scale(1.002);
-        transition: all 0.2s ease;
+        transform: scale(1.005);
+        transition: all 0.15s;
     }
-    .card, .btn, .badge {
-        transition: all 0.3s ease;
-    }
-    a[href*="prediksi.form"]:hover {
-        background: linear-gradient(45deg, #1a87e3, #4dbaff) !important;
-    }
-    .d-flex.flex-wrap.align-items-end.gap-4 {
-        gap: 28px !important;
-        margin-left: 4px;
-        margin-right: 4px;
-    }
+    .card, .btn, .badge { transition: all 0.3s ease; }
     @media (max-width: 950px) {
         .d-flex.flex-wrap.align-items-end.gap-4 {
             flex-direction: column;
