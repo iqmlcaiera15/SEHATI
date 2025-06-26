@@ -44,18 +44,21 @@
                 <!-- Tombol Sekunder -->
                 <div class="d-flex gap-2">
                     @if($allPredictions->count() > 0)
-                    <!-- Hapus Semua -->
-                    <form action="{{ route('prediksi.deleteAll') }}" method="POST" class="d-inline">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-outline-danger btn-lg d-flex align-items-center gap-2 fw-semibold" style="border-radius: 12px;"
-                                onclick="return confirm('Yakin hapus semua data prediksi?');">
-                            <i class="fas fa-trash-alt"></i> Hapus Semua
+                        <!-- Hapus Semua -->
+                        <form action="{{ route('prediksi.deleteAll') }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-lg d-flex align-items-center gap-2 fw-semibold"
+                                    style="border-radius: 12px;"
+                                    onclick="return confirm('Yakin hapus semua data prediksi?');">
+                                <i class="fas fa-trash-alt"></i> Hapus Semua
+                            </button>
+                        </form>
+                        <!-- Export Data (dummy only) -->
+                        <button class="btn btn-outline-primary btn-lg d-flex align-items-center gap-2 fw-semibold" style="border-radius: 12px;" disabled>
+                            <i class="fas fa-download"></i> Export Data
                         </button>
-                    </form>
-                    <!-- Export Data (dummy only) -->
-                    <button class="btn btn-outline-primary btn-lg d-flex align-items-center gap-2 fw-semibold" style="border-radius: 12px;" disabled>
-                        <i class="fas fa-download"></i> Export Data
-                    </button>
                     @endif
                 </div>
             </div>
