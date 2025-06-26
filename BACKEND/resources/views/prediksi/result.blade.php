@@ -2,18 +2,18 @@
 
 @section('content')
 @php
-    $method      = strtolower($prediction->metode_persalinan ?? '');
-    $isCaesar    = $method === 'caesar';
+    $method = strtolower($prediction->metode_persalinan ?? '');
+    $isCaesar = $method === 'caesar';
     $headlineClass = $isCaesar ? 'text-danger' : 'text-primary';
     $ovalClass     = $isCaesar ? 'border-danger text-danger' : 'border-primary text-primary';
 
-    // Aman: cek relasi ada, lalu cek propertynya, jika tidak ada tampilkan '-'
-    $hpl = optional(optional($prediction->hpl)->hpl)
-        ? \Carbon\Carbon::parse($prediction->hpl->hpl)->translatedFormat('d F Y')
+    // Aman: relasi bisa saja null, pakai optional
+    $hplValue = optional(optional($prediction->hpl)->hpl);
+    $hpl = $hplValue
+        ? \Carbon\Carbon::parse($hplValue)->translatedFormat('d F Y')
         : '-';
 
-    // Tanggal prediksi (bisa jadi null)
-    $tanggalPrediksi = optional($prediction->created_at)
+    $tanggalPrediksi = $prediction->created_at
         ? \Carbon\Carbon::parse($prediction->created_at)->format('d M Y, H:i')
         : '-';
 @endphp
@@ -55,7 +55,7 @@
                             {{ $isCaesar ? 'Caesar' : 'Normal' }}
                         </div>
                         <div class="border {{ $ovalClass }} rounded-pill px-4 py-2 fw-bold mt-2 mb-1" style="font-size:1.13rem; border-width:2px;">
-                            Prediksi Metode Persalinan: <span class="{{ $headlineClass }}">{{ ucfirst($prediction->metode_persalinan ?? '-') }}</span>
+                            Prediksi Metode Persalinan: <span class="{{ $headlineClass }}">{{ ucfirst($prediction->metode_persalinan) }}</span>
                         </div>
                         <div class="text-muted small mb-2">
                             <i class="fas fa-calendar-alt me-1"></i>
@@ -73,7 +73,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-semibold text-secondary" style="font-size: 1.02rem;">Faktor Penentu</div>
-                                    <div style="font-size: 1.07rem;">{{ $prediction->faktor ?? '-' }}</div>
+                                    <div style="font-size: 1.07rem;">{{ $prediction->faktor ?? 'Tidak tersedia' }}</div>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +84,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-semibold text-secondary" style="font-size: 1.02rem;">Confidence</div>
-                                    <div style="font-size: 1.19rem;">{{ is_numeric($prediction->confidence ?? null) ? round($prediction->confidence) . '%' : '-' }}</div>
+                                    <div style="font-size: 1.19rem;">{{ is_numeric($prediction->confidence) ? round($prediction->confidence) . '%' : '-' }}</div>
                                 </div>
                             </div>
                         </div>
@@ -101,25 +101,25 @@
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;background:linear-gradient(135deg,#e3f3ff,#b7e6ff);">
                                         <i class="fas fa-user text-primary"></i>
                                     </div>
-                                    <span><b>Nama Ibu:</b> {{ optional($prediction->user)->name ?? '-' }}</span>
+                                    <span><b>Nama Ibu:</b> {{ $prediction->user->name ?? '-' }}</span>
                                 </div>
                                 <div class="rounded-3 border bg-white px-3 py-2 mb-2 d-flex align-items-center gap-3">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;background:linear-gradient(135deg,#ffe1f2,#fde8ed);">
                                         <i class="fas fa-hourglass-half text-primary"></i>
                                     </div>
-                                    <span><b>Usia Ibu:</b> {{ $prediction->usia_ibu ?? '-' }} tahun</span>
+                                    <span><b>Usia Ibu:</b> {{ $prediction->usia_ibu }} tahun</span>
                                 </div>
                                 <div class="rounded-3 border bg-white px-3 py-2 mb-2 d-flex align-items-center gap-3">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;background:linear-gradient(135deg,#e4fbe6,#d5f1dc);">
                                         <i class="fas fa-tint text-primary"></i>
                                     </div>
-                                    <span><b>Tekanan Darah:</b> {{ ucfirst($prediction->tekanan_darah ?? '-') }}</span>
+                                    <span><b>Tekanan Darah:</b> {{ ucfirst($prediction->tekanan_darah) }}</span>
                                 </div>
                                 <div class="rounded-3 border bg-white px-3 py-2 d-flex align-items-center gap-3">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;background:linear-gradient(135deg,#fff7e1,#fff3c6);">
                                         <i class="fas fa-history text-primary"></i>
                                     </div>
-                                    <span><b>Riwayat Persalinan:</b> {{ ucfirst($prediction->riwayat_persalinan ?? '-') }}</span>
+                                    <span><b>Riwayat Persalinan:</b> {{ ucfirst($prediction->riwayat_persalinan) }}</span>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -127,19 +127,19 @@
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;background:linear-gradient(135deg,#e5e4fb,#e1eaff);">
                                         <i class="fas fa-baby text-primary"></i>
                                     </div>
-                                    <span><b>Posisi Janin:</b> {{ ucfirst($prediction->posisi_janin ?? '-') }}</span>
+                                    <span><b>Posisi Janin:</b> {{ ucfirst($prediction->posisi_janin) }}</span>
                                 </div>
                                 <div class="rounded-3 border bg-white px-3 py-2 mb-2 d-flex align-items-center gap-3">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;background:linear-gradient(135deg,#fbe4e4,#ffe4ee);">
                                         <i class="fas fa-heartbeat text-primary"></i>
                                     </div>
-                                    <span><b>Kondisi Janin:</b> {{ ucfirst($prediction->kondisi_kesehatan_janin ?? '-') }}</span>
+                                    <span><b>Kondisi Janin:</b> {{ ucfirst($prediction->kondisi_kesehatan_janin) }}</span>
                                 </div>
                                 <div class="rounded-3 border bg-white px-3 py-2 mb-2 d-flex align-items-center gap-3">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;background:linear-gradient(135deg,#e1fff3,#d6fbe8);">
                                         <i class="fas fa-notes-medical text-primary"></i>
                                     </div>
-                                    <span><b>Riwayat Kesehatan Ibu:</b> {{ ucfirst($prediction->riwayat_kesehatan_ibu ?? '-') }}</span>
+                                    <span><b>Riwayat Kesehatan Ibu:</b> {{ ucfirst($prediction->riwayat_kesehatan_ibu) }}</span>
                                 </div>
                                 <div class="rounded-3 border bg-white px-3 py-2 d-flex align-items-center gap-3 d-md-none">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;background:linear-gradient(135deg,#f8ffea,#edffe6);">
@@ -159,7 +159,7 @@
                             <i class="fas fa-list"></i> Kembali ke Riwayat
                         </a>
                         @if(Route::has('prediksi.print'))
-                        <a href="{{ route('prediksi.print', $prediction->id ?? 0) }}" target="_blank"
+                        <a href="{{ route('prediksi.print', $prediction->id) }}" target="_blank"
                            class="btn fw-semibold px-4 py-2 rounded-3 d-flex align-items-center gap-2"
                            style="background: linear-gradient(45deg, #4dbaff, #1a87e3); color: white;">
                             <i class="fas fa-print"></i> Cetak Hasil

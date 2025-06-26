@@ -26,7 +26,7 @@
             <div class="alert alert-info rounded-3 px-4 py-2"
                 style="background:linear-gradient(90deg, #eef7ff 70%, #e6f2fb);border:1.5px solid #bae0fd; font-size:1.12rem;">
                 <i class="fas fa-info-circle me-2"></i>
-                <b>Semua kolom wajib diisi</b>, gunakan kata sederhana, misal: <b>“tidak ada”</b> jika sehat.
+                <b>Semua kolom wajib diisi</b>, gunakan kata sederhana, misal: <b>Normal</b> jika sehat.
             </div>
         </div>
     </div>
@@ -190,24 +190,25 @@
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Alert Perhatian Paling Bawah -->
-<div class="row mt-4">
-    <div class="col-lg-10 col-md-12 mx-auto">
-        <div class="alert alert-warning mb-0 rounded-3 px-4 py-2"
-            style="background: #fffbe9; border:1.5px solid #ffe7a7; font-size:1.12rem;">
-            <span class="fw-bold d-block mb-1" style="color:#d29b00;">
-                <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
-            </span>
-            <div class="ms-4" style="color:#222; font-size: 1.03rem;">
-                <i class="fas fa-info-circle me-1" style="color:#a2a2a2;font-size:0.99rem;"></i>
-                Hasil prediksi metode persalinan ini hanya untuk referensi awal dan tidak menggantikan konsultasi medis profesional.
-                Pastikan semua data yang dimasukkan sesuai untuk hasil yang optimal.
+                    <!-- ALERT KUNING di dalam card-body, di bawah tombol submit -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert alert-warning mb-0 rounded-3 px-4 py-2"
+                                style="background: #fffbe9; border:1.5px solid #ffe7a7; font-size:1.12rem;">
+                                <span class="fw-bold d-block mb-1" style="color:#d29b00;">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
+                                </span>
+                                <div class="ms-4" style="color:#222; font-size: 1.03rem;">
+                                    <i class="fas fa-info-circle me-1" style="color:#a2a2a2;font-size:0.99rem;"></i>
+                                    Hasil prediksi metode persalinan ini hanya untuk referensi awal dan tidak menggantikan konsultasi medis profesional.
+                                    Pastikan semua data yang dimasukkan sesuai untuk hasil yang optimal.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END ALERT -->
+                </div>
             </div>
         </div>
     </div>
