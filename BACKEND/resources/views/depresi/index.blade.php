@@ -11,7 +11,15 @@
 
                 <div class="card-body">
                     @if(session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
                     @endif
 
                     <!-- Filter -->
@@ -51,7 +59,7 @@
                                     @foreach($prediksiList as $data)
                                     <tr>
                                         <td>{{ $data->user->name ?? '-' }}</td>
-                                        <td>{{ $data->user->usia ?? '-' }}</td>
+                                        <td>{{ $data->user->usia ?? '-' }} tahun</td>
                                         <td>
                                             @php
                                                 $finalResult = false;
@@ -108,13 +116,34 @@
                                         <td>{{ $data->created_at->format('d M Y H:i') }}</td>
                                         <td>
                                             <a href="{{ route('depresi.show', $data->id) }}" class="btn btn-sm btn-info">Detail</a>
-                                            <form action="{{ route('depresi.destroy', $data->id) }}" method="POST" class="d-inline"
-                                                  onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                                @csrf @method('DELETE')
-                                                <button class="btn btn-sm btn-danger">Hapus</button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $data->id }}">
+                                                Hapus
+                                            </button>
                                         </td>
                                     </tr>
+                                    
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal{{ $data->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                      <div class="modal-dialog">
+                                        <div class="modal-content">
+                                          <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                          </div>
+                                          <div class="modal-body">
+                                            Apakah Anda yakin ingin menghapus data prediksi untuk "{{ $data->user->name ?? 'Pengguna' }}"?
+                                          </div>
+                                          <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <form action="{{ route('depresi.destroy', $data->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger">Hapus</button>
+                                            </form>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
                                     @endforeach
                                 </tbody>
                             </table>
