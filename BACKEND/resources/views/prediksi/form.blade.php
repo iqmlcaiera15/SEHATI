@@ -3,58 +3,38 @@
 @section('content')
 <div class="container-fluid py-4">
     <!-- Header Card -->
-    <div class="row mb-0">
-        <div class="col-lg-8 col-md-10 mx-auto">
-            <div class="card border-0 shadow-sm mb-0" style="background: linear-gradient(135deg, #53b6ec 0%, #58b3fa 100%); border-radius: 14px;">
-                <div class="card-body text-white d-flex justify-content-between align-items-center py-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fas fa-baby fs-2"></i>
-                        <span style="font-size: 1.4rem; font-weight: 600;">Form Prediksi Persalinan</span>
+    <div class="row mb-3">
+        <div class="col-lg-10 col-md-12 mx-auto">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #53b6ec 0%, #58b3fa 100%); border-radius: 18px;">
+                <div class="card-body text-white d-flex justify-content-between align-items-center py-4" style="min-height: 70px;">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="fas fa-baby" style="font-size: 2.1rem;"></i>
+                        <span style="font-size: 1.7rem; font-weight: 700;">Form Prediksi Persalinan</span>
                     </div>
                     <a href="{{ route('prediksi.index') }}"
-                        class="btn btn-white fw-semibold d-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-none"
-                        style="border:1.5px solid #d7e4ef; color:#2176a6; background:#fff;">
+                        class="btn btn-white fw-semibold d-flex align-items-center gap-2 px-4 py-2 rounded-3 shadow-none"
+                        style="border:1.5px solid #d7e4ef; color:#2176a6; background:#fff; font-size:1.13rem;">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- Alert di bawah header -->
     <div class="row mb-3">
-        <div class="col-lg-8 col-md-10 mx-auto">
-            <div class="alert alert-info mb-0 rounded-3 px-4 py-2"
-                style="background:linear-gradient(90deg, #eef7ff 70%, #e6f2fb);border:1.5px solid #bae0fd; font-size:1.08rem;">
+        <div class="col-lg-10 col-md-12 mx-auto">
+            <div class="alert alert-info rounded-3 px-4 py-2"
+                style="background:linear-gradient(90deg, #eef7ff 70%, #e6f2fb);border:1.5px solid #bae0fd; font-size:1.12rem;">
                 <i class="fas fa-info-circle me-2"></i>
                 <b>Semua kolom wajib diisi</b>, gunakan kata sederhana, misal: <b>“tidak ada”</b> jika sehat.
             </div>
         </div>
     </div>
 
-    <!-- Alert Perhatian (kuning) -->
-    <div class="row mt-3 mb-2">
-        <div class="col-lg-8 col-md-10 mx-auto">
-            <div class="alert alert-warning mb-0 rounded-3 px-4 py-2 d-flex align-items-center"
-                style="background:linear-gradient(90deg, #fffbe9 70%, #fff7c2);border:1.5px solid #ffe7a7; font-size:1.07rem;">
-                <div>
-                    <span class="fw-bold" style="color:#d29b00;">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
-                    </span>
-                    <div class="mt-1" style="color:#222;">
-                        <i class="fas fa-info-circle me-1" style="color:#a2a2a2;font-size:0.98rem;"></i>
-                        Hasil deteksi ini hanya untuk referensi awal dan tidak menggantikan konsultasi medis profesional. Pastikan semua data yang dimasukkan akurat untuk hasil yang optimal.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
     <!-- Error Alert -->
     @if ($errors->any())
     <div class="row mb-2">
-        <div class="col-lg-8 col-md-10 mx-auto">
+        <div class="col-lg-10 col-md-12 mx-auto">
             <div class="alert alert-danger shadow-sm rounded-3 mb-3">
                 <strong>Mohon lengkapi isian berikut:</strong>
                 <ul class="mb-0 mt-2">
@@ -68,27 +48,26 @@
     @endif
     @if(session('error'))
         <div class="row mb-2">
-            <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="col-lg-10 col-md-12 mx-auto">
                 <div class="alert alert-danger shadow-sm rounded-3 mb-3">{{ session('error') }}</div>
             </div>
         </div>
     @endif
     @if(session('success'))
         <div class="row mb-2">
-            <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="col-lg-10 col-md-12 mx-auto">
                 <div class="alert alert-success shadow-sm rounded-3 mb-3">{{ session('success') }}</div>
             </div>
         </div>
     @endif
 
     <!-- Form Card -->
-    <div class="row justify-content-center mb-5"> <!-- mb-5 tambah jarak bawah -->
-        <div class="col-lg-8 col-md-10 mx-auto">
-            <div class="card shadow-sm border-0" style="border-radius: 18px;">
-                <div class="card-body px-4 py-4">
-                    <!-- Tambahkan paragraf berikut di bawah judul form -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10 col-md-12 mx-auto">
+            <div class="card shadow-sm border-0" style="border-radius: 22px;">
+                <div class="card-body px-5 py-5">
                     <div class="mb-3">
-                        <span class="d-block text-primary" style="font-size: 1.08rem; font-weight: 500;">
+                        <span class="d-block text-primary" style="font-size: 1.15rem; font-weight: 600;">
                             Mohon isi data berikut dengan lengkap dan benar agar hasil prediksi lebih akurat
                         </span>
                     </div>
@@ -126,7 +105,7 @@
                                 </label>
                                 <input type="number" id="usia_ibu" name="usia_ibu" class="form-control custom-input" min="15" max="50"
                                     value="{{ old('usia_ibu') }}" required placeholder="Isi usia ibu, contoh: 28">
-                                <div class="text-muted mt-1" style="font-size: 0.93rem;">
+                                <div class="text-muted mt-1" style="font-size: 1rem;">
                                     <i class="fas fa-exclamation-circle me-1"></i>
                                     Masukkan usia antara 15 sampai 50 tahun
                                 </div>
@@ -205,7 +184,7 @@
 
                         <div class="col-12 text-end mt-4">
                             <button type="submit" class="btn btn-gradient-main px-5 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm rounded-3"
-                                style="font-size: 1.13rem;">
+                                style="font-size: 1.22rem;">
                                 <i class="fas fa-check-circle me-2"></i>
                                 Prediksi Sekarang
                             </button>
@@ -217,28 +196,43 @@
     </div>
 </div>
 
+<!-- Alert Perhatian Paling Bawah -->
+<div class="row mt-4">
+    <div class="col-lg-10 col-md-12 mx-auto">
+        <div class="alert alert-warning mb-0 rounded-3 px-4 py-2"
+            style="background: #fffbe9; border:1.5px solid #ffe7a7; font-size:1.12rem;">
+            <span class="fw-bold d-block mb-1" style="color:#d29b00;">
+                <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
+            </span>
+            <div class="ms-4" style="color:#222; font-size: 1.03rem;">
+                <i class="fas fa-info-circle me-1" style="color:#a2a2a2;font-size:0.99rem;"></i>
+                Hasil prediksi metode persalinan ini hanya untuk referensi awal dan tidak menggantikan konsultasi medis profesional.
+                Pastikan semua data yang dimasukkan sesuai untuk hasil yang optimal.
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
-    .custom-input,
-    .custom-input:focus {
+    .custom-input, .custom-input:focus {
         border: 1.5px solid #e0e6ed !important;
         box-shadow: none !important;
         background: #f9fcff !important;
         color: #22364b;
         transition: border 0.2s, background 0.2s;
-        font-size: 1.04rem;
+        font-size: 1.13rem !important;
+        min-height: 48px;
     }
-    .custom-input:focus {
-        border-color: #4dbaff !important;
-        background: #f1f8ff !important;
-    }
-    .form-label { font-weight: 600; }
+    .form-label { font-weight: 600; font-size: 1.13rem;}
     .btn-gradient-main {
         background: linear-gradient(45deg, #4dbaff, #1a87e3);
         color: white !important;
         border: none;
-        font-size: 1.13rem;
+        font-size: 1.22rem !important;
         box-shadow: 0 2px 16px rgba(30,170,255,0.10);
         letter-spacing: 0.5px;
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
     }
     .btn-gradient-main:hover {
         background: linear-gradient(60deg, #1a87e3, #4dbaff);
@@ -249,6 +243,7 @@
         color: #2176a6 !important;
         border: 1.5px solid #d7e4ef !important;
         font-weight: 600;
+        font-size: 1.13rem;
     }
     .needs-validation .form-control:invalid,
     .needs-validation .form-select:invalid {
