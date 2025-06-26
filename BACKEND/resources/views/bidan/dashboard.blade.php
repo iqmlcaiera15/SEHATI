@@ -248,9 +248,9 @@
                                         @elseif($depresi->epds->score >= 12) bg-warning
                                         @else bg-success
                                         @endif">
-                                        @if($depresi->epds->score >= 14)
+                                        @if($depresi->epds->score >= 13)
                                             Risiko Tinggi Depresi
-                                        @elseif($depresi->epds->score >= 12)
+                                        @elseif($depresi->epds->score >= 10)
                                             Kemungkinan Depresi
                                         @else
                                             Gejala Ringan
