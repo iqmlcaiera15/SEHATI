@@ -33,7 +33,7 @@
             <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
                 <!-- Primary CTA Button - Deteksi Baru -->
                 <div>
-                    <a href="{{ route('deteksi.create') }}" class="btn btn-lg px-4 py-3" 
+                    <a href="{{ route('deteksi.create') }}" class="btn btn-lg px-4 py-3"
                        style="background: linear-gradient(45deg, #28a745, #20c997); border: none; color: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); transition: all 0.3s ease;">
                         <i class="fas fa-plus-circle me-2 fs-5"></i>
                         <span class="fw-bold">Mulai Deteksi Baru</span>
@@ -44,13 +44,13 @@
                 <!-- Secondary Actions -->
                 <div class="d-flex gap-2">
                     @if(count($deteksiPenyakit) > 0)
-                    <button type="button" class="btn btn-outline-danger btn-lg" 
+                    <button type="button" class="btn btn-outline-danger btn-lg"
                             data-bs-toggle="modal" data-bs-target="#deleteAllModal"
                             style="border-radius: 12px;">
                         <i class="fas fa-trash-alt me-2"></i>
                         Hapus Semua
                     </button>
-                    
+
                     <button class="btn btn-outline-primary btn-lg" style="border-radius: 12px;">
                         <i class="fas fa-download me-2"></i>
                         Export Data
@@ -69,7 +69,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
-    
+
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius: 12px;">
             <i class="fas fa-exclamation-circle me-2"></i>
@@ -87,7 +87,7 @@
                     <div class="col-md-3 mb-3">
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
-                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
                                      style="width: 60px; height: 60px; background: rgba(40, 167, 69, 0.1);">
                                     <i class="fas fa-user-check text-success fs-4"></i>
                                 </div>
@@ -99,7 +99,7 @@
                     <div class="col-md-3 mb-3">
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
-                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
                                      style="width: 60px; height: 60px; background: rgba(255, 193, 7, 0.1);">
                                     <i class="fas fa-exclamation-triangle text-warning fs-4"></i>
                                 </div>
@@ -111,7 +111,7 @@
                     <div class="col-md-3 mb-3">
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
-                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
                                      style="width: 60px; height: 60px; background: rgba(220, 53, 69, 0.1);">
                                     <i class="fas fa-heart text-danger fs-4"></i>
                                 </div>
@@ -123,7 +123,7 @@
                     <div class="col-md-3 mb-3">
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
-                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
                                      style="width: 60px; height: 60px; background: rgba(13, 202, 240, 0.1);">
                                     <i class="fas fa-baby text-info fs-4"></i>
                                 </div>
@@ -184,7 +184,7 @@
                                     <tr class="border-bottom">
                                         <td class="py-3 px-4">
                                             <div class="d-flex align-items-center">
-                                                <div class="rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                                <div class="rounded-circle me-3 d-flex align-items-center justify-content-center"
                                                      style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2); color: white;">
                                                     {{ strtoupper(substr($deteksi->nama, 0, 1)) }}
                                                 </div>
@@ -195,7 +195,7 @@
                                             </div>
                                         </td>
                                         <td class="py-3">
-                                            <span class="badge px-3 py-2 
+                                            <span class="badge px-3 py-2
                                                 @if($deteksi->bmi < 18.5) bg-warning
                                                 @elseif($deteksi->bmi >= 18.5 && $deteksi->bmi < 25) bg-success
                                                 @elseif($deteksi->bmi >= 25 && $deteksi->bmi < 30) bg-warning
@@ -249,11 +249,11 @@
                                         </td>
                                         <td class="py-3 text-center">
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('deteksi.show', $deteksi->deteksi_id) }}" 
+                                                <a href="{{ route('deteksi.show', $deteksi->deteksi_id) }}"
                                                    class="btn btn-sm btn-outline-primary" style="border-radius: 8px 0 0 8px;">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
                                                         data-bs-toggle="modal" data-bs-target="#deleteModal{{ $deteksi->deteksi_id }}"
                                                         style="border-radius: 0 8px 8px 0;">
                                                     <i class="fas fa-trash"></i>
@@ -261,7 +261,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    
+
                                     <!-- Delete Modal -->
                                     <div class="modal fade" id="deleteModal{{ $deteksi->deteksi_id }}" tabindex="-1">
                                         <div class="modal-dialog modal-dialog-centered">
@@ -305,7 +305,7 @@
                         </div>
                         <h4 class="mb-3">Belum Ada Data Deteksi</h4>
                         <p class="text-muted mb-4">Mulai deteksi kesehatan pertama untuk pasien Anda</p>
-                        <a href="{{ route('deteksi.create') }}" class="btn btn-lg px-5 py-3" 
+                        <a href="{{ route('deteksi.create') }}" class="btn btn-lg px-5 py-3"
                            style="background: linear-gradient(45deg, #28a745, #20c997); border: none; color: white; border-radius: 15px;">
                             <i class="fas fa-plus-circle me-2"></i>
                             <span class="fw-bold">Mulai Deteksi Pertama</span>
@@ -352,24 +352,24 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
     }
-    
+
     /* Table hover effects */
     .table-hover tbody tr:hover {
         background-color: rgba(102, 126, 234, 0.05);
         transform: scale(1.002);
         transition: all 0.2s ease;
     }
-    
+
     /* Search functionality */
     #searchInput {
         border-radius: 0 8px 8px 0 !important;
     }
-    
+
     /* Smooth transitions */
     .card, .btn, .badge {
         transition: all 0.3s ease;
     }
-    
+
     /* Custom gradient hover for primary button */
     a[href*="deteksi.create"]:hover {
         background: linear-gradient(45deg, #20c997, #28a745) !important;
@@ -381,12 +381,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const table = document.getElementById('deteksiTable');
-    
+
     if (searchInput && table) {
         searchInput.addEventListener('keyup', function() {
             const filter = this.value.toLowerCase();
             const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-            
+
             for (let i = 0; i < rows.length; i++) {
                 const nameCell = rows[i].getElementsByTagName('td')[0];
                 if (nameCell) {
