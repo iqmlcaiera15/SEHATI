@@ -31,9 +31,6 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
-                <!-- Primary CTA Button - Prediksi Baru -->
-
-                <!-- Secondary Actions -->
                 <div class="d-flex gap-2">
                     @if($prediksiList->count() > 0)
                     <button type="button" class="btn btn-outline-danger btn-lg" 
