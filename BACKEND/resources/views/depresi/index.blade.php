@@ -32,14 +32,6 @@
         <div class="col-12">
             <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
                 <!-- Primary CTA Button - Prediksi Baru -->
-                <div>
-                    <a href="{{ route('depresi.create') }}" class="btn btn-lg px-4 py-3" 
-                       style="background: linear-gradient(45deg, #28a745, #20c997); border: none; color: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); transition: all 0.3s ease;">
-                        <i class="fas fa-plus-circle me-2 fs-5"></i>
-                        <span class="fw-bold">Mulai Prediksi Baru</span>
-                        <small class="d-block mt-1 opacity-75">Periksa pasien baru</small>
-                    </a>
-                </div>
 
                 <!-- Secondary Actions -->
                 <div class="d-flex gap-2">
