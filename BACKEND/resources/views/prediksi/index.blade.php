@@ -99,8 +99,8 @@
             <!-- Tombol Tambah Prediksi Baru (kalem, kecil, tidak mencolok) -->
             <div class="col-auto d-flex align-items-center">
                 <a href="{{ route('prediksi.form') }}"
-                   class="btn btn-tambah-prediksi fw-semibold d-flex align-items-center gap-2 px-4 py-2"
-                   style="font-size: 1.04rem; min-width: 170px;">
+                class="btn btn-tambah-prediksi fw-semibold d-flex align-items-center gap-2 px-3 py-2"
+                style="font-size: 1rem; min-width: 155px;">
                     <i class="fas fa-plus-circle"></i>
                     Tambah Prediksi Baru
                 </a>
