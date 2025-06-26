@@ -395,11 +395,6 @@
                         </div>
                         <h4 class="mb-3">Belum Ada Data Prediksi Depresi</h4>
                         <p class="text-muted mb-4">Mulai prediksi depresi pertama untuk pasien Anda</p>
-                        <a href="{{ route('depresi.create') }}" class="btn btn-lg px-5 py-3" 
-                           style="background: linear-gradient(45deg, #28a745, #20c997); border: none; color: white; border-radius: 15px;">
-                            <i class="fas fa-plus-circle me-2"></i>
-                            <span class="fw-bold">Mulai Prediksi Pertama</span>
-                        </a>
                     </div>
                 </div>
             @endif
