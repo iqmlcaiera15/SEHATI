@@ -5,40 +5,23 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h3>Riwayat Prediksi Depresi</h3>
-                    <div>
-                        <a href="{{ route('depresi.create') }}" class="btn btn-primary">Prediksi Baru</a>
-                        
-                        @if($prediksiList->count() > 0)
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAllModal">
-                            Hapus Semua
-                        </button>
-                        @endif
-                    </div>
                 </div>
 
                 <div class="card-body">
                     @if(session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-                    
-                    @if(session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
-                        </div>
+                        <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
 
-                    <!-- Filter Section -->
+                    <!-- Filter -->
                     <form method="GET" class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <label class="form-label">Filter Tanggal</label>
+                            <label>Filter Tanggal</label>
                             <input type="date" name="tanggal" class="form-control" value="{{ request('tanggal') }}">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Filter Hasil</label>
+                            <label>Filter Hasil</label>
                             <select name="hasil" class="form-control">
                                 <option value="">-- Semua --</option>
                                 <option value="bergejala" {{ request('hasil') == 'bergejala' ? 'selected' : '' }}>Bergejala Depresi</option>
@@ -49,7 +32,7 @@
                             <button type="submit" class="btn btn-primary w-100">Filter</button>
                         </div>
                     </form>
-                    
+
                     @if($prediksiList->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-striped">
@@ -68,7 +51,7 @@
                                     @foreach($prediksiList as $data)
                                     <tr>
                                         <td>{{ $data->user->name ?? '-' }}</td>
-                                        <td>{{ $data->user->usia ?? '-' }} tahun</td>
+                                        <td>{{ $data->user->usia ?? '-' }}</td>
                                         <td>
                                             @php
                                                 $finalResult = false;
@@ -119,75 +102,30 @@
                                                 <li>Pola Makan: {{ $data->getPolaMakanTextAttribute() }}</li>
                                             </ul>
                                         </td>
-                                        <td>{{ $data->epds?->score ?? '-' }}</td>
+                                        <td>
+                                            {{ $data->epds?->score ?? '-' }}
+                                        </td>
                                         <td>{{ $data->created_at->format('d M Y H:i') }}</td>
                                         <td>
                                             <a href="{{ route('depresi.show', $data->id) }}" class="btn btn-sm btn-info">Detail</a>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $data->id }}">
-                                                Hapus
-                                            </button>
+                                            <form action="{{ route('depresi.destroy', $data->id) }}" method="POST" class="d-inline"
+                                                  onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                @csrf @method('DELETE')
+                                                <button class="btn btn-sm btn-danger">Hapus</button>
+                                            </form>
                                         </td>
                                     </tr>
-                                    
-                                    <!-- Delete Modal -->
-                                    <div class="modal fade" id="deleteModal{{ $data->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                                      <div class="modal-dialog">
-                                        <div class="modal-content">
-                                          <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                          </div>
-                                          <div class="modal-body">
-                                            Apakah Anda yakin ingin menghapus data prediksi untuk "{{ $data->user->name ?? 'User' }}"?
-                                          </div>
-                                          <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                            <form action="{{ route('depresi.destroy', $data->id) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Hapus</button>
-                                            </form>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
-                        
-                        <!-- Pagination -->
-                        <div class="d-flex justify-content-center">
-                            {{ $prediksiList->links() }}
-                        </div>
+                        {{ $prediksiList->links() }}
                     @else
-                        <div class="alert alert-info">
-                            Belum ada data prediksi depresi. 
-                            <a href="{{ route('depresi.create') }}" class="alert-link">Buat prediksi baru</a>.
-                        </div>
+                        <div class="alert alert-info">Belum ada data prediksi depresi.</div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Delete All Modal -->
-<div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="deleteAllModalLabel">Konfirmasi Hapus Semua</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        Apakah Anda yakin ingin menghapus semua data prediksi depresi?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <a href="{{ route('depresi.deleteAll') }}" class="btn btn-danger">Hapus Semua</a>
-      </div>
-    </div>
-  </div>
 </div>
 @endsection
