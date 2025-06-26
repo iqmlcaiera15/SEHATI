@@ -430,9 +430,6 @@
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                <a href="{{ route('depresi.deleteAll') }}" class="btn btn-danger">
-                    <i class="fas fa-trash-alt me-1"></i>Ya, Hapus Semua
-                </a>
             </div>
         </div>
     </div>
