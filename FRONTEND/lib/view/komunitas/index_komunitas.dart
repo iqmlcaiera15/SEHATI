@@ -64,60 +64,256 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  // Helper function to format the API timestamp into a "time ago" format
-  static String _formatTimeAgo(String? dateString) {
-    if (dateString == null || dateString.isEmpty) return 'baru saja';
-    
-    try {
-      final DateTime date = DateTime.parse(dateString);
-      final Duration difference = DateTime.now().difference(date);
-      
-      if (difference.inDays > 365) {
-        return '${(difference.inDays / 365).floor()} tahun yang lalu';
-      } else if (difference.inDays > 30) {
-        return '${(difference.inDays / 30).floor()} bulan yang lalu';
-      } else if (difference.inDays > 0) {
-        return '${difference.inDays} hari yang lalu';
-      } else if (difference.inHours > 0) {
-        return '${difference.inHours} jam yang lalu';
-      } else if (difference.inMinutes > 0) {
-        return '${difference.inMinutes} menit yang lalu';
-      } else {
-        return 'baru saja';
-      }
-    } catch (e) {
-      print('Error formatting date: $e');
-      return 'baru saja';
-    }
+  // FIXED: Bottom Navigation - Prevent duplicate navigation
+  Widget _buildBottomNavigation() {
+    return BottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTap: (index) {
+        // Prevent navigation to the same page
+        if (index == _currentIndex) return;
+        
+        setState(() {
+          _currentIndex = index;
+        });
+        
+        // Navigate based on index with proper route management
+        switch (index) {
+          case 0:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+            break;
+          case 1:
+            // Already on Community page, do nothing
+            break;
+          case 3:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ShopPage()),
+            );
+            break;
+          case 4:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => UserDataViewPage()),
+            );
+            break;
+        }
+      },
+      backgroundColor: Colors.white,
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: const Color(0xFF4DBAFF),
+      unselectedItemColor: const Color(0xFF4C617F),
+      selectedLabelStyle: const TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+      ),
+      items: [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Beranda',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.group),
+          label: 'Komunitas',
+        ),
+        BottomNavigationBarItem(
+          icon: SizedBox(), // Empty space for FAB
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_bag),
+          label: 'Shop',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profil',
+        ),
+      ],
+    );
   }
 
-  // Helper method to build user avatar
-  Widget _buildUserAvatar(String? imageUrl) {
-    if (imageUrl == null || imageUrl.isEmpty || imageUrl == 'assets/images/default_user.png') {
-      return const Icon(
-        Icons.person,
-        color: Colors.white,
-        size: 20,
-      );
-    } else {
-      return ClipOval(
-        child: Image.network(
-          imageUrl,
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 20,
+  // FIXED: Create Post Dialog with better state management
+  void _showCreatePostDialog() {
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    bool isSubmitting = false; // Add loading state
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent accidental dismissal
+      builder: (context) {
+        return StatefulBuilder( // Use StatefulBuilder for dialog state
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text(
+                'Buat Postingan Baru',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    enabled: !isSubmitting, // Disable when submitting
+                    decoration: const InputDecoration(
+                      labelText: 'Judul',
+                      labelStyle: TextStyle(fontFamily: 'Poppins'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: descriptionController,
+                    enabled: !isSubmitting, // Disable when submitting
+                    decoration: const InputDecoration(
+                      labelText: 'Deskripsi',
+                      labelStyle: TextStyle(fontFamily: 'Poppins'),
+                    ),
+                    maxLines: 3,
+                  ),
+                  if (isSubmitting) // Show loading indicator
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: CircularProgressIndicator(),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () {
+                    titleController.dispose();
+                    descriptionController.dispose();
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Batal',
+                    style: TextStyle(color: Colors.grey, fontFamily: 'Poppins'),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting ? null : () async {
+                    // Validate inputs
+                    if (titleController.text.trim().isEmpty || 
+                        descriptionController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Judul dan deskripsi tidak boleh kosong'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+                    
+                    // Set loading state
+                    setDialogState(() {
+                      isSubmitting = true;
+                    });
+                    
+                    try {
+                      // Create post model
+                      final newPost = PostModel(
+                        judul: titleController.text.trim(),
+                        deskripsi: descriptionController.text.trim(),
+                      );
+                      
+                      // Call API service
+                      await ApiServicePosts.createPost(newPost);
+                      
+                      // Close dialog first
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
+                      
+                      // Then reload posts
+                      if (mounted) {
+                        await _loadPosts();
+                      }
+                      
+                      // Show success message
+                      if (mounted) {
+                        _showSnackBar(
+                          'Postingan berhasil dibuat',
+                          backgroundColor: Colors.green,
+                        );
+                      }
+                    } catch (e) {
+                      // Reset loading state on error
+                      setDialogState(() {
+                        isSubmitting = false;
+                      });
+                      
+                      // Show error message
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error membuat postingan: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    } finally {
+                      // Always dispose controllers
+                      titleController.dispose();
+                      descriptionController.dispose();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4DBAFF),
+                  ),
+                  child: const Text(
+                    'Posting',
+                    style: TextStyle(fontFamily: 'Poppins'),
+                  ),
+                ),
+              ],
             );
           },
-        ),
-      );
+        );
+      },
+    );
+  }
+
+  // FIXED: Like handler with duplicate prevention
+  void _handleLikePost(PostModel post) async {
+    print('[CommunityPage] _handleLikePost DIPANGGIL untuk post ID: ${post.id}');
+    
+    if (post.id != null && !isLoading) { // Prevent multiple simultaneous calls
+      setState(() {
+        isLoading = true;
+      });
+      
+      try {
+        await ApiServicePosts.updateLikes(post.id!, post.apresiasi + 1);
+        
+        // Only reload if still mounted
+        if (mounted) {
+          await _loadPosts();
+        }
+      } catch (e) {
+        if (mounted) {
+          _showSnackBar('Error updating apresiasi: $e');
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
     }
   }
 
+  // FIXED: Build method with ListView key for better performance
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
@@ -126,7 +322,7 @@ class _CommunityPageState extends State<CommunityPage> {
         backgroundColor: Colors.white,
         body: Column(
           children: [
-            // App Bar with Back Button (Removed Status Bar)
+            // App Bar with Back Button (unchanged)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -214,7 +410,7 @@ class _CommunityPageState extends State<CommunityPage> {
                 ),
                 child: Stack(
                   children: [
-                    // Community Header
+                    // Community Header (unchanged)
                     Positioned(
                       left: 29,
                       top: 20,
@@ -256,7 +452,7 @@ class _CommunityPageState extends State<CommunityPage> {
                       ),
                     ),
                     
-                    // Posts List
+                    // FIXED: Posts List with proper key management
                     Positioned(
                       left: 29,
                       top: 90,
@@ -321,10 +517,22 @@ class _CommunityPageState extends State<CommunityPage> {
                             }
                             
                             final posts = snapshot.data!;
+                            // Remove duplicates based on post ID
+                            final uniquePosts = <PostModel>[];
+                            final seenIds = <int?>{};
+                            
+                            for (final post in posts) {
+                              if (!seenIds.contains(post.id)) {
+                                seenIds.add(post.id);
+                                uniquePosts.add(post);
+                              }
+                            }
+                            
                             return ListView.builder(
-                              itemCount: posts.length,
+                              key: ValueKey('posts_${uniquePosts.length}'), // Add key for better rebuilds
+                              itemCount: uniquePosts.length,
                               itemBuilder: (context, index) {
-                                return _buildPostCard(posts[index]);
+                                return _buildPostCard(uniquePosts[index]);
                               },
                             );
                           },
@@ -350,91 +558,73 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return BottomNavigationBar(
-      currentIndex: _currentIndex,
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CommunityPage()),
+  // Rest of the methods remain the same...
+  static String _formatTimeAgo(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return 'baru saja';
+    
+    try {
+      final DateTime date = DateTime.parse(dateString);
+      final Duration difference = DateTime.now().difference(date);
+      
+      if (difference.inDays > 365) {
+        return '${(difference.inDays / 365).floor()} tahun yang lalu';
+      } else if (difference.inDays > 30) {
+        return '${(difference.inDays / 30).floor()} bulan yang lalu';
+      } else if (difference.inDays > 0) {
+        return '${difference.inDays} hari yang lalu';
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours} jam yang lalu';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes} menit yang lalu';
+      } else {
+        return 'baru saja';
+      }
+    } catch (e) {
+      print('Error formatting date: $e');
+      return 'baru saja';
+    }
+  }
+
+  Widget _buildUserAvatar(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty || imageUrl == 'assets/images/default_user.png') {
+      return const Icon(
+        Icons.person,
+        color: Colors.white,
+        size: 20,
+      );
+    } else {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 20,
             );
-          } else if (index == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-          }
-          else if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ShopPage()),
-            );
-          }
-          else if (index == 4) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => UserDataViewPage()),
-            );
-          }
-        });
-      },
-      backgroundColor: Colors.white,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF4DBAFF),
-      unselectedItemColor: const Color(0xFF4C617F),
-      selectedLabelStyle: const TextStyle(
-        fontFamily: 'Poppins',
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontFamily: 'Poppins',
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Beranda',
+          },
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.group),
-          label: 'Komunitas',
-        ),
-        BottomNavigationBarItem(
-          icon: SizedBox(), // Empty space for FAB
-          label: '',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_bag),
-          label: 'Shop',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profil',
-        ),
-      ],
-    );
+      );
+    }
   }
 
   Widget _buildPostCard(PostModel post) {
     return GestureDetector(
       onTap: () {
-        // Navigate to the comment page when post is tapped
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => CommentPage(post: post),
           ),
         ).then((_) {
-          // Refresh the posts when returning from comment page
           _loadPosts();
         });
       },
       child: Container(
+        key: ValueKey('post_${post.id}'), // Add unique key for each post
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -523,7 +713,7 @@ class _CommunityPageState extends State<CommunityPage> {
             
             const Divider(height: 32),
             
-            // Like and comment buttons (Removed share button)
+            // Like and comment buttons
             Padding(
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
               child: Row(
@@ -538,14 +728,12 @@ class _CommunityPageState extends State<CommunityPage> {
                     Icons.comment_outlined, 
                     "Komentar (${post.komentar})",
                     () {
-                      // Navigate to the comment page when comment button is tapped
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => CommentPage(post: post),
                         ),
                       ).then((_) {
-                        // Refresh the posts when returning from comment page
                         _loadPosts();
                       });
                     },
@@ -576,252 +764,6 @@ class _CommunityPageState extends State<CommunityPage> {
           ),
         ],
       ),
-    );
-  }
-  
-  void _handleLikePost(PostModel post) async {
-    print('[CommunityPage] _handleLikePost DIPANGGIL untuk post ID: ${post.id}'); // <-- TAMBAHKAN INI
-    if (post.id != null) {
-      setState(() {
-        isLoading = true;
-      });
-      
-      try {
-        await ApiServicePosts.updateLikes(post.id!, post.apresiasi + 1);
-        _loadPosts(); // Reload posts to get updated data
-      } catch (e) {
-        _showSnackBar('Error updating apresiasi: $e');
-      } finally {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
-  
-  void _showCommentSheet(PostModel post) {
-    final commentController = TextEditingController();
-    
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Tambahkan Komentar',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: commentController,
-                decoration: InputDecoration(
-                  hintText: 'Tulis komentar...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF4DBAFF)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF4DBAFF), width: 2),
-                  ),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Batal',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (commentController.text.isNotEmpty && post.id != null) {
-                        try {
-                          
-                          await ApiServicePosts.addComment(post.id!, commentController.text);
-                          _loadPosts(); // Reload posts to update comments count
-                          Navigator.pop(context);
-                        } catch (e) {
-                          _showSnackBar('Error adding comment: $e');
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4DBAFF),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Kirim',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
-  
-  void _showCreatePostDialog() {
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            'Buat Postingan Baru',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Judul',
-                  labelStyle: TextStyle(fontFamily: 'Poppins'),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Deskripsi',
-                  labelStyle: TextStyle(fontFamily: 'Poppins'),
-                ),
-                maxLines: 3,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'Batal',
-                style: TextStyle(color: Colors.grey, fontFamily: 'Poppins'),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                // Validate inputs
-                if (titleController.text.isEmpty || descriptionController.text.isEmpty) {
-                  _scaffoldMessengerKey.currentState?.showSnackBar(
-                    const SnackBar(content: Text('Judul dan deskripsi tidak boleh kosong')),
-                  );
-                  return;
-                }
-                
-                try {
-                  // Create post model
-                  final newPost = PostModel(
-                    judul: titleController.text,
-                    deskripsi: descriptionController.text,
-                  );
-                  
-                  // Call API service
-                  await ApiServicePosts.createPost(newPost);
-                  
-                  // Close form dialog
-                  if (mounted) Navigator.of(context).pop();
-                  
-                  // Reload posts
-                  if (mounted) await _loadPosts();
-                  
-                  // Show success message
-                  if (mounted) {
-                    _scaffoldMessengerKey.currentState?.showSnackBar(
-                      const SnackBar(
-                        content: Text('Postingan berhasil dibuat'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  // Show error message
-                  if (mounted) {
-                    _scaffoldMessengerKey.currentState?.showSnackBar(
-                      SnackBar(
-                        content: Text('Error membuat postingan: ${e.toString()}'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                } finally {
-                  // Clear controllers
-                  titleController.dispose();
-                  descriptionController.dispose();
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4DBAFF),
-              ),
-              child: const Text(
-                'Posting',
-                style: TextStyle(fontFamily: 'Poppins'),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-// Entry point for the community feature
-class CommunityFeature extends StatelessWidget {
-  const CommunityFeature({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sehati Community',
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        primaryColor: const Color(0xFF4DBAFF),
-        fontFamily: 'Poppins',
-      ),
-      home: const CommunityPage(),
     );
   }
 }

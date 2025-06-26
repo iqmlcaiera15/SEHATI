@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DepressionDetailView extends StatelessWidget {
   final int score;
@@ -83,6 +84,25 @@ class DepressionDetailView extends StatelessWidget {
     }
 
     return result;
+  }
+
+  // Function to open WhatsApp
+  Future<void> _openWhatsApp() async {
+    const phoneNumber = '6281234567890'; // Ganti dengan nomor WhatsApp yang diinginkan
+    const message = 'Halo, saya memerlukan bantuan konseling terkait kesehatan mental.';
+    
+    final whatsappUrl = 'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
+    
+    try {
+      if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+        await launchUrl(Uri.parse(whatsappUrl));
+      } else {
+        throw 'Could not launch WhatsApp';
+      }
+    } catch (e) {
+      print('Error opening WhatsApp: $e');
+      // Bisa tambahkan snackbar atau dialog untuk memberi tahu user
+    }
   }
 
   @override
@@ -348,7 +368,7 @@ class DepressionDetailView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Jika Anda memerlukan bantuan segera, hubungi layanan konseling atau hotline berikut:',
+                      'Jika Anda memerlukan bantuan segera, hubungi layanan konseling melalui WhatsApp:',
                       style: TextStyle(
                         color: Color(0xFF4C617F),
                         fontSize: 14,
@@ -359,64 +379,29 @@ class DepressionDetailView extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              // Implementasi untuk menghubungi hotline
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4DBAFF),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                              ),
-                            ),
-                            icon: const Icon(Icons.phone),
-                            label: const Text(
-                              'Hotline',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _openWhatsApp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF25D366), // WhatsApp green color
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              // Implementasi untuk menghubungi konselor
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF4DBAFF),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: const BorderSide(
-                                  color: Color(0xFF4DBAFF),
-                                  width: 1,
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                              ),
-                            ),
-                            icon: const Icon(Icons.chat_bubble_outline),
-                            label: const Text(
-                              'Konselor',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                        icon: const Icon(Icons.chat),
+                        label: const Text(
+                          'Hubungi via WhatsApp',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

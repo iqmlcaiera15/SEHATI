@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:Sehati/view/homeprofile/home.dart';
 import 'package:intl/intl.dart';
 import 'package:Sehati/view/prediksidepresi/riwayat_prediksidepresi.dart'; // Import halaman riwayat
+import 'package:url_launcher/url_launcher.dart'; // Add this import for WhatsApp
 
 class DepressionResult extends StatelessWidget {
   final bool isDepressed;
   final Map<String, dynamic> data;
   final int? score;
+
+  // WhatsApp phone number constant
+  static const phoneNumber = '6285155362293';
 
   const DepressionResult({
     Key? key,
@@ -19,6 +23,44 @@ class DepressionResult extends StatelessWidget {
   String _getFormattedDate() {
     final now = DateTime.now();
     return DateFormat('dd MMMM yyyy').format(now);
+  }
+
+  // Function to open WhatsApp
+  Future<void> _openWhatsApp(BuildContext context) async {
+    final message = Uri.encodeComponent(
+      'Halo, saya memerlukan bantuan profesional untuk kesehatan mental. '
+      'Saya telah melakukan tes depresi dan hasilnya menunjukkan risiko tinggi. '
+      'Bisakah saya berkonsultasi dengan Anda?'
+    );
+    
+    final whatsappUrl = 'https://wa.me/$phoneNumber?text=$message';
+    
+    try {
+      if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+        await launchUrl(
+          Uri.parse(whatsappUrl),
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tidak dapat membuka WhatsApp. Pastikan aplikasi terinstal.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Terjadi kesalahan saat membuka WhatsApp.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   // Get result status text and color
@@ -60,7 +102,6 @@ class DepressionResult extends StatelessWidget {
         };
       } 
     }
-
 
     // Default for initial screening (should not reach here)
     return {
@@ -417,13 +458,11 @@ class DepressionResult extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // Action button based on result
-                    if (isDepressed && (score != null && score! >= 10)) {
-                      // TODO: Navigate to help resources
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Navigating to help resources...')),
-                      );
+                    if (isDepressed && (score != null && score! >= 13)) {
+                      // Open WhatsApp for professional help
+                      await _openWhatsApp(context);
                     } else {
                       // Go back to dashboard
                       Navigator.of(context).pushAndRemoveUntil(
@@ -442,13 +481,22 @@ class DepressionResult extends StatelessWidget {
                     elevation: 2,
                     minimumSize: const Size(double.infinity, 56),
                   ),
-                  child: Text(
-                    resultStatus['buttonText'],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isDepressed && (score != null && score! >= 13)) ...[
+                        const Icon(Icons.phone, size: 18),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        resultStatus['buttonText'],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

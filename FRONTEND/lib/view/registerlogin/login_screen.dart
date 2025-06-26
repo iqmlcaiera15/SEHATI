@@ -38,6 +38,59 @@ class _LoginScreenState extends State<LoginScreen> {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  // Method to show error dialog
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Color(0xFFFC5C9C),
+                size: 24,
+              ),
+              SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Color(0xFF1E293B),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            message,
+            style: TextStyle(
+              color: Color(0xFF4C617F),
+              fontSize: 14,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'OK',
+                style: TextStyle(
+                  color: Color(0xFF4DBAFF),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -247,10 +300,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                             (route) => false, // Remove all routes from stack
                                           );
+                                        } else if (!success && mounted) {
+                                          // Login failed - show specific error dialog
+                                          _showErrorDialog(
+                                            'Login Gagal',
+                                            'Email atau password yang Anda masukkan salah. Silakan periksa kembali kredensial Anda.',
+                                          );
                                         }
                                       } catch (e) {
-                                        // Error handling is managed by the provider
-                                        // AuthProvider will set the error property
+                                        // Handle unexpected errors
+                                        if (mounted) {
+                                          _showErrorDialog(
+                                            'Terjadi Kesalahan',
+                                            'Terjadi kesalahan saat mencoba masuk. Silakan coba lagi.',
+                                          );
+                                        }
                                       }
                                     }
                                   },

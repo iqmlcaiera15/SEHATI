@@ -49,7 +49,7 @@ class _DepressionQuestionnaireState extends State<DepressionQuestionnaire> {
       ],
     },
     {
-      'title': 'Dalam 7 hari terakhir, apakah Anda mudah tersinggung atau marah?',
+      'title': 'Dalam 7 hari terakhir, apakah Anda mudah tersinggung atau marah terhadap pasangan atau keluarga?',
       'key': 'mudah_tersinggung',
       'options': [
         {'value': 'Tidak', 'text': 'Tidak'},
