@@ -16,11 +16,9 @@ class PredictionDesktopController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'bidan') {
-            // Semua prediksi untuk summary card
             $allPredictions = Prediction::all();
             $users = User::where('role', 'ibu_hamil')->get();
 
-            // Data hasil filter (untuk tabel)
             $query = Prediction::with(['user', 'hpl'])->latest();
             if ($request->filled('method')) {
                 $query->where('metode_persalinan', $request->method);
@@ -33,11 +31,17 @@ class PredictionDesktopController extends Controller
                     $q->whereDate('hpl', $request->hpl);
                 });
             }
+            // FILTER SEARCH NAMA
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                });
+            }
             $predictions = $query->get();
         } else {
-            // Untuk user ibu hamil: hanya data milik sendiri
             $allPredictions = Prediction::where('user_id', $user->id)->get();
-            $users = collect([$user]); // hanya dirinya sendiri
+            $users = collect([$user]);
 
             $query = Prediction::with(['user', 'hpl'])->where('user_id', $user->id)->latest();
             if ($request->filled('method')) {
@@ -48,10 +52,16 @@ class PredictionDesktopController extends Controller
                     $q->whereDate('hpl', $request->hpl);
                 });
             }
+            // FILTER SEARCH NAMA (buat user, biasanya tidak perlu karena nama = dirinya sendiri, tapi boleh kalau mau konsisten)
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                });
+            }
             $predictions = $query->get();
         }
 
-        // Pass ke view, summary card pakai allPredictions
         return view('prediksi.index', [
             'predictions'      => $predictions,
             'users'            => $users,

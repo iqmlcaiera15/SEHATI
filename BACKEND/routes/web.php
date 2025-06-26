@@ -59,6 +59,7 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::post('/prediksi', [PredictionDesktopController::class, 'store'])->name('prediksi.store');
     Route::get('/prediksi/{id}', [PredictionDesktopController::class, 'show'])->name('prediksi.show');
     Route::delete('/prediksi/{id}', [PredictionDesktopController::class, 'destroy'])->name('prediksi.delete');
+    Route::delete('/prediksi/delete-all', [PredictionDesktopController::class, 'deleteAll'])->name('prediksi.deleteAll');
     Route::get('/prediksi/{id}/print', [PredictionDesktopController::class, 'print'])->name('prediksi.print');
 
     // Route::get('/dashboard', [HomeController::class, 'index'])->name('bidan.dashboard');
