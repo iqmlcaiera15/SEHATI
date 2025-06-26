@@ -7,10 +7,10 @@
     $headlineClass = $isCaesar ? 'text-danger' : 'text-primary';
     $ovalClass     = $isCaesar ? 'border-danger text-danger' : 'border-primary text-primary';
 
-    // Aman: relasi bisa saja null, pakai optional
-    $hplValue = optional(optional($prediction->hpl)->hpl);
-    $hpl = $hplValue
-        ? \Carbon\Carbon::parse($hplValue)->translatedFormat('d F Y')
+    // Solusi error: cek benar-benar nullable, jangan lempar object Optional
+    $hplRaw = $prediction->hpl && $prediction->hpl->hpl ? $prediction->hpl->hpl : null;
+    $hpl = $hplRaw
+        ? \Carbon\Carbon::parse($hplRaw)->translatedFormat('d F Y')
         : '-';
 
     $tanggalPrediksi = $prediction->created_at
