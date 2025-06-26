@@ -2,8 +2,7 @@
 
 @section('content')
 <div class="container-fluid py-4">
-
-    <!-- Header Section (Purple Gradient & Jumlah Pasien) -->
+    <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -32,7 +31,6 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
-                <!-- Tombol Tambah -->
                 <div>
                     <a href="{{ route('prediksi.form') }}" class="btn btn-lg px-4 py-3 fw-bold d-flex align-items-center gap-2"
                        style="background: linear-gradient(45deg, #28a745, #20c997); border: none; color: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.15);">
@@ -41,21 +39,14 @@
                         <small class="d-block mt-1 opacity-75 fw-normal" style="font-size:0.98rem;">Input prediksi baru</small>
                     </a>
                 </div>
-                <!-- Tombol Sekunder -->
                 <div class="d-flex gap-2">
                     @if($allPredictions->count() > 0)
-                        <!-- Hapus Semua -->
-                        <form action="{{ route('prediksi.deleteAll') }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="btn btn-outline-danger btn-lg d-flex align-items-center gap-2 fw-semibold"
-                                    style="border-radius: 12px;"
-                                    onclick="return confirm('Yakin hapus semua data prediksi?');">
-                                <i class="fas fa-trash-alt"></i> Hapus Semua
-                            </button>
-                        </form>
-                        <!-- Export Data (dummy only) -->
+                        <!-- Hapus Semua pakai modal -->
+                        <button type="button" class="btn btn-outline-danger btn-lg d-flex align-items-center gap-2 fw-semibold"
+                                style="border-radius: 12px;"
+                                data-bs-toggle="modal" data-bs-target="#deleteAllModal">
+                            <i class="fas fa-trash-alt"></i> Hapus Semua
+                        </button>
                         <button class="btn btn-outline-primary btn-lg d-flex align-items-center gap-2 fw-semibold" style="border-radius: 12px;" disabled>
                             <i class="fas fa-download"></i> Export Data
                         </button>
@@ -70,6 +61,13 @@
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-3" role="alert" style="border-radius: 12px;">
             <i class="fas fa-check-circle me-2"></i>
             {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-3" role="alert" style="border-radius: 12px;">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -238,7 +236,7 @@
                                         <td class="py-3 text-center">
                                             <div class="btn-group" role="group">
                                                 <a href="{{ route('prediksi.show', $prediction->id) }}"
-                                                    class="btn btn-sm btn-outline-primary" style="border-radius: 8px 0 0 8px;">
+                                                   class="btn btn-sm btn-outline-primary" style="border-radius: 8px 0 0 8px;">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 <form action="{{ route('prediksi.delete', $prediction->id) }}" method="POST"
@@ -263,10 +261,40 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        <!-- Pagination (optional, if needed) -->
-                        {{-- {{ $predictions->links('pagination::bootstrap-4') }} --}}
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete All Modal -->
+<div class="modal fade" id="deleteAllModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 15px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                    Konfirmasi Hapus Semua Data
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <p class="mb-2">Apakah Anda yakin ingin menghapus <strong>SEMUA</strong> data prediksi?</p>
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan!
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <form action="{{ route('prediksi.deleteAll') }}" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i>Ya, Hapus Semua
+                    </button>
+                </form>
             </div>
         </div>
     </div>
