@@ -48,7 +48,7 @@ Route::middleware(['auth'])->prefix('bidan')->group(function () {
     Route::get('/deteksi/{id}', [DeteksiDesktopController::class, 'show'])->name('deteksi.show');
     Route::get('/deteksi/latest', [DeteksiDesktopController::class, 'indexlatest'])->name('deteksi.latest');
     Route::get('/deteksi/delete-all', [DeteksiDesktopController::class, 'deleteAll'])->name('deteksi.deleteAll');
-    Route::delete('/deteksi/{id}', [DeteksiDesktopController::class, 'destroy']);
+    Route::delete('/deteksi/{id}', [DeteksiDesktopController::class, 'destroy'])->name('deteksi.destroy');
     Route::get('/detail/{id}', [HomeController::class, 'show'])->name('ibu_hamil.detail');
     Route::get('/depresi', [PrediksiDepresiDesktopController::class, 'index'])->name('depresi.index');
     Route::get('/depresi/show/{id}', [PrediksiDepresiDesktopController::class, 'show'])->name('depresi.show');
