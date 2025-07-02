@@ -31,14 +31,6 @@
         <div class="col-12">
             <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
                 <div class="d-flex gap-2">
-                    @if($prediksiList->count() > 0)
-                    <button type="button" class="btn btn-outline-danger btn-lg" 
-                            data-bs-toggle="modal" data-bs-target="#deleteAllModal"
-                            style="border-radius: 12px;">
-                        <i class="fas fa-trash-alt me-2"></i>
-                        Hapus Semua
-                    </button>
-                    @endif
                 </div>
             </div>
         </div>
