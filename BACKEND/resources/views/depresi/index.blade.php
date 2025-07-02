@@ -485,6 +485,32 @@
         border-color: #667eea;
         color: #667eea;
     }
+    
+    /* Hide arrow buttons in pagination - Previous/Next tetap ada tapi tanpa arrow */
+    .pagination .page-item:first-child .page-link::before,
+    .pagination .page-item:last-child .page-link::after {
+        display: none;
+    }
+    
+    /* Hide the arrow symbols completely */
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        font-size: 0; /* Hide default arrow text */
+    }
+    
+    /* Add text content for Previous/Next */
+    .pagination .page-item:first-child .page-link::after {
+        content: "Previous";
+        font-size: 0.875rem;
+        display: inline;
+    }
+    
+    .pagination .page-item:last-child .page-link::after {
+        content: "Next";
+        font-size: 0.875rem;
+        display: inline;
+    }
+
 </style>
 
 <!-- JavaScript for Search Functionality -->
