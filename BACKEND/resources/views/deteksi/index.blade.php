@@ -41,18 +41,6 @@
                     </a>
                 </div>
 
-                <!-- Secondary Actions -->
-                <div class="d-flex gap-2">
-                    @if(count($deteksiPenyakit) > 0)
-                    <button type="button" class="btn btn-outline-danger btn-lg"
-                            data-bs-toggle="modal" data-bs-target="#deleteAllModal"
-                            style="border-radius: 12px;">
-                        <i class="fas fa-trash-alt me-2"></i>
-                        Hapus Semua
-                    </button>
-
-                    @endif
-                </div>
             </div>
         </div>
     </div>
