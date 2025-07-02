@@ -57,31 +57,6 @@
                     @endif
                 </div>
             </div>
-
-            <!-- Quick Actions -->
-            <div class="card shadow mt-4">
-                <div class="card-header">
-                    <h6 class="card-title mb-0">
-                        <i class="fas fa-tasks me-2"></i>Aksi Cepat
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="#" class="btn btn-outline-success btn-sm">
-                            <i class="fas fa-heartbeat me-1"></i> Riwayat Kesehatan
-                        </a>
-                        <a href="#" class="btn btn-outline-warning btn-sm">
-                            <i class="fas fa-calendar-check me-1"></i> Jadwal Pemeriksaan
-                        </a>
-                        <a href="#" class="btn btn-outline-info btn-sm">
-                            <i class="fas fa-notes-medical me-1"></i> Catatan Medis
-                        </a>
-                        <a href="{{ route('deteksi.create') }}" class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-stethoscope me-1"></i> Deteksi Penyakit
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Detailed Information -->
@@ -213,7 +188,7 @@
                                 @if($ibuHamil->usia_kehamilan)
                                     @php
                                         $trimester = $ibuHamil->usia_kehamilan <= 12 ? '1' : 
-                                                   ($ibuHamil->usia_kehamilan <= 28 ? '2' : '3');
+                                                     ($ibuHamil->usia_kehamilan <= 28 ? '2' : '3');
                                     @endphp
                                     <span class="badge bg-info">Trimester {{ $trimester }}</span>
                                 @else
@@ -268,15 +243,6 @@
                 </div>
             </div>
             @endif
-        </div>
-    </div>
-
-    <!-- Edit Button -->
-    <div class="row">
-        <div class="col-12 text-center mb-4">
-            <a href="#" class="btn btn-primary btn-lg">
-                <i class="fas fa-edit me-2"></i>Edit Data Ibu Hamil
-            </a>
         </div>
     </div>
 </div>
