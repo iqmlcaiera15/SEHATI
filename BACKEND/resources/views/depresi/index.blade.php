@@ -17,7 +17,8 @@
                         <div class="text-end">
                             <div class="badge bg-light text-dark px-3 py-2 fs-6">
                                 <i class="fas fa-users me-1"></i>
-                                {{ $prediksiList->total() }} Pasien
+                                {{-- Menggunakan count() untuk data non-paginasi --}}
+                                {{ $prediksiList->count() }} Pasien
                             </div>
                         </div>
                     </div>
@@ -248,7 +249,6 @@
                                                 $hasilText = 'Tidak Bergejala Depresi';
                                                 $badgeClass = 'bg-success';
                                                 
-                                                // Logika berdasarkan hasil prediksi dan skor EPDS
                                                 if ($data->hasil_prediksi == 1) {
                                                     if ($data->epds && $data->epds->score >= 13) {
                                                         $finalResult = true;
@@ -369,13 +369,8 @@
                         </div>
                     </div>
                     
-                    @if($prediksiList->hasPages())
-                    <div class="card-footer bg-white border-0 py-3">
-                        <div class="d-flex justify-content-center">
-                            {{ $prediksiList->links() }}
-                        </div>
-                    </div>
-                    @endif
+                    {{-- BLOK PAGINASI DIHAPUS --}}
+                    
                 </div>
             @else
                 <div class="card border-0 shadow-sm text-center py-5" style="border-radius: 15px;">
@@ -445,53 +440,7 @@
         background: linear-gradient(45deg, #20c997, #28a745) !important;
     }
     
-    /* Fix pagination button size */
-    .pagination {
-        margin-bottom: 0;
-    }
-    
-    .pagination .page-link {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
-        line-height: 1.5;
-        border-radius: 0.375rem;
-        margin: 0 2px;
-    }
-    
-    .pagination .page-item:first-child .page-link,
-    .pagination .page-item:last-child .page-link {
-        border-radius: 0.375rem;
-    }
-    
-    .pagination .page-item.active .page-link {
-        background-color: #667eea;
-        border-color: #667eea;
-    }
-    
-    .pagination .page-link:hover {
-        background-color: rgba(102, 126, 234, 0.1);
-        border-color: #667eea;
-        color: #667eea;
-    }
-    
-    /* Hide default chevron text on Previous/Next links */
-    .pagination .page-item:first-child .page-link,
-    .pagination .page-item:last-child .page-link {
-        font-size: 0;
-    }
-
-    /* Add text content for Previous/Next and restore font size */
-    .pagination .page-item:first-child .page-link::after {
-        content: "Previous";
-        font-size: 0.875rem;
-        display: inline;
-    }
-    
-    .pagination .page-item:last-child .page-link::after {
-        content: "Next";
-        font-size: 0.875rem;
-        display: inline;
-    }
+    /* Hapus semua style yang berhubungan dengan paginasi */
 
 </style>
 
