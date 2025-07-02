@@ -70,18 +70,13 @@
     @yield('content')
 </main>
 
-<!-- <footer class="py-4 bg-light mt-auto">
+<footer class="py-4 bg-light mt-auto">
     <div class="container-fluid px-4">
         <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">Copyright &copy; SEHATI 2025</div>
-            <div>
-                <a href="#" class="text-decoration-none">Privacy Policy</a>
-                &middot;
-                <a href="#" class="text-decoration-none">Terms &amp; Conditions</a>
-            </div>
         </div>
     </div>
-</footer> -->
+</footer>
 
 <!-- Bootstrap JS Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
