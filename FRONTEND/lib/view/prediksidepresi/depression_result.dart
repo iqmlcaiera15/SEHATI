@@ -16,7 +16,7 @@ class DepressionResult extends StatelessWidget {
     Key? key,
     required this.isDepressed,
     required this.data,
-    this.score, // This should now receive the EPDS score
+    this.score,
   }) : super(key: key);
 
   // Get the formatted date
@@ -90,7 +90,7 @@ class DepressionResult extends StatelessWidget {
           'description':
               'Skor EPDS Anda menunjukkan kemungkinan depresi. Disarankan untuk mendapat edukasi, pemantauan, dan rujukan ke dokter layanan primer.',
           'color': const Color(0xFFFFAA4D),
-          'buttonText': 'Lihat Saran',
+          'buttonText': 'Cari Bantuan Profesional',
         };
       } else {
         return {
@@ -460,7 +460,7 @@ class DepressionResult extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     // Action button based on result
-                    if (isDepressed && (score != null && score! >= 13)) {
+                    if (isDepressed && (score != null && score! >= 10)) {
                       // Open WhatsApp for professional help
                       await _openWhatsApp(context);
                     } else {
@@ -536,7 +536,7 @@ class DepressionResult extends StatelessWidget {
                 ),
               ),
               
-              // Share results button (if needed)
+          
               if (isDepressed) ...[
                 const SizedBox(height: 16),
                 Padding(
