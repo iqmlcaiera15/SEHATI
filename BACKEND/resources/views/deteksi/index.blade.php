@@ -51,10 +51,6 @@
                         Hapus Semua
                     </button>
 
-                    <button class="btn btn-outline-primary btn-lg" style="border-radius: 12px;">
-                        <i class="fas fa-download me-2"></i>
-                        Export Data
-                    </button>
                     @endif
                 </div>
             </div>
