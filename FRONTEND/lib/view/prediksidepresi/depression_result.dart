@@ -10,7 +10,7 @@ class DepressionResult extends StatelessWidget {
   final int? score;
 
   // WhatsApp phone number constant
-  static const phoneNumber = '6285155362293';
+  static const phoneNumber = '6285720110281';
 
   const DepressionResult({
     Key? key,

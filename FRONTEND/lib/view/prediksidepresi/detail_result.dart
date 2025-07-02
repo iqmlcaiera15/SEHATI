@@ -88,7 +88,7 @@ class DepressionDetailView extends StatelessWidget {
 
   // Function to open WhatsApp
   Future<void> _openWhatsApp() async {
-    const phoneNumber = '6281234567890'; // Ganti dengan nomor WhatsApp yang diinginkan
+    const phoneNumber = '6285720110281'; // Ganti dengan nomor WhatsApp yang diinginkan
     const message = 'Halo, saya memerlukan bantuan konseling terkait kesehatan mental.';
     
     final whatsappUrl = 'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
