@@ -1,10 +1,3 @@
-Tentu, saya akan menghapus chevron dari tombol paginasi dan memberikan kode lengkapnya.
-
-Perubahan yang saya lakukan ada di dalam blok `<style>` di bagian bawah. Saya telah menyesuaikan aturan CSS untuk menyembunyikan chevron bawaan dan hanya menampilkan teks "Previous" dan "Next" yang Anda inginkan.
-
-Berikut adalah kode lengkap yang telah diperbarui:
-
-```php
 @extends('layouts.app')
 
 @section('content')
@@ -528,4 +521,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
-```
