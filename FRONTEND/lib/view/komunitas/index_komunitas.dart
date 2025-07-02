@@ -374,21 +374,6 @@ class _CommunityPageState extends State<CommunityPage> {
                     ),
                   ),
                   // User profile button
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF44336),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -435,17 +420,13 @@ class _CommunityPageState extends State<CommunityPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              "Postingan pilihan oleh Sehati",
+                              "Postingan Terbaru dari Komunitas Ibu Hamil",
                               style: TextStyle(
                                 color: Color(0xFF1E293B),
                                 fontSize: 14,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
                               ),
-                            ),
-                            Icon(
-                              Icons.keyboard_arrow_down,
-                              color: const Color(0xFFF44336),
                             ),
                           ],
                         ),

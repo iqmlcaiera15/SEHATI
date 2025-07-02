@@ -456,6 +456,35 @@
     a[href*="depresi.create"]:hover {
         background: linear-gradient(45deg, #20c997, #28a745) !important;
     }
+    
+    /* Fix pagination button size */
+    .pagination {
+        margin-bottom: 0;
+    }
+    
+    .pagination .page-link {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.375rem;
+        margin: 0 2px;
+    }
+    
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        border-radius: 0.375rem;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+        border-color: #667eea;
+        color: #667eea;
+    }
 </style>
 
 <!-- JavaScript for Search Functionality -->

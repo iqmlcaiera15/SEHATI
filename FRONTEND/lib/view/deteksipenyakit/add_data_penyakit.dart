@@ -443,7 +443,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           Row(
+          Row(
             children: [
               Text(
                 label,
@@ -496,7 +496,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
       ),
     );
   }
-  
+ 
   Widget _buildYesNoDropdownField({
     required String currentValue,
     required String label,
@@ -729,7 +729,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                   child: _buildTextField(
+                  child: _buildTextField(
                     controller: _heightController,
                     label: 'Tinggi Badan',
                     hintText: 'Contoh: 158',
@@ -856,7 +856,7 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               hintText: 'Contoh: 90',
               keyboardType: TextInputType.number,
               fieldKey: 'bs',
-                suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mg/dL', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
+                suffix: Container( padding: const EdgeInsets.all(12.0), child: Text('mmol/l', style: TextStyle(fontSize: 14, color: Colors.grey.shade600))),
             ),
             _buildYesNoDropdownField(
               currentValue: _selectedCurrentSmoker!,
@@ -886,6 +886,194 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
     ];
   }
 
+  // ============== START: FUNGSI VALIDASI ==============
+
+  // Method untuk validasi per step
+  bool _validateCurrentStep() {
+    switch (_currentStep) {
+      case 0: // Data Pribadi
+        return _validateStep0();
+      case 1: // Riwayat Kehamilan
+        return _validateStep1();
+      case 2: // Indeks & Pengukuran Tubuh
+        return _validateStep2();
+      case 3: // Kondisi Kardiovaskular
+        return _validateStep3();
+      case 4: // Gula Darah & Gaya Hidup
+        return _validateStep4();
+      default:
+        return true;
+    }
+  }
+
+  bool _validateStep0() {
+    // Validasi Data Pribadi
+    if (_namaController.text.isEmpty) {
+      _showValidationError('Nama lengkap wajib diisi');
+      return false;
+    }
+    if (_ageController.text.isEmpty) {
+      _showValidationError('Usia wajib diisi');
+      return false;
+    }
+    if (double.tryParse(_ageController.text) == null) {
+      _showValidationError('Usia harus berupa angka yang valid');
+      return false;
+    }
+    if (double.parse(_ageController.text) < 0) {
+      _showValidationError('Usia tidak boleh negatif');
+      return false;
+    }
+    return true;
+  }
+
+  bool _validateStep1() {
+    // Validasi Riwayat Kehamilan
+    if (_pregnanciesController.text.isEmpty) {
+      _showValidationError('Jumlah kehamilan sebelumnya wajib diisi');
+      return false;
+    }
+    if (int.tryParse(_pregnanciesController.text) == null) {
+      _showValidationError('Jumlah kehamilan harus berupa angka yang valid');
+      return false;
+    }
+    if (int.parse(_pregnanciesController.text) < 0) {
+      _showValidationError('Jumlah kehamilan tidak boleh negatif');
+      return false;
+    }
+    return true;
+  }
+
+  bool _validateStep2() {
+    // Validasi Indeks & Pengukuran Tubuh
+    if (_weightController.text.isEmpty) {
+      _showValidationError('Berat badan wajib diisi');
+      return false;
+    }
+    if (_heightController.text.isEmpty) {
+      _showValidationError('Tinggi badan wajib diisi');
+      return false;
+    }
+    if (double.tryParse(_weightController.text) == null) {
+      _showValidationError('Berat badan harus berupa angka yang valid');
+      return false;
+    }
+    if (double.tryParse(_heightController.text) == null) {
+      _showValidationError('Tinggi badan harus berupa angka yang valid');
+      return false;
+    }
+    if (double.parse(_weightController.text) <= 0) {
+      _showValidationError('Berat badan harus lebih dari 0');
+      return false;
+    }
+    if (double.parse(_heightController.text) <= 0) {
+      _showValidationError('Tinggi badan harus lebih dari 0');
+      return false;
+    }
+    if (_bodyTempController.text.isEmpty) {
+      _showValidationError('Suhu tubuh wajib diisi');
+      return false;
+    }
+    if (double.tryParse(_bodyTempController.text) == null) {
+      _showValidationError('Suhu tubuh harus berupa angka yang valid');
+      return false;
+    }
+    return true;
+  }
+
+  bool _validateStep3() {
+    // Validasi Kondisi Kardiovaskular
+    if (_systolicBpController.text.isEmpty) {
+      _showValidationError('Tekanan darah sistolik wajib diisi');
+      return false;
+    }
+    if (_diastolicBpController.text.isEmpty) {
+      _showValidationError('Tekanan darah diastolik wajib diisi');
+      return false;
+    }
+    if (double.tryParse(_systolicBpController.text) == null) {
+      _showValidationError('Tekanan darah sistolik harus berupa angka yang valid');
+      return false;
+    }
+    if (double.tryParse(_diastolicBpController.text) == null) {
+      _showValidationError('Tekanan darah diastolik harus berupa angka yang valid');
+      return false;
+    }
+    if (double.parse(_systolicBpController.text) <= 0) {
+      _showValidationError('Tekanan darah sistolik harus lebih dari 0');
+      return false;
+    }
+    if (double.parse(_diastolicBpController.text) <= 0) {
+      _showValidationError('Tekanan darah diastolik harus lebih dari 0');
+      return false;
+    }
+    if (_heartRateController.text.isEmpty) {
+      _showValidationError('Detak jantung wajib diisi');
+      return false;
+    }
+    if (int.tryParse(_heartRateController.text) == null) {
+      _showValidationError('Detak jantung harus berupa angka yang valid');
+      return false;
+    }
+    if (int.parse(_heartRateController.text) <= 0) {
+      _showValidationError('Detak jantung harus lebih dari 0');
+      return false;
+    }
+    if (_selectedBpMeds == null) {
+      _showValidationError('Status konsumsi obat tekanan darah wajib dipilih');
+      return false;
+    }
+    return true;
+  }
+
+  bool _validateStep4() {
+    // Validasi Gula Darah & Gaya Hidup
+    if (_bsController.text.isEmpty) {
+      _showValidationError('Kadar gula darah wajib diisi');
+      return false;
+    }
+    if (double.tryParse(_bsController.text) == null) {
+      _showValidationError('Kadar gula darah harus berupa angka yang valid');
+      return false;
+    }
+    if (double.parse(_bsController.text) < 0) {
+      _showValidationError('Kadar gula darah tidak boleh negatif');
+      return false;
+    }
+    if (_selectedCurrentSmoker == null) {
+      _showValidationError('Status perokok aktif wajib dipilih');
+      return false;
+    }
+    if (_selectedCurrentSmoker == "Ya") {
+      if (_cigsPerDayController.text.isEmpty) {
+        _showValidationError('Jumlah rokok per hari wajib diisi untuk perokok aktif');
+        return false;
+      }
+      if (int.tryParse(_cigsPerDayController.text) == null) {
+        _showValidationError('Jumlah rokok per hari harus berupa angka yang valid');
+        return false;
+      }
+      if (int.parse(_cigsPerDayController.text) < 0) {
+        _showValidationError('Jumlah rokok per hari tidak boleh negatif');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _showValidationError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.orange.shade700,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  // ============== END: FUNGSI VALIDASI ==============
 
   @override
   Widget build(BuildContext context) {
@@ -908,34 +1096,8 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
             type: StepperType.vertical,
             currentStep: _currentStep,
             onStepTapped: (step) => setState(() => _currentStep = step),
-            onStepContinue: () {
-              final isLastStep = _currentStep == _buildSteps().length - 1;
-              if (_formKey.currentState!.validate()) {
-                if (isLastStep) {
-                  _submitData();
-                } else {
-                  setState(() {
-                    _currentStep += 1;
-                  });
-                }
-              } else {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Harap lengkapi semua data wajib (*) di langkah ini dengan benar.'),
-                    backgroundColor: Colors.orange.shade700,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            },
-            onStepCancel: () {
-              if (_currentStep > 0) {
-                setState(() {
-                  _currentStep -= 1;
-                });
-              }
-            },
             steps: _buildSteps(),
+            // ============== START: `controlsBuilder` DIMODIFIKASI ==============
             controlsBuilder: (context, details) {
               return Container(
                 margin: const EdgeInsets.only(top: 24, bottom: 8),
@@ -943,7 +1105,33 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : details.onStepContinue,
+                        onPressed: _isLoading ? null : () {
+                          final isLastStep = _currentStep == _buildSteps().length - 1;
+                         
+                          if (isLastStep) {
+                            // Untuk step terakhir, validasi seluruh form
+                            if (_formKey.currentState!.validate()) {
+                              _submitData();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Harap periksa kembali semua input yang wajib diisi pada setiap langkah.'),
+                                  backgroundColor: Colors.orange.shade700,
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: const EdgeInsets.all(16),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              );
+                            }
+                          } else {
+                            // Untuk step sebelumnya, hanya validasi step saat ini
+                            if (_validateCurrentStep()) {
+                              setState(() {
+                                _currentStep += 1;
+                              });
+                            }
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4DBAFF),
                           foregroundColor: Colors.white,
@@ -970,27 +1158,12 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
                               ),
                       ),
                     ),
-                    if (_currentStep > 0 && !_isLoading) ...[
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: details.onStepCancel,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.grey.shade700,
-                            side: BorderSide(color: Colors.grey.shade400, width: 1.0),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text('Kembali', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-                        ),
-                      ),
-                    ],
+                    // Blok 'if' untuk tombol kembali dihapus dari sini
                   ],
                 ),
               );
             },
+            // ============== END: `controlsBuilder` DIMODIFIKASI ==============
           ),
         ),
       ),
@@ -1004,13 +1177,13 @@ class _AddDataPenyakitState extends State<AddDataPenyakit> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.shield_outlined, color: Color(0xFF4DBAFF), size: 22),
-                  SizedBox(width: 10),
+                  const Icon(Icons.shield_outlined, color: Color(0xFF4DBAFF), size: 22),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: RichText(
-                      text: TextSpan(
+                      text: const TextSpan(
                         style: TextStyle(color: Color(0xFF4C617F), fontSize: 11.5, height: 1.4),
-                        children: const [
+                        children: [
                           TextSpan(
                             text: 'Privasi Data Anda Terjamin. ',
                             style: TextStyle(fontWeight: FontWeight.bold),

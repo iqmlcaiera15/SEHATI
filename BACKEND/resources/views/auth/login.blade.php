@@ -47,8 +47,7 @@
 
                     <div class="mt-3 text-center">
                         <p>Belum punya akun? 
-                            <a href="{{ route('register.bidan') }}">Daftar sebagai Bidan</a> atau 
-                            <a href="{{ route('register.dinkes') }}">Daftar sebagai Dinkes</a>
+                            <a href="{{ route('register.bidan') }}">Daftar sebagai Bidan</a> 
                         </p>
                     </div>
                 </div>

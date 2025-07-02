@@ -133,9 +133,6 @@
                         <div class="card-footer bg-light">
                             <div class="d-flex justify-content-between">
                                 <a href="{{ route('ibu_hamil.detail', $ibu->id) }}" class="btn btn-sm btn-primary">Detail</a>
-                                <a href="#" class="btn btn-sm btn-success">
-                                    <i class="fas fa-heartbeat me-1"></i>Riwayat Kesehatan
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -211,7 +208,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <a href="#" class="btn btn-sm btn-warning w-100">Detail Lengkap</a>
+                            <a href="{{ route('deteksi.show', $deteksi->deteksi_id) }}" class="btn btn-sm btn-warning w-100">Detail Lengkap</a>
                         </div>
                     </div>
                 </div>

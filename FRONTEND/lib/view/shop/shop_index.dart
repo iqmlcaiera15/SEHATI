@@ -16,16 +16,15 @@ class ShopPage extends StatefulWidget {
 class _ShopPageState extends State<ShopPage> {
   Future<List<ProductModel>> _products = Future.value([]);
   bool isLoading = false;
-  int _currentIndex = 2; // Assuming shop is at index 2
+  int _currentIndex = 2; 
   
-  // Global key for scaffold to show SnackBar properly
+ 
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = 
       GlobalKey<ScaffoldMessengerState>();
   
   @override
   void initState() {
     super.initState();
-    // Load products in a slightly delayed manner to ensure the widget is fully mounted
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProducts();
     });
@@ -103,69 +102,7 @@ class _ShopPageState extends State<ShopPage> {
         backgroundColor: Colors.white,
         body: Column(
           children: [
-            // Status Bar Space
-            Container(
-              width: double.infinity,
-              height: 44,
-              color: Colors.white,
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: 21,
-                    top: 10.50,
-                    child: SizedBox(
-                      width: 54,
-                      child: Text(
-                        '9:41',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: const Color(0xFF1E293B),
-                          fontSize: 15,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.30,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Battery icon
-                  Positioned(
-                    left: 389.33,
-                    top: 17.33,
-                    child: Opacity(
-                      opacity: 0.35,
-                      child: Container(
-                        width: 22,
-                        height: 11.33,
-                        decoration: ShapeDecoration(
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              width: 1,
-                              color: const Color(0xFF1E293B),
-                            ),
-                            borderRadius: BorderRadius.circular(2.67),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 391.33,
-                    top: 19.33,
-                    child: Container(
-                      width: 18,
-                      height: 7.33,
-                      decoration: ShapeDecoration(
-                        color: const Color(0xFF1E293B),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(1.33)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
+           
               // App Bar with Back Button
               Container(
                 width: double.infinity,
@@ -218,21 +155,7 @@ class _ShopPageState extends State<ShopPage> {
                       ),
                     ),
                     // Search button
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4DBAFF),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.search,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                      ),
-                    ),
+                    
                   ],
                 ),
               ),
@@ -286,10 +209,6 @@ class _ShopPageState extends State<ShopPage> {
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500,
                                 ),
-                              ),
-                              Icon(
-                                Icons.local_pharmacy,
-                                color: const Color(0xFF4DBAFF),
                               ),
                             ],
                           ),
