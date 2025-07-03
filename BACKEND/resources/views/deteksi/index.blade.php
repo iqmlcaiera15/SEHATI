@@ -40,7 +40,6 @@
                         <small class="d-block mt-1 opacity-75">Periksa pasien baru</small>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
@@ -72,7 +71,7 @@
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
                                 <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
-                                    style="width: 60px; height: 60px; background: rgba(40, 167, 69, 0.1);">
+                                     style="width: 60px; height: 60px; background: rgba(40, 167, 69, 0.1);">
                                     <i class="fas fa-user-check text-success fs-4"></i>
                                 </div>
                                 <h3 class="mb-1">{{ $deteksiPenyakit->where('diabetes_prediction', 0)->where('hypertension_prediction', 0)->count() }}</h3>
@@ -84,7 +83,7 @@
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
                                 <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
-                                    style="width: 60px; height: 60px; background: rgba(255, 193, 7, 0.1);">
+                                     style="width: 60px; height: 60px; background: rgba(255, 193, 7, 0.1);">
                                     <i class="fas fa-exclamation-triangle text-warning fs-4"></i>
                                 </div>
                                 <h3 class="mb-1">{{ $deteksiPenyakit->where('diabetes_prediction', 1)->count() }}</h3>
@@ -96,7 +95,7 @@
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
                                 <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
-                                    style="width: 60px; height: 60px; background: rgba(220, 53, 69, 0.1);">
+                                     style="width: 60px; height: 60px; background: rgba(220, 53, 69, 0.1);">
                                     <i class="fas fa-heart text-danger fs-4"></i>
                                 </div>
                                 <h3 class="mb-1">{{ $deteksiPenyakit->where('hypertension_prediction', 1)->count() }}</h3>
@@ -108,10 +107,10 @@
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
                                 <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
-                                    style="width: 60px; height: 60px; background: rgba(13, 202, 240, 0.1);">
+                                     style="width: 60px; height: 60px; background: rgba(13, 202, 240, 0.1);">
                                     <i class="fas fa-baby text-info fs-4"></i>
                                 </div>
-                                <h3 class="mb-1">{{ $deteksiPenyakit->where('maternal_health_prediction', 'medium risk')->orWhere('maternal_health_prediction', 'high risk')->count() }}</h3>
+                                <h3 class="mb-1">{{ $deteksiPenyakit->where('maternal_health_prediction', '!=', 'low risk')->count() }}</h3>
                                 <p class="text-muted mb-0">Risiko Maternal</p>
                             </div>
                         </div>
