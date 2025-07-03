@@ -182,20 +182,7 @@ class _IndexKickCounterState extends State<IndexKickCounter> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              if (kickData.isNotEmpty)
-                                TextButton(
-                                  onPressed: () {
-                                    // View full history
-                                  },
-                                  child: Text(
-                                    'Lihat Semua',
-                                    style: TextStyle(
-                                      color: const Color(0xFF4DBAFF),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
+                              
                             ],
                           ),
                         ),

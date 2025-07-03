@@ -396,11 +396,6 @@ class _CommentPageState extends State<CommentPage> {
                           "Komentar (${_comments.length})",
                           () {},
                         ),
-                        _buildActionButton(
-                          Icons.share_outlined, 
-                          "Bagikan",
-                          () {},
-                        ),
                       ],
                     ),
                   ),

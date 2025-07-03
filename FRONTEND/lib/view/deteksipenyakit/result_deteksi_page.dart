@@ -282,7 +282,7 @@ class _ResultDeteksiPageState extends State<ResultDeteksiPage> {
                           _buildEnhancedDataRow("Umur", age, Icons.person_outline),
                           _buildEnhancedDataRow("BMI", bmi, Icons.monitor_weight_outlined),
                           _buildEnhancedDataRow("Tekanan Darah", "$systolicBp/$diastolicBp mmHg", Icons.favorite_outline),
-                          _buildEnhancedDataRow("Gula Darah", "$bloodSugar mg/dL", Icons.opacity_outlined),
+                          _buildEnhancedDataRow("Gula Darah", "$bloodSugar mmol/l", Icons.opacity_outlined),
                         ],
                       ),
                     ),

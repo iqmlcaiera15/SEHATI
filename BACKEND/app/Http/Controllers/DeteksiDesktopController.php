@@ -14,8 +14,8 @@ class DeteksiDesktopController extends Controller
         $user = Auth::user();
 
         // Ambil data DeteksiPenyakit hanya milik user tersebut
-        // $deteksiPenyakit = DeteksiPenyakit::all();
-        $deteksiPenyakit = DeteksiPenyakit::where('user_id', $user->id)->get();
+        $deteksiPenyakit = DeteksiPenyakit::all();
+        // $deteksiPenyakit = DeteksiPenyakit::where('user_id', $user->id)->get();
         
         return view('deteksi.index', compact('deteksiPenyakit'));
     }
@@ -30,9 +30,9 @@ class DeteksiDesktopController extends Controller
         $deteksi = DeteksiPenyakit::findOrFail($id);
         
         // Periksa apakah deteksi ini milik user yang login
-        if (Auth::id() !== $deteksi->user_id) {
-            return redirect()->route('deteksi.index')->with('error', 'Anda tidak memiliki akses ke data ini');
-        }
+        // if (Auth::id() !== $deteksi->user_id) {
+        //     return redirect()->route('deteksi.index')->with('error', 'Anda tidak memiliki akses ke data ini');
+        // }
         
         return view('deteksi.result', compact('deteksi'));
     }
@@ -309,14 +309,14 @@ class DeteksiDesktopController extends Controller
                 return redirect()->route('deteksi.index')->with('error', 'Data tidak ditemukan');
             }
             
-            if (Auth::id() !== $deteksi->user_id) {
-                Log::warning('Unauthorized delete attempt', [
-                    'deteksi_id' => $id,
-                    'deteksi_user_id' => $deteksi->user_id,
-                    'current_user_id' => Auth::id()
-                ]);
-                return redirect()->route('deteksi.index')->with('error', 'Anda tidak memiliki akses untuk menghapus data ini');
-            }
+            // if (Auth::id() !== $deteksi->user_id) {
+            //     Log::warning('Unauthorized delete attempt', [
+            //         'deteksi_id' => $id,
+            //         'deteksi_user_id' => $deteksi->user_id,
+            //         'current_user_id' => Auth::id()
+            //     ]);
+            //     return redirect()->route('deteksi.index')->with('error', 'Anda tidak memiliki akses untuk menghapus data ini');
+            // }
             
             $deteksi->delete();
             

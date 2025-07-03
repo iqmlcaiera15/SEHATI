@@ -707,7 +707,7 @@ class _CommunityPageState extends State<CommunityPage> {
                   ),
                   _buildActionButton(
                     Icons.comment_outlined, 
-                    "Komentar (${post.komentar})",
+                    "Komentar",
                     () {
                       Navigator.push(
                         context,
