@@ -125,12 +125,8 @@ class DepressionHistoryProvider with ChangeNotifier {
     }
     
     // For EPDS results
-    if (score >= 14) {
-        return 'Risiko Tinggi Depresi';
-    } else if (score >= 12) {
-        return 'Kemungkinan Depresi';
-    } else if (score >= 9) {
-        return 'Gejala Ringan';
+    if (score >= 10) {
+        return 'Risiko Bergejala Depresi';
     } else {
         return 'Tidak Ada Indikasi Depresi';
     }
@@ -141,10 +137,8 @@ class DepressionHistoryProvider with ChangeNotifier {
       return hasilPrediksi == 1 ? const Color(0xFFFFAA4D) : const Color(0xFF4DBAFF);
     }
     
-    if (score >= 13) {
+    if (score >= 10) {
       return const Color(0xFFFF4D4D);
-    } else if (score >= 10) {
-      return const Color(0xFFFFAA4D);
     } else {
       return const Color(0xFF4DBAFF);
     }

@@ -76,23 +76,15 @@ class DepressionResult extends StatelessWidget {
 
     // EPDS Score severity levels
     if (score != null) {
-      if (score! >= 13) {
+      if (score! >= 10) {
         return {
-          'title': 'Risiko Tinggi Depresi',
+          'title': 'Risiko Bergejala Depresi',
           'description':
-              'Skor EPDS Anda menunjukkan risiko tinggi mengalami depresi. Diperlukan penilaian diagnostik dan pengobatan oleh profesional kesehatan atau spesialis.',
+              'Skor EPDS Anda menunjukkan risiko gejala depresi. Diperlukan penilaian diagnostik dan pengobatan oleh profesional kesehatan atau spesialis.',
           'color': const Color(0xFFFF4D4D),
           'buttonText': 'Cari Bantuan Profesional',
         };
-      } else if (score! >= 10) {
-        return {
-          'title': 'Kemungkinan Depresi',
-          'description':
-              'Skor EPDS Anda menunjukkan kemungkinan depresi. Disarankan untuk mendapat edukasi, pemantauan, dan rujukan ke dokter layanan primer.',
-          'color': const Color(0xFFFFAA4D),
-          'buttonText': 'Cari Bantuan Profesional',
-        };
-      } else {
+      }  else {
         return {
           'title': 'Tidak Ada Gejala Depresi',
           'description':
@@ -133,7 +125,7 @@ class DepressionResult extends StatelessWidget {
 
     // If depressed based on EPDS
     if (score != null) {
-      if (score! >= 14) {
+      if (score! >= 10) {
         return [
           {
             'title': 'Konsultasi segera',
@@ -150,25 +142,6 @@ class DepressionResult extends StatelessWidget {
           {
             'title': 'Hindari isolasi',
             'description': 'Meskipun sulit, hindari mengasingkan diri dan tetap menjalin komunikasi dengan orang terdekat.'
-          }
-        ];
-      } else if (score! >= 10) {
-        return [
-          {
-            'title': 'Konsultasi profesional',
-            'description': 'Pertimbangkan untuk berkonsultasi dengan psikolog atau konselor profesional.'
-          },
-          {
-            'title': 'Jadwalkan aktivitas menyenangkan',
-            'description': 'Sisihkan waktu untuk melakukan aktivitas yang membuat Anda bahagia setiap harinya.'
-          },
-          {
-            'title': 'Kelola pikiran negatif',
-            'description': 'Latih diri untuk mengenali dan mengubah pola pikir negatif.'
-          },
-          {
-            'title': 'Rutin olahraga',
-            'description': 'Lakukan olahraga ringan secara rutin, ini dapat membantu meningkatkan suasana hati.'
           }
         ];
       } else {
@@ -484,7 +457,7 @@ class DepressionResult extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (isDepressed && (score != null && score! >= 13)) ...[
+                      if (isDepressed && (score != null && score! >= 10)) ...[
                         const Icon(Icons.phone, size: 18),
                         const SizedBox(width: 8),
                       ],
