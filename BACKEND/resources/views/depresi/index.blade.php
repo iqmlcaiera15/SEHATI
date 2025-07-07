@@ -217,7 +217,7 @@
                                                 if ($data->hasil_prediksi == 1) {
                                                     if ($data->epds && $data->epds->score >= 10) {
                                                         $finalResult = true;
-                                                        $hasilText = 'Resiko Tinggi Depresi';
+                                                        $hasilText = 'Risiko Bergejala Depresi';
                                                         $badgeClass = 'bg-danger';
                                                     } else {
                                                         $finalResult = false;
@@ -227,7 +227,7 @@
                                                 } elseif ($data->hasil_prediksi == 0) {
                                                     if ($data->epds && $data->epds->score >= 10) {
                                                         $finalResult = true;
-                                                        $hasilText = 'Resiko Tinggi Depresi';
+                                                        $hasilText = 'Risiko Bergejala Depresi';
                                                         $badgeClass = 'bg-danger';
                                                     } else {
                                                         $finalResult = false;
