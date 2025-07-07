@@ -115,28 +115,6 @@
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
                                 <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
-                                     style="width: 60px; height: 60px; background: rgba(255, 193, 7, 0.1);">
-                                    <i class="fas fa-exclamation-triangle text-warning fs-4"></i>
-                                </div>
-                                <h3 class="mb-1">
-                                    @php
-                                        $kemungkinanGejala = 0;
-                                        foreach($prediksiList as $data) {
-                                            if ($data->epds && $data->epds->score >= 10 && $data->epds->score < 13) {
-                                                $kemungkinanGejala++;
-                                            }
-                                        }
-                                    @endphp
-                                    {{ $kemungkinanGejala }}
-                                </h3>
-                                <p class="text-muted mb-0">Kemungkinan Gejala</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-                            <div class="card-body text-center">
-                                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
                                      style="width: 60px; height: 60px; background: rgba(220, 53, 69, 0.1);">
                                     <i class="fas fa-exclamation-circle text-danger fs-4"></i>
                                 </div>
@@ -144,14 +122,14 @@
                                     @php
                                         $resikoTinggi = 0;
                                         foreach($prediksiList as $data) {
-                                            if ($data->epds && $data->epds->score >= 13) {
+                                            if ($data->epds && $data->epds->score >= 10) {
                                                 $resikoTinggi++;
                                             }
                                         }
                                     @endphp
                                     {{ $resikoTinggi }}
                                 </h3>
-                                <p class="text-muted mb-0">Resiko Tinggi</p>
+                                <p class="text-muted mb-0">Risiko Bergejala Depresi</p>
                             </div>
                         </div>
                     </div>
