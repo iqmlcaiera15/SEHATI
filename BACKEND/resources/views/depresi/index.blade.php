@@ -80,7 +80,7 @@
     <div class="row">
         <div class="col-12">
             @if($prediksiList->count() > 0)
-                <div class="row mb-4">
+                <div class="row mb-3">
                     <div class="col-md-3 mb-3">
                         <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
                             <div class="card-body text-center">
