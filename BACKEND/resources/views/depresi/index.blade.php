@@ -215,28 +215,20 @@
                                                 $badgeClass = 'bg-success';
                                                 
                                                 if ($data->hasil_prediksi == 1) {
-                                                    if ($data->epds && $data->epds->score >= 13) {
+                                                    if ($data->epds && $data->epds->score >= 10) {
                                                         $finalResult = true;
                                                         $hasilText = 'Resiko Tinggi Depresi';
                                                         $badgeClass = 'bg-danger';
-                                                    } elseif ($data->epds && $data->epds->score >= 10) {
-                                                        $finalResult = true;
-                                                        $hasilText = 'Kemungkinan Gejala Depresi';
-                                                        $badgeClass = 'bg-warning';
                                                     } else {
                                                         $finalResult = false;
                                                         $hasilText = 'Tidak Bergejala Depresi';
                                                         $badgeClass = 'bg-success';
                                                     }
                                                 } elseif ($data->hasil_prediksi == 0) {
-                                                    if ($data->epds && $data->epds->score >= 13) {
+                                                    if ($data->epds && $data->epds->score >= 10) {
                                                         $finalResult = true;
                                                         $hasilText = 'Resiko Tinggi Depresi';
                                                         $badgeClass = 'bg-danger';
-                                                    } elseif ($data->epds && $data->epds->score >= 10) {
-                                                        $finalResult = true;
-                                                        $hasilText = 'Kemungkinan Gejala Depresi';
-                                                        $badgeClass = 'bg-warning';
                                                     } else {
                                                         $finalResult = false;
                                                         $hasilText = 'Tidak Bergejala Depresi';
@@ -257,8 +249,7 @@
                                         </td>
                                         <td class="py-3">
                                             <span class="badge px-3 py-2 
-                                                @if($data->epds && $data->epds->score >= 13) bg-danger
-                                                @elseif($data->epds && $data->epds->score >= 10) bg-warning
+                                                @if($data->epds && $data->epds->score >= 10) bg-danger
                                                 @else bg-success
                                                 @endif" style="border-radius: 20px;">
                                                 {{ $data->epds?->score ?? '-' }}
